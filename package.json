@@ -1,26 +1,17 @@
-{
+﻿{
   "name": "scioworld-discord-bot",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "ScioWorld: cooperative civilization game + ScioVirtual utility commands",
+  "description": "A minimal ScioVirtual Discord bot",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "register:guild": "node --env-file=.dev.vars scripts/register.js guild",
-    "register:global": "node --env-file=.dev.vars scripts/register.js global",
-    "db:local": "wrangler d1 migrations apply scio-world-db --local",
-    "db:remote": "wrangler d1 migrations apply scio-world-db --remote",
-    "test": "node --test",
-    "check": "node --check src/index.js && node --check src/game.js && node --check src/commands.js && node --check scripts/register.js"
+    "start": "node src/index.js",
+    "deploy-commands": "node src/deploy-commands.js",
+    "check": "node --check src/index.js && node --check src/deploy-commands.js && node --check src/commands/index.js && node --check src/commands/ping.js && node --check src/commands/help.js"
   },
   "dependencies": {
-    "discord-interactions": "^4.4.0"
+    "discord.js": "^14.19.3",
+    "dotenv": "^16.4.7"
   },
-  "devDependencies": {
-    "wrangler": "^4.0.0"
-  },
-  "engines": {
-    "node": ">=20"
-  }
+  "engines": { "node": ">=20" }
 }
