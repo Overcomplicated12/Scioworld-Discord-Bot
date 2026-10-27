@@ -1,0 +1,6 @@
+# Copy to .dev.vars; NEVER commit .dev.vars
+DISCORD_PUBLIC_KEY=replace_with_discord_application_public_key
+DISCORD_APPLICATION_ID=replace_with_discord_application_id
+DISCORD_TOKEN=replace_with_discord_bot_token
+# Used only for fast command registration in your test Discord server
+DISCORD_GUILD_ID=replace_with_test_server_id
