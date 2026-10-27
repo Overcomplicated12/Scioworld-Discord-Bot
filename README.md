@@ -16,4 +16,6 @@ A minimal Discord Gateway bot with `/ping` and `/help`.
 
 Run these commands from the repository directory on your local machine or home server. Never commit or share `.env`.
 
+For persistent home-server hosting and manual updates, see [docs/HOSTING.md](docs/HOSTING.md).
+
 To add a command, create a module in `src/commands` exporting `data` and `execute`, add it to `src/commands/index.js`, update the help text, and run `npm run deploy-commands` again. Run `npm run check` for syntax checks.

@@ -15,3 +15,16 @@ npm-debug.log*
 Microsoft/Windows/PowerShell/ModuleAnalysisCache
 .DS_Store
 Thumbs.db
+
+# Local credentials, database files, and PM2 output
+.dev.vars*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+*.db3
+*.db3-*
+.pm2/
+logs/
