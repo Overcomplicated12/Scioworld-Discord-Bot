@@ -2,7 +2,7 @@
 import { REST, Routes } from 'discord.js';
 import { commands } from './commands/index.js';
 
-const { DISCORD_TOKEN, DISCORD_APPLICATION_ID } = process.env;
+const { DISCORD_TOKEN, DISCORD_APPLICATION_ID, DISCORD_GUILD_ID } = process.env;
 if (!DISCORD_TOKEN || !DISCORD_APPLICATION_ID) {
   console.error('Set DISCORD_TOKEN and DISCORD_APPLICATION_ID in .env.');
   process.exit(1);
@@ -15,6 +15,13 @@ try {
     { body: commands.map(command => command.data.toJSON()) },
   );
   console.log(`Registered ${commands.length} global commands.`);
+  if (DISCORD_GUILD_ID) {
+    await rest.put(
+      Routes.applicationGuildCommands(DISCORD_APPLICATION_ID, DISCORD_GUILD_ID),
+      { body: commands.map(command => command.data.toJSON()) },
+    );
+    console.log(`Registered ${commands.length} commands in guild ${DISCORD_GUILD_ID}.`);
+  }
 } catch (error) {
   console.error('Could not register commands:', error.message);
   process.exitCode = 1;
