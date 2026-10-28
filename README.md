@@ -12,7 +12,7 @@ A Discord Gateway bot for ScioVirtual culture, daily rewards, player profiles, c
    - `DISCORD_GUILD_ID` (optional): your testing server ID; when set, command deployment registers commands there immediately as well as globally.
 4. In the Developer Portal's installation settings, add the `bot` and `applications.commands` scopes for a server install. Generate/use the install link and add the bot to your server. The bot needs permission to view the channel and send messages.
 5. Run `npm run check` to validate the source, then `npm run deploy-commands` to register commands globally. If `DISCORD_GUILD_ID` is set, the same commands are also registered immediately in that testing server. Deployment replaces this application's existing command set in each target.
-6. Run `npm start` and keep the process running. Try `/start`, `/daily`, `/profile`, `/inventory`, `/frog`, `/lore`, `/ping`, and `/help` in your server. Stop the bot with Ctrl+C.
+6. Run `npm start` and keep the process running. Try `/start`, `/daily`, `/trivia`, `/shop`, `/draw`, `/profile`, `/inventory`, `/frog`, `/lore`, `/ping`, and `/help` in your server. Stop the bot with Ctrl+C.
 
 Run these commands from the repository directory on your local machine or home server. Never commit or share `.env`.
 

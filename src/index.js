@@ -1,6 +1,6 @@
 ﻿import 'dotenv/config';
 import { Client, Events, GatewayIntentBits, MessageFlags } from 'discord.js';
-import { commands } from './commands/index.js';
+import { commands, trivia } from './commands/index.js';
 
 if (!process.env.DISCORD_TOKEN) {
   console.error('Missing DISCORD_TOKEN in .env.');
@@ -15,6 +15,15 @@ client.once(Events.ClientReady, readyClient => {
 });
 
 client.on(Events.InteractionCreate, async interaction => {
+  if (interaction.isButton() && interaction.customId.startsWith('trivia:')) {
+    try {
+      await trivia.handleButton(interaction);
+    } catch (error) {
+      console.error('Trivia button failed:', error);
+      if (!interaction.replied && !interaction.deferred) await interaction.reply({ content: 'That trivia answer could not be processed.', flags: MessageFlags.Ephemeral });
+    }
+    return;
+  }
   if (!interaction.isChatInputCommand()) return;
   const command = commandsByName.get(interaction.commandName);
   if (!command) return;

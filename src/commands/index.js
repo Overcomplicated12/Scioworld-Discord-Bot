@@ -6,5 +6,9 @@ import * as inventory from './inventory.js';
 import * as daily from './daily.js';
 import * as frog from './frog.js';
 import * as lore from './lore.js';
+import * as trivia from './trivia.js';
+import * as shop from './shop.js';
+import * as draw from './draw.js';
 
-export const commands = [ping, help, start, profile, inventory, daily, frog, lore];
+export const commands = [ping, help, start, profile, inventory, daily, frog, lore, trivia, shop, draw];
+export { trivia };

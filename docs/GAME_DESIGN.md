@@ -70,7 +70,7 @@ Suggested starting balance: 100 Sciocoins, one starter collectible, and a small 
 - `/equip [collectible]` — display a collectible on the profile.
 - `/trade [player] [item]` — optional later feature; require confirmation from both players.
 
-The implemented foundation is `/ping`, `/help`, `/start`, `/profile`, `/inventory`, `/daily`, `/frog`, and `/lore`. Trivia, collectibles, shops, leaderboards, and races are planned next; add them after profiles and persistent storage are reliable.
+The implemented foundation is `/ping`, `/help`, `/start`, `/profile`, `/inventory`, `/daily`, `/trivia`, `/shop`, `/draw`, `/frog`, and `/lore`. Leaderboards and races are planned next; add them after profiles and persistent storage are reliable.
 
 ## Race Bet minigame
 
