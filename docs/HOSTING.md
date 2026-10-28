@@ -35,7 +35,7 @@ Use a normal, non-root account with sudo access. The bot connects outbound to th
    nano .env
    ```
 
-   Set `DISCORD_TOKEN` to your bot token and `DISCORD_APPLICATION_ID` to the application ID. The main README explains where to find these values and how to invite the bot. Keep the token private.
+   Set `DISCORD_TOKEN` to your bot token and `DISCORD_APPLICATION_ID` to the application ID. Set `DISCORD_GUILD_ID` to the testing server ID if you want command updates to appear there immediately; commands are still registered globally. The main README explains where to find these values and how to invite the bot. Keep the token private.
 
 5. Install dependencies, register the global commands, and start the bot:
 
@@ -46,7 +46,7 @@ Use a normal, non-root account with sudo access. The bot connects outbound to th
    pm2 save
    ```
 
-   Registration replaces all of this application's existing global commands with the commands in this project. Global commands may take time to appear. Previously registered guild commands are separate and can appear as duplicates; see the main README for one-time cleanup instructions.
+   Registration replaces all of this application's existing global commands with the commands in this project. If `DISCORD_GUILD_ID` is set, it replaces that server's command set too. Previously registered guild commands in other servers are separate and can appear as duplicates; see the main README for one-time cleanup instructions.
 
 6. Enable restart after reboot using your normal account:
 
@@ -69,6 +69,8 @@ pm2 save
 ```
 
 `pm2 save` records the current process list for reboot. Logs are normally under `~/.pm2/logs`.
+
+Player profiles are stored in `data/profiles.json` with owner-only permissions. Back up that file with the bot stopped or before upgrades; it is intentionally ignored by Git.
 
 From the repository directory, update manually with:
 
