@@ -1,0 +1,39 @@
+{
+  "id": "frog-of-wisdom-gets-lost-in-spain",
+  "title": "The Frog of Wisdom Gets Lost in Spain",
+  "author": "ScioVirtual lore team",
+  "description": "A philosopher frog, one wrong turn, and a surprisingly important lesson about asking for directions.",
+  "tags": ["frog-of-wisdom", "spain", "adventure", "comedy"],
+  "entries": [
+    {
+      "id": "wrong-turn-at-dawn",
+      "title": "The Wrong Turn at Dawn",
+      "text": "The Frog of Wisdom set out to find the oldest library in Spain. It consulted three maps, two stars, and one pigeon. The pigeon was the only one who had actually been there, but the Frog considered this insufficiently philosophical and turned left.",
+      "tags": ["beginning", "travel"]
+    },
+    {
+      "id": "the-question-of-direction",
+      "title": "The Question of Direction",
+      "text": "By noon, the Frog had learned an uncomfortable truth: knowing many things does not mean knowing where you are. It asked a nearby traveler for directions. This was humiliating for exactly four seconds, after which it became extremely convenient.",
+      "tags": ["lesson", "wisdom"]
+    },
+    {
+      "id": "tapas-and-teleology",
+      "title": "Tapas and Teleology",
+      "text": "The traveler led the Frog to a small table covered in tapas. The Frog announced that every journey has a purpose. The traveler asked whether the purpose could include eating. After careful reflection, the Frog concluded that philosophy should occasionally be served on a small plate.",
+      "tags": ["food", "philosophy"]
+    },
+    {
+      "id": "the-plaza-of-reflection",
+      "title": "The Plaza of Reflection",
+      "text": "At sunset, the Frog reached a quiet plaza and realized it was still lost. Yet it had found a library card, three new friends, and the ability to say ‘thank you’ in another language. The map was wrong, but the day had not been.",
+      "tags": ["reflection", "friendship"]
+    },
+    {
+      "id": "the-return-of-the-frog",
+      "title": "The Return of the Frog",
+      "text": "When the Frog finally returned to ScioVirtual, everyone asked whether it had discovered the secret of Spain. The Frog nodded solemnly and said, ‘Yes. If you are lost, ask for help before you start giving a lecture about the stars.’ Then it requested another tapas night.",
+      "tags": ["return", "punchline"]
+    }
+  ]
+}

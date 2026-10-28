@@ -56,6 +56,7 @@ Suggested starting balance: 100 Sciocoins, one starter collectible, and a small 
 
 - `/daily` — once per day, award a small bonus and a rotating Sciovirtual fact.
 - `/frog` — if the player owns the Frog of Wisdom, reveal a philosopher quote; use a per-player cooldown to prevent spam.
+- `/lore [action] [query]` — reveal a random community story, list stories, or search contributed entries.
 - `/trivia [category]` — start a short question for the channel or an ephemeral solo question.
 - `/race create [category] [wager]` — open a time-limited race.
 - `/race join` — join an open race.
@@ -69,7 +70,7 @@ Suggested starting balance: 100 Sciocoins, one starter collectible, and a small 
 - `/equip [collectible]` — display a collectible on the profile.
 - `/trade [player] [item]` — optional later feature; require confirmation from both players.
 
-The implemented foundation is `/ping`, `/help`, `/start`, `/profile`, `/inventory`, `/daily`, and `/frog`. Trivia, collectibles, shops, leaderboards, and races are planned next; add them after profiles and persistent storage are reliable.
+The implemented foundation is `/ping`, `/help`, `/start`, `/profile`, `/inventory`, `/daily`, `/frog`, and `/lore`. Trivia, collectibles, shops, leaderboards, and races are planned next; add them after profiles and persistent storage are reliable.
 
 ## Race Bet minigame
 
