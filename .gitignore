@@ -28,3 +28,6 @@ Thumbs.db
 *.db3-*
 .pm2/
 logs/
+
+# Runtime profile data
+data/
