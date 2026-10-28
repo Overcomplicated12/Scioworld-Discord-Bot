@@ -9,6 +9,7 @@ import * as lore from './lore.js';
 import * as trivia from './trivia.js';
 import * as shop from './shop.js';
 import * as draw from './draw.js';
+import * as trade from './trade.js';
 
-export const commands = [ping, help, start, profile, inventory, daily, frog, lore, trivia, shop, draw];
+export const commands = [ping, help, start, profile, inventory, daily, frog, lore, trivia, shop, draw, trade];
 export { trivia };

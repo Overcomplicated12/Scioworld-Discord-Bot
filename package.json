@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node src/index.js",
     "deploy-commands": "node src/deploy-commands.js",
-    "check": "node --check src/index.js && node --check src/deploy-commands.js && node --check src/store.js && node --check src/quotes.js && node --check src/lore.js && node --check src/questions.js && node --check src/collectibles.js && node --check src/validate-content.js && node --check src/commands/index.js && node --check src/commands/ping.js && node --check src/commands/help.js && node --check src/commands/start.js && node --check src/commands/profile.js && node --check src/commands/inventory.js && node --check src/commands/daily.js && node --check src/commands/frog.js && node --check src/commands/lore.js && node --check src/commands/trivia.js && node --check src/commands/shop.js && node --check src/commands/draw.js && node --check src/commands/utils.js",
+    "check": "node --check src/index.js && node --check src/deploy-commands.js && node --check src/store.js && node --check src/quotes.js && node --check src/lore.js && node --check src/questions.js && node --check src/collectibles.js && node --check src/validate-content.js && node --check src/commands/index.js && node --check src/commands/ping.js && node --check src/commands/help.js && node --check src/commands/start.js && node --check src/commands/profile.js && node --check src/commands/inventory.js && node --check src/commands/daily.js && node --check src/commands/frog.js && node --check src/commands/lore.js && node --check src/commands/trivia.js && node --check src/commands/shop.js && node --check src/commands/draw.js && node --check src/commands/trade.js && node --check src/commands/utils.js",
     "check-content": "node src/validate-content.js"
   },
   "dependencies": {

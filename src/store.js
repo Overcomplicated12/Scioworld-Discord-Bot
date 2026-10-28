@@ -17,14 +17,16 @@ function newProfile(guildId, userId) {
 }
 
 export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.json')) {
-  let state = { profiles: {} };
+  let state = { profiles: {}, trades: [], nextTradeId: 1 };
   function load() {
     try {
       state = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-      if (!state || typeof state !== 'object' || !state.profiles || typeof state.profiles !== 'object') state = { profiles: {} };
+      if (!state || typeof state !== 'object' || !state.profiles || typeof state.profiles !== 'object') state = { profiles: {}, trades: [], nextTradeId: 1 };
+      if (!Array.isArray(state.trades)) state.trades = [];
+      if (!Number.isInteger(state.nextTradeId) || state.nextTradeId < 1) state.nextTradeId = 1;
     } catch (error) {
       if (error.code !== 'ENOENT') throw error;
-      state = { profiles: {} };
+      state = { profiles: {}, trades: [], nextTradeId: 1 };
     }
   }
   function save() {
@@ -120,7 +122,60 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     save();
     return { drawn: true, duplicate, duplicateRefund, profile };
   }
-  return { getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, drawCollectible };
+  function createTradeOffer(guildId, fromUserId, toUserId, giveItem, wantItem, giveCoins, wantCoins, nowMs) {
+    if (fromUserId === toUserId) return { created: false, reason: 'self' };
+    const sender = getOrCreate(guildId, fromUserId);
+    if (!sender.collectibles.includes(giveItem)) return { created: false, reason: 'missing-give-item' };
+    if (sender.coins < giveCoins) return { created: false, reason: 'insufficient-give-coins', costNeeded: giveCoins - sender.coins };
+    if (giveItem === wantItem && giveCoins === wantCoins) return { created: false, reason: 'identical' };
+    load();
+    const id = `T${String(state.nextTradeId++).padStart(4, '0')}`;
+    state.trades.push({ id, guildId, fromUserId, toUserId, giveItem, wantItem, giveCoins, wantCoins, status: 'pending', createdAt: new Date(nowMs).toISOString(), expiresAt: new Date(nowMs + 24 * 60 * 60 * 1000).toISOString() });
+    save();
+    return { created: true, offer: state.trades[state.trades.length - 1] };
+  }
+  function findTrade(id) {
+    load();
+    return state.trades.find(trade => trade.id.toLowerCase() === id.toLowerCase());
+  }
+  function settleTrade(guildId, userId, id, action, nowMs) {
+    const trade = findTrade(id);
+    if (!trade) return { settled: false, reason: 'not-found' };
+    if (trade.guildId !== guildId) return { settled: false, reason: 'wrong-server' };
+    if (trade.status !== 'pending') return { settled: false, reason: 'not-pending', trade };
+    if (new Date(trade.expiresAt).getTime() <= nowMs) { trade.status = 'expired'; save(); return { settled: false, reason: 'expired', trade }; }
+    if (action === 'cancel' && trade.fromUserId !== userId) return { settled: false, reason: 'not-owner' };
+    if (action === 'decline' && trade.toUserId !== userId) return { settled: false, reason: 'not-recipient' };
+    if (action !== 'accept') { trade.status = action; trade.resolvedAt = new Date(nowMs).toISOString(); save(); return { settled: true, trade }; }
+    if (trade.toUserId !== userId) return { settled: false, reason: 'not-recipient' };
+    load();
+    const senderKey = keyFor(guildId, trade.fromUserId);
+    const recipientKey = keyFor(guildId, trade.toUserId);
+    if (!state.profiles[senderKey]) state.profiles[senderKey] = newProfile(guildId, trade.fromUserId);
+    if (!state.profiles[recipientKey]) state.profiles[recipientKey] = newProfile(guildId, trade.toUserId);
+    const sender = state.profiles[senderKey];
+    const recipient = state.profiles[recipientKey];
+    if (!sender.collectibles.includes(trade.giveItem)) return { settled: false, reason: 'sender-missing-item' };
+    if (!recipient.collectibles.includes(trade.wantItem)) return { settled: false, reason: 'recipient-missing-item' };
+    if (sender.coins < trade.giveCoins) return { settled: false, reason: 'sender-missing-coins' };
+    if (recipient.coins < trade.wantCoins) return { settled: false, reason: 'recipient-missing-coins' };
+    if (recipient.collectibles.includes(trade.giveItem)) return { settled: false, reason: 'recipient-already-owns-give' };
+    if (sender.collectibles.includes(trade.wantItem)) return { settled: false, reason: 'sender-already-owns-want' };
+    sender.collectibles.splice(sender.collectibles.indexOf(trade.giveItem), 1);
+    recipient.collectibles.splice(recipient.collectibles.indexOf(trade.wantItem), 1);
+    sender.collectibles.push(trade.wantItem);
+    recipient.collectibles.push(trade.giveItem);
+    sender.coins = sender.coins - trade.giveCoins + trade.wantCoins;
+    recipient.coins = recipient.coins - trade.wantCoins + trade.giveCoins;
+    trade.status = 'accepted'; trade.resolvedAt = new Date(nowMs).toISOString();
+    save();
+    return { settled: true, trade };
+  }
+  function pendingTrades(guildId, userId) {
+    load();
+    return state.trades.filter(trade => trade.guildId === guildId && trade.status === 'pending' && (trade.fromUserId === userId || trade.toUserId === userId));
+  }
+  return { getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, drawCollectible, createTradeOffer, settleTrade, pendingTrades };
 }
 
 export const store = createStore();

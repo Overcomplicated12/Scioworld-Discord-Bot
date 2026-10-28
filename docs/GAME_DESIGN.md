@@ -68,7 +68,7 @@ Suggested starting balance: 100 Sciocoins, one starter collectible, and a small 
 - `/draw [count]` — spend Sciocoins on random collectibles with visible rarity odds.
 - `/craft [recipe]` — exchange resources for a known item.
 - `/equip [collectible]` — display a collectible on the profile.
-- `/trade [player] [item]` — optional later feature; require confirmation from both players.
+- `/trade offer|accept|decline|cancel|list` — exchange collectibles and Sciocoins with explicit confirmation from both players.
 
 The implemented foundation is `/ping`, `/help`, `/start`, `/profile`, `/inventory`, `/daily`, `/trivia`, `/shop`, `/draw`, `/frog`, and `/lore`. Leaderboards and races are planned next; add them after profiles and persistent storage are reliable.
 
