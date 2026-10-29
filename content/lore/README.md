@@ -43,10 +43,10 @@ Copy this shape and replace the values:
 2. Validate the file with a JSON validator or `node`:
 
    ```bash
-   node -e "JSON.parse(require('fs').readFileSync('content/lore/your-file.json', 'utf8')); console.log('valid JSON')"
+   npm run check-content
    ```
 
 3. Read the entry aloud once. If the joke depends on private context, add enough explanation for a new player to enjoy it.
-4. Submit the file for review before it is added to a public event or collectible.
+4. Submit the file for review before it is added to a public event or collectible. The check rejects malformed JSON, tabs, trailing whitespace, missing final newlines, and incomplete story shapes.
 
 The example story in this folder is a template as well as a playable lore concept. Copy it when starting a new story, then change the IDs and content.
