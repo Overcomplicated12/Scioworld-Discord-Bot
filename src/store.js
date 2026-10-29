@@ -11,22 +11,27 @@ function newProfile(guildId, userId) {
     guildId, userId, coins: 100, knowledgePoints: 0, streak: 0, lastDailyAt: null,
     resources: { 'starter-kit': 1 }, collectibles: ['frog-of-wisdom'],
     frogLastUsedAt: null, frogQuoteHistory: [],
-    triviaCooldownUntil: 0, pendingTrivia: null, lastDrawAt: 0,
+    triviaCooldownUntil: 0, pendingTrivia: null,
+    reportCooldownUntil: 0,
     equippedCollectible: 'frog-of-wisdom', createdAt: new Date().toISOString(),
   };
 }
 
 export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.json')) {
-  let state = { profiles: {}, trades: [], nextTradeId: 1 };
+  let state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], campResources: {} };
   function load() {
     try {
       state = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-      if (!state || typeof state !== 'object' || !state.profiles || typeof state.profiles !== 'object') state = { profiles: {}, trades: [], nextTradeId: 1 };
+      if (!state || typeof state !== 'object' || !state.profiles || typeof state.profiles !== 'object') state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], campResources: {} };
       if (!Array.isArray(state.trades)) state.trades = [];
       if (!Number.isInteger(state.nextTradeId) || state.nextTradeId < 1) state.nextTradeId = 1;
+      if (!Array.isArray(state.races)) state.races = [];
+      if (!Number.isInteger(state.nextRaceId) || state.nextRaceId < 1) state.nextRaceId = 1;
+      if (!Array.isArray(state.reports)) state.reports = [];
+      if (!state.campResources || typeof state.campResources !== 'object') state.campResources = {};
     } catch (error) {
       if (error.code !== 'ENOENT') throw error;
-      state = { profiles: {}, trades: [], nextTradeId: 1 };
+      state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], campResources: {} };
     }
   }
   function save() {
@@ -44,7 +49,8 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     if (!Array.isArray(profile.frogQuoteHistory)) profile.frogQuoteHistory = [];
     if (profile.triviaCooldownUntil === undefined) profile.triviaCooldownUntil = 0;
     if (profile.pendingTrivia === undefined) profile.pendingTrivia = null;
-    if (profile.lastDrawAt === undefined) profile.lastDrawAt = 0;
+    if (profile.reportCooldownUntil === undefined) profile.reportCooldownUntil = 0;
+    if (profile.leaderboardOptOut === undefined) profile.leaderboardOptOut = false;
     return profile;
   }
   function hasProfile(guildId, userId) {
@@ -109,19 +115,6 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     save();
     return { purchased: true, profile };
   }
-  function drawCollectible(guildId, userId, itemId, cost, nowMs) {
-    const profile = getOrCreate(guildId, userId);
-    if (profile.lastDrawAt + 5_000 > nowMs) return { drawn: false, reason: 'cooldown', remainingMs: profile.lastDrawAt + 5_000 - nowMs, profile };
-    if (profile.coins < cost) return { drawn: false, reason: 'insufficient-coins', profile, costNeeded: cost - profile.coins };
-    profile.coins -= cost;
-    profile.lastDrawAt = nowMs;
-    const duplicate = profile.collectibles.includes(itemId);
-    const duplicateRefund = duplicate ? Math.floor(cost * 0.25) : 0;
-    if (duplicate) profile.coins += duplicateRefund;
-    else profile.collectibles.push(itemId);
-    save();
-    return { drawn: true, duplicate, duplicateRefund, profile };
-  }
   function createTradeOffer(guildId, fromUserId, toUserId, giveItem, wantItem, giveCoins, wantCoins, nowMs) {
     if (fromUserId === toUserId) return { created: false, reason: 'self' };
     const sender = getOrCreate(guildId, fromUserId);
@@ -175,7 +168,122 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     load();
     return state.trades.filter(trade => trade.guildId === guildId && trade.status === 'pending' && (trade.fromUserId === userId || trade.toUserId === userId));
   }
-  return { getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, drawCollectible, createTradeOffer, settleTrade, pendingTrades };
+  function listProfiles(guildId, metric) {
+    load();
+    return Object.values(state.profiles).filter(profile => profile.guildId === guildId && !profile.leaderboardOptOut).sort((a, b) => (b[metric] || 0) - (a[metric] || 0));
+  }
+  function setLeaderboardPrivacy(guildId, userId, optedOut) {
+    const profile = getOrCreate(guildId, userId); profile.leaderboardOptOut = optedOut; save(); return profile;
+  }
+  function equipCollectible(guildId, userId, itemId) {
+    const profile = getOrCreate(guildId, userId);
+    if (!profile.collectibles.includes(itemId)) return { equipped: false, reason: 'missing-item', profile };
+    profile.equippedCollectible = itemId; save(); return { equipped: true, profile };
+  }
+  function craftCollectible(guildId, userId, outputId, inputResource, inputCount, coinCost) {
+    const profile = getOrCreate(guildId, userId);
+    if (profile.collectibles.includes(outputId)) return { crafted: false, reason: 'owned', profile };
+    if ((profile.resources[inputResource] || 0) < inputCount) return { crafted: false, reason: 'missing-resource', profile };
+    if (profile.coins < coinCost) return { crafted: false, reason: 'insufficient-coins', profile, costNeeded: coinCost - profile.coins };
+    profile.resources[inputResource] -= inputCount; profile.coins -= coinCost; profile.collectibles.push(outputId); save(); return { crafted: true, profile };
+  }
+  function createRace(guildId, hostId, category, questionIds, nowMs) {
+    load();
+    if (state.races.some(race => race.guildId === guildId && ['lobby', 'active'].includes(race.status))) return { created: false, reason: 'active-race' };
+    const host = getOrCreate(guildId, hostId);
+    const id = `R${String(state.nextRaceId++).padStart(4, '0')}`;
+    const race = { id, guildId, hostId, category, questionIds, players: [hostId], scores: { [hostId]: 0 }, answers: {}, round: -1, status: 'lobby', createdAt: new Date(nowMs).toISOString() };
+    state.races.push(race); save(); return { created: true, race };
+  }
+  function joinRace(guildId, userId, raceId) {
+    load(); const race = state.races.find(item => item.guildId === guildId && item.id.toLowerCase() === raceId.toLowerCase());
+    if (!race) return { joined: false, reason: 'not-found' }; if (race.status !== 'lobby') return { joined: false, reason: 'not-lobby' }; if (race.players.includes(userId)) return { joined: false, reason: 'already-joined' };
+    const profileKey = keyFor(guildId, userId);
+    if (!state.profiles[profileKey]) state.profiles[profileKey] = newProfile(guildId, userId);
+    const profile = state.profiles[profileKey];
+    race.players.push(userId); race.scores[userId] = 0; save(); return { joined: true, race };
+  }
+  function startRace(guildId, userId, raceId, nowMs) {
+    load(); const race = state.races.find(item => item.guildId === guildId && item.id.toLowerCase() === raceId.toLowerCase());
+    if (!race) return { started: false, reason: 'not-found' }; if (race.hostId !== userId) return { started: false, reason: 'not-host' }; if (race.players.length < 2) return { started: false, reason: 'not-enough-players' };
+    race.status = 'active'; race.round = 0; race.answers = {}; race.startedAt = new Date(nowMs).toISOString(); save(); return { started: true, race, questionId: race.questionIds[0] };
+  }
+  function answerRace(guildId, userId, raceId, answerIndex, question, nowMs) {
+    load(); const race = state.races.find(item => item.guildId === guildId && item.id.toLowerCase() === raceId.toLowerCase());
+    if (!race) return { answered: false, reason: 'not-found' }; if (race.status !== 'active') return { answered: false, reason: 'not-active' }; if (!race.players.includes(userId)) return { answered: false, reason: 'not-player' };
+    if (!race.answers[race.round]) race.answers[race.round] = {};
+    if (race.answers[race.round][userId] !== undefined) return { answered: false, reason: 'already-answered' };
+    race.answers[race.round][userId] = answerIndex;
+    const complete = race.players.every(player => race.answers[race.round][player] !== undefined);
+    if (!complete) { save(); return { answered: true, complete: false, correct: answerIndex === question.answer, race }; }
+    for (const player of race.players) if (race.answers[race.round][player] === question.answer) race.scores[player] += 1;
+    race.round += 1;
+    if (race.round >= race.questionIds.length) {
+      race.status = 'finished'; race.finishedAt = new Date(nowMs).toISOString(); const max = Math.max(...Object.values(race.scores)); const winners = race.players.filter(player => race.scores[player] === max); save(); return { answered: true, complete: true, finished: true, winners, race };
+    }
+    save(); return { answered: true, complete: true, finished: false, nextQuestionId: race.questionIds[race.round], race };
+  }
+  function cancelRace(guildId, userId, raceId, isModerator = false) {
+    load(); const race = state.races.find(item => item.guildId === guildId && item.id.toLowerCase() === raceId.toLowerCase()); if (!race) return { cancelled: false, reason: 'not-found' }; if (!isModerator && race.hostId !== userId) return { cancelled: false, reason: 'not-host' }; if (!['lobby', 'active'].includes(race.status)) return { cancelled: false, reason: 'not-active' }; race.status = 'cancelled'; race.cancelledAt = new Date().toISOString(); save(); return { cancelled: true, race };
+  }
+  function getRace(guildId, raceId) { load(); return state.races.find(item => item.guildId === guildId && item.id.toLowerCase() === raceId.toLowerCase()); }
+  function createReport(guildId, reporterId, reportedUserId, reason, nowMs) {
+    const reporter = getOrCreate(guildId, reporterId);
+    if (reporter.reportCooldownUntil > nowMs) return { created: false, reason: 'cooldown', remainingMs: reporter.reportCooldownUntil - nowMs };
+    load();
+    const hourAgo = nowMs - 60 * 60 * 1000;
+    const recentReports = state.reports.filter(report => report.guildId === guildId && report.reporterId === reporterId && Date.parse(report.createdAt) > hourAgo);
+    if (recentReports.length >= 5) return { created: false, reason: 'hourly-limit' };
+    state.reports.push({ guildId, reporterId, reportedUserId, reason, createdAt: new Date(nowMs).toISOString(), status: 'open' });
+    const profileKey = keyFor(guildId, reporterId);
+    if (!state.profiles[profileKey]) state.profiles[profileKey] = newProfile(guildId, reporterId);
+    state.profiles[profileKey].reportCooldownUntil = nowMs + 60 * 1000;
+    save();
+    return { created: true };
+  }
+  function getCampResources(guildId) {
+    load();
+    return Object.values(state.campResources[guildId] || {}).sort((a, b) => a.name.localeCompare(b.name));
+  }
+  function addCampCourse(guildId, name, roleId, roleName) {
+    load();
+    if (!state.campResources[guildId]) state.campResources[guildId] = {};
+    const courseId = name.trim().toLowerCase();
+    if (state.campResources[guildId][courseId]) return { added: false, reason: 'exists' };
+    state.campResources[guildId][courseId] = { id: courseId, name: name.trim(), roleId, roleName, instructors: [] };
+    save();
+    return { added: true, course: state.campResources[guildId][courseId] };
+  }
+  function removeCampCourse(guildId, name) {
+    load();
+    const courses = state.campResources[guildId] || {};
+    const courseId = name.trim().toLowerCase();
+    if (!courses[courseId]) return { removed: false, reason: 'not-found' };
+    const course = courses[courseId];
+    delete courses[courseId];
+    save();
+    return { removed: true, course };
+  }
+  function addCampInstructor(guildId, courseName, userId, username) {
+    load();
+    const course = (state.campResources[guildId] || {})[courseName.trim().toLowerCase()];
+    if (!course) return { added: false, reason: 'course-not-found' };
+    if (course.instructors.some(instructor => instructor.userId === userId)) return { added: false, reason: 'exists' };
+    course.instructors.push({ userId, username });
+    save();
+    return { added: true, course };
+  }
+  function removeCampInstructor(guildId, courseName, userId) {
+    load();
+    const course = (state.campResources[guildId] || {})[courseName.trim().toLowerCase()];
+    if (!course) return { removed: false, reason: 'course-not-found' };
+    const index = course.instructors.findIndex(instructor => instructor.userId === userId);
+    if (index < 0) return { removed: false, reason: 'not-found' };
+    const [instructor] = course.instructors.splice(index, 1);
+    save();
+    return { removed: true, course, instructor };
+  }
+  return { getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, createTradeOffer, settleTrade, pendingTrades, listProfiles, setLeaderboardPrivacy, equipCollectible, craftCollectible, createRace, joinRace, startRace, answerRace, cancelRace, getRace, createReport, getCampResources, addCampCourse, removeCampCourse, addCampInstructor, removeCampInstructor };
 }
 
 export const store = createStore();
