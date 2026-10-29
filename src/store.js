@@ -18,20 +18,21 @@ function newProfile(guildId, userId) {
 }
 
 export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.json')) {
-  let state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], campResources: {} };
+  let state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], campResources: {}, pollSchedules: {} };
   function load() {
     try {
       state = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-      if (!state || typeof state !== 'object' || !state.profiles || typeof state.profiles !== 'object') state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], campResources: {} };
+      if (!state || typeof state !== 'object' || !state.profiles || typeof state.profiles !== 'object') state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], campResources: {}, pollSchedules: {} };
       if (!Array.isArray(state.trades)) state.trades = [];
       if (!Number.isInteger(state.nextTradeId) || state.nextTradeId < 1) state.nextTradeId = 1;
       if (!Array.isArray(state.races)) state.races = [];
       if (!Number.isInteger(state.nextRaceId) || state.nextRaceId < 1) state.nextRaceId = 1;
       if (!Array.isArray(state.reports)) state.reports = [];
       if (!state.campResources || typeof state.campResources !== 'object') state.campResources = {};
+      if (!state.pollSchedules || typeof state.pollSchedules !== 'object') state.pollSchedules = {};
     } catch (error) {
       if (error.code !== 'ENOENT') throw error;
-      state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], campResources: {} };
+      state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], campResources: {}, pollSchedules: {} };
     }
   }
   function save() {
@@ -283,7 +284,49 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     save();
     return { removed: true, course, instructor };
   }
-  return { getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, createTradeOffer, settleTrade, pendingTrades, listProfiles, setLeaderboardPrivacy, equipCollectible, craftCollectible, createRace, joinRace, startRace, answerRace, cancelRace, getRace, createReport, getCampResources, addCampCourse, removeCampCourse, addCampInstructor, removeCampInstructor };
+  function getPollSchedule(guildId, nowMs = Date.now()) {
+    load();
+    if (!state.pollSchedules[guildId]) {
+      state.pollSchedules[guildId] = { nextDueAt: nowMs + 7 * 24 * 60 * 60 * 1000, lastSentAt: null, channelId: null, history: [], reminderSent: false, exhaustedReminderAt: null, overrideWeek: null };
+      save();
+    }
+    const schedule = state.pollSchedules[guildId];
+    if (!Array.isArray(schedule.history)) schedule.history = [];
+    if (schedule.nextDueAt === undefined) schedule.nextDueAt = nowMs + 7 * 24 * 60 * 60 * 1000;
+    if (schedule.reminderSent === undefined) schedule.reminderSent = false;
+    return schedule;
+  }
+  function markPollReminderSent(guildId) {
+    const schedule = getPollSchedule(guildId);
+    schedule.reminderSent = true;
+    save();
+  }
+  function markPollExhaustedReminderSent(guildId, nowMs) {
+    const schedule = getPollSchedule(guildId, nowMs);
+    schedule.exhaustedReminderAt = nowMs;
+    save();
+  }
+  function markPollSent(guildId, pollId, nowMs, channelId, override = false) {
+    const schedule = getPollSchedule(guildId, nowMs);
+    schedule.history.push({ pollId, usedAt: nowMs });
+    schedule.history = schedule.history.filter(item => item.usedAt > nowMs - 366 * 24 * 60 * 60 * 1000);
+    schedule.lastSentAt = nowMs;
+    schedule.nextDueAt = nowMs + 7 * 24 * 60 * 60 * 1000;
+    schedule.channelId = channelId;
+    schedule.reminderSent = false;
+    schedule.exhaustedReminderAt = null;
+    schedule.overrideWeek = Math.floor(nowMs / (7 * 24 * 60 * 60 * 1000));
+    save();
+  }
+  function pollOverrideAvailable(guildId, nowMs) {
+    const schedule = getPollSchedule(guildId, nowMs);
+    return schedule.overrideWeek !== Math.floor(nowMs / (7 * 24 * 60 * 60 * 1000));
+  }
+  function pollUsedWithinYear(guildId, pollId, nowMs) {
+    const schedule = getPollSchedule(guildId, nowMs);
+    return schedule.history.some(item => item.pollId === pollId && item.usedAt > nowMs - 366 * 24 * 60 * 60 * 1000);
+  }
+  return { getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, createTradeOffer, settleTrade, pendingTrades, listProfiles, setLeaderboardPrivacy, equipCollectible, craftCollectible, createRace, joinRace, startRace, answerRace, cancelRace, getRace, createReport, getCampResources, addCampCourse, removeCampCourse, addCampInstructor, removeCampInstructor, getPollSchedule, markPollReminderSent, markPollExhaustedReminderSent, markPollSent, pollOverrideAvailable, pollUsedWithinYear };
 }
 
 export const store = createStore();

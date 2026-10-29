@@ -19,6 +19,7 @@ import * as sets from './sets.js';
 import * as campResources from './camp-resources.js';
 import * as campCourse from './camp-course.js';
 import * as campInstructor from './camp-instructor.js';
+import * as poll from './poll.js';
 
-export const commands = [ping, help, start, profile, inventory, daily, frog, lore, trivia, shop, trade, leaderboard, privacy, craft, equip, report, race, sets, campResources, campCourse, campInstructor];
+export const commands = [ping, help, start, profile, inventory, daily, frog, lore, trivia, shop, trade, leaderboard, privacy, craft, equip, report, race, sets, campResources, campCourse, campInstructor, poll];
 export { trivia };

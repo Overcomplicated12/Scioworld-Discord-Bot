@@ -1,6 +1,7 @@
 ﻿import 'dotenv/config';
 import { Client, Events, GatewayIntentBits, MessageFlags } from 'discord.js';
 import { commands, trivia } from './commands/index.js';
+import { checkPollSchedules } from './poll-scheduler.js';
 
 if (!process.env.DISCORD_TOKEN) {
   console.error('Missing DISCORD_TOKEN in .env.');
@@ -12,6 +13,8 @@ const commandsByName = new Map(commands.map(command => [command.data.name, comma
 
 client.once(Events.ClientReady, readyClient => {
   console.log(`Logged in as ${readyClient.user.tag}.`);
+  checkPollSchedules(readyClient).catch(error => console.error('Initial poll schedule check failed:', error));
+  setInterval(() => checkPollSchedules(readyClient).catch(error => console.error('Poll schedule check failed:', error)), 15 * 60 * 1000);
 });
 
 client.on(Events.InteractionCreate, async interaction => {
