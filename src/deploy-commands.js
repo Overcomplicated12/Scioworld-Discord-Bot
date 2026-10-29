@@ -10,17 +10,20 @@ if (!DISCORD_TOKEN || !DISCORD_APPLICATION_ID) {
 
 try {
   const rest = new REST().setToken(DISCORD_TOKEN);
-  await rest.put(
-    Routes.applicationCommands(DISCORD_APPLICATION_ID),
-    { body: commands.map(command => command.data.toJSON()) },
-  );
-  console.log(`Registered ${commands.length} global commands.`);
   if (DISCORD_GUILD_ID) {
     await rest.put(
       Routes.applicationGuildCommands(DISCORD_APPLICATION_ID, DISCORD_GUILD_ID),
       { body: commands.map(command => command.data.toJSON()) },
     );
     console.log(`Registered ${commands.length} commands in guild ${DISCORD_GUILD_ID}.`);
+    await rest.put(Routes.applicationCommands(DISCORD_APPLICATION_ID), { body: [] });
+    console.log('Cleared global commands to prevent duplicate entries in the testing server.');
+  } else {
+    await rest.put(
+      Routes.applicationCommands(DISCORD_APPLICATION_ID),
+      { body: commands.map(command => command.data.toJSON()) },
+    );
+    console.log(`Registered ${commands.length} global commands.`);
   }
 } catch (error) {
   console.error('Could not register commands:', error.message);
