@@ -20,7 +20,7 @@ The game should reward showing up and helping the community as much as winning.
 
 1. A player uses `/start` and receives a short welcome and starter inventory.
 2. They use `/daily`, `/frog`, `/trivia`, or join `/race` to earn **Sciocoins** and knowledge.
-3. They spend resources on crafting, saving, trading, or a cosmetic collectible draw.
+3. They spend resources on crafting, saving, trading, or cosmetic collectibles.
 4. They use `/inventory`, `/profile`, and `/leaderboard` to see progress.
 5. They return for a daily bonus, a new question set, an event, or a rematch with friends.
 
@@ -32,10 +32,10 @@ Keep the first version small:
 
 | Item | Earned from | Used for |
 | --- | --- | --- |
-| **Sciocoins** | Correct answers, race wins, daily bonus | Wagers, prize draws, basic shop items |
+| **Sciocoins** | Correct answers, activities, daily bonus | Basic shop items, crafting, and trades |
 | **Knowledge points** | Answering questions, especially new categories | Levels, titles, leaderboard recognition |
 | **Camp resources** | Minigames and camp integration | Recipes, discounts, or camp-specific rewards |
-| **Collectibles** | Prize draws, crafting, events | Profile display, badges, set completion |
+| **Collectibles** | Shop purchases, crafting, and events | Profile display, badges, set completion |
 | **Torture Om charges** | Approved integration rewards | A limited camp feature, subject to per-player limits |
 
 Sciocoins are fictional and have no cash value. Do not sell them, allow cash-out, or make spending money part of the game. Wagers should be optional and capped so a player cannot lose all progress in one round.
@@ -58,50 +58,47 @@ Suggested starting balance: 100 Sciocoins, one starter collectible, and a small 
 - `/frog` — if the player owns the Frog of Wisdom, reveal a philosopher quote; use a per-player cooldown to prevent spam.
 - `/lore [action] [query]` — reveal a random community story, list stories, or search contributed entries.
 - `/trivia [category]` — start a short question for the channel or an ephemeral solo question.
-- `/race create [category] [wager]` — open a time-limited race.
+- `/race create [category]` — open a friendly time-limited race.
 - `/race join` — join an open race.
 - `/race answer` — answer the current question through a button or modal where possible.
 
 ### Spending and collecting
 
 - `/shop` — show the current rotating shop.
-- `/draw [count]` — spend Sciocoins on random collectibles with visible rarity odds.
 - `/craft [recipe]` — exchange resources for a known item.
 - `/equip [collectible]` — display a collectible on the profile.
 - `/trade offer|accept|decline|cancel|list` — exchange collectibles and Sciocoins with explicit confirmation from both players.
 
-The implemented foundation is `/ping`, `/help`, `/start`, `/profile`, `/inventory`, `/daily`, `/trivia`, `/shop`, `/draw`, `/frog`, and `/lore`. Leaderboards and races are planned next; add them after profiles and persistent storage are reliable.
+The implemented foundation includes profiles, trivia, daily rewards, collectibles, crafting, trading, races, leaderboards, polls, camp resources, reports, and lore.
 
-## Race Bet minigame
+## Race minigame
 
 The race is a social event, not a high-pressure gambling system:
 
-1. A player creates a race with a topic, maximum players, answer time, and optional wager.
-2. Other players join before the lobby closes. Everyone sees the rules and the wager before confirming.
+1. A player creates a race with a topic.
+2. Other players join before the lobby closes.
 3. The bot posts one question at a time. Players answer with buttons or a short response; the first correct answer gets a point.
 4. After 5–10 questions, the highest score wins. Ties receive an equal split or a rematch.
-5. The winner receives the wager pool plus a small knowledge-point bonus. The bot announces the result and gives a positive sportsmanship message.
+5. The bot announces the result and gives a positive sportsmanship message.
 
 Guardrails:
 
-- wagers are optional, use only fictional Sciocoins, and have a low server-wide cap;
-- a player cannot wager more than a fixed percentage of their balance;
 - no player can join their own race with multiple accounts;
 - answers are accepted only during the active question and are rate-limited;
-- the host can cancel before the first question, with all wagers refunded;
+- the host or a moderator can cancel before the first question;
 - disconnects and timeouts have a documented refund rule;
 - harassment, spam, answer flooding, and targeting another player are not part of the game.
 
-## Prize draws and collectibles
+## Collectibles
 
-Use a rotating collection tied to Sciovirtual culture. Examples include the Frog of Wisdom, fictional camp artifacts, stickers, emotes, scientist badges, and lore references. Each item should have:
+Use a shop and crafting collection tied to Sciovirtual culture. Examples include the Frog of Wisdom, fictional camp artifacts, stickers, scientist badges, and lore references. Each item should have:
 
 - a name and one-sentence story;
 - a rarity (common, uncommon, rare, legendary);
 - a profile display or set-bonus purpose;
 - a duplicate policy, such as conversion into crafting dust or a small refund.
 
-Show the odds before a draw. Avoid rewards that make a player permanently stronger than everyone else. A rare prize can be memorable, cosmetic, or grant a modest temporary bonus such as a discount. A limited number of extra Torture Om charges can be an event reward only when the integration owner approves the limit.
+Keep rewards cosmetic or modest. A rare item can be memorable, part of a set, or grant a small temporary bonus such as a discount. Avoid permanent advantages.
 
 ## Culture and safety rules
 
@@ -123,7 +120,7 @@ Persist one profile per Discord user and server:
 profile: user_id, guild_id, coins, knowledge_points, streak, last_daily_at,
          resources, collectibles, equipped_collectible, frog_last_used_at,
          frog_quote_history, created_at
-race: id, guild_id, host_id, category, wager, players, questions, scores,
+race: id, guild_id, host_id, category, players, questions, scores,
       state, created_at, closes_at
 question: id, category, prompt, answers, explanation, difficulty, active
 item: id, name, rarity, description, source, tradeable
@@ -146,7 +143,7 @@ Make this opt-in and quota based. Store a per-player allowance, record every gra
 The first release is ready when:
 
 - a new player can start, answer a question, inspect inventory, and receive a reward;
-- two or more players can complete a race with an optional wager and deterministic refunds;
+- two or more players can complete a race with deterministic scoring;
 - balances and collectibles survive a bot restart;
 - commands have cooldowns and invalid input does not crash the bot;
 - organizers can add questions, items, and lore without changing game logic;
@@ -159,7 +156,7 @@ The first release is ready when:
 | Monday | Repository and testing server complete. Finish this design and agree on the first command list. |
 | Tuesday | Implement `/start`, `/help`, `/profile`, `/inventory`, `/daily`, and persistent profiles. |
 | Wednesday | Add trivia, rewards, the basic economy, and the first collectible set. |
-| Thursday | Add race lobbies, optional capped wagers, leaderboards, cooldowns, and moderation controls. |
+| Thursday | Add race lobbies, leaderboards, cooldowns, moderation controls, and friendly social features. |
 | Friday | Add the camp resource adapter and a limited Torture Om adapter behind feature flags. |
 | Saturday | Test edge cases, restart persistence, duplicate rewards, permissions, and channel behavior; polish copy. |
 | Sunday | Run a clean deployment test, verify commands in Discord, back up data, and prepare the submission demo. |

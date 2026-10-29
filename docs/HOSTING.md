@@ -35,9 +35,9 @@ Use a normal, non-root account with sudo access. The bot connects outbound to th
    nano .env
    ```
 
-   Set `DISCORD_TOKEN` to your bot token and `DISCORD_APPLICATION_ID` to the application ID. Set `DISCORD_GUILD_ID` to the testing server ID if you want command updates to appear there immediately; commands are still registered globally. The main README explains where to find these values and how to invite the bot. Keep the token private.
+   Set `DISCORD_TOKEN` to your bot token and `DISCORD_APPLICATION_ID` to the application ID. Set `DISCORD_GUILD_ID` to the testing server ID for immediate guild updates; deployment clears global copies so commands do not appear twice. Keep the token private.
 
-5. Install dependencies, register the global commands, and start the bot:
+5. Install dependencies, register commands, and start the bot:
 
    ```bash
    npm ci
@@ -46,7 +46,7 @@ Use a normal, non-root account with sudo access. The bot connects outbound to th
    pm2 save
    ```
 
-   Registration replaces all of this application's existing global commands with the commands in this project. If `DISCORD_GUILD_ID` is set, it replaces that server's command set too. Previously registered guild commands in other servers are separate and can appear as duplicates; see the main README for one-time cleanup instructions.
+   Registration replaces this application's command set in the selected target. With `DISCORD_GUILD_ID`, the testing server receives the commands and global copies are cleared.
 
 6. Enable restart after reboot using your normal account:
 
@@ -91,6 +91,6 @@ From another directory, invoke the script by its absolute path. The script requi
 - **Dirty working tree or wrong branch:** inspect `git status` and `git branch`; preserve or commit your changes before switching to `main` and updating. Do not discard data you need.
 - **Pull fails:** check GitHub authentication and network connectivity. A non-fast-forward update means local `main` has diverged; inspect its history and resolve it manually.
 - **Install or tests fail:** check Node/npm versions and the error output; correct the issue before rerunning. If the server cannot reach npm, restore network access.
-- **Commands fail to register:** check both `.env` values and network access to Discord. If commands do not appear, check the bot's server installation and permissions and allow time for global commands to propagate.
+- **Commands fail to register:** check both `.env` values and network access to Discord. If commands do not appear, check the bot's server installation and permissions, then refresh Discord's command picker.
 - **Bot is offline:** check `pm2 status` and `pm2 logs scioworld`, the token, and Discord connectivity. PM2 may restart a process repeatedly if configuration is invalid.
 - **Bot does not return after reboot:** run `pm2 startup` and its printed command, then `pm2 save` under the same account that started the bot. Check the generated systemd service and PM2 logs.

@@ -1,48 +1,97 @@
-﻿# ScioVirtual Discord bot
+# ScioVirtual Discord bot
 
-A Discord Gateway bot for ScioVirtual culture, daily rewards, player profiles, collectibles, and quick social games.
+A Discord bot for ScioVirtual culture, science trivia, community lore, collectibles, camp resources, and friendly social games.
 
 ## Setup
 
-1. Install Node.js 20 or later and npm. In this directory, run `npm ci`.
-2. In the [Discord Developer Portal](https://discord.com/developers/applications), create an application. On its **Bot** page, create/reset and copy its bot token. Keep this token private.
-3. Copy `.env.example` to `.env` and fill in:
-   - `DISCORD_TOKEN`: the bot token from the Bot page.
-   - `DISCORD_APPLICATION_ID`: the Application ID on the General Information page.
-   - `DISCORD_GUILD_ID` (optional): your testing server ID; when set, command deployment registers commands there immediately as well as globally.
-4. In the Developer Portal's installation settings, add the `bot` and `applications.commands` scopes for a server install. Generate/use the install link and add the bot to your server. The bot needs permission to view the channel and send messages.
-5. Run `npm run check` to validate the source, then `npm run deploy-commands` to register commands globally. If `DISCORD_GUILD_ID` is set, the same commands are also registered immediately in that testing server. Deployment replaces this application's existing command set in each target.
-6. Run `npm start` and keep the process running. Try `/start`, `/daily`, `/trivia`, `/shop`, `/trade`, `/profile`, `/inventory`, `/frog`, `/lore`, `/ping`, and `/help` in your server. Stop the bot with Ctrl+C.
+1. Install Node.js 20 or later.
+2. Install dependencies:
 
-Run these commands from the repository directory on your local machine or home server. Never commit or share `.env`.
+   ```bash
+   npm ci
+   ```
 
-For persistent home-server hosting and manual updates, see [docs/HOSTING.md](docs/HOSTING.md).
+3. Copy `.env.example` to `.env` and set:
+   - `DISCORD_TOKEN` — bot token from the Discord Developer Portal.
+   - `DISCORD_APPLICATION_ID` — application ID.
+   - `DISCORD_GUILD_ID` — optional testing server ID.
+4. Invite the bot with the `bot` and `applications.commands` scopes. It needs permission to view channels, send messages, and create polls.
+5. Validate and register commands:
 
-The gameplay direction, implemented command set, lore contribution format, economy, minigames, culture rules, and week plan are in [docs/GAME_DESIGN.md](docs/GAME_DESIGN.md).
+   ```bash
+   npm run check
+   npm run check-content
+   npm run deploy-commands
+   ```
 
-## Remove old test-server commands
+   When `DISCORD_GUILD_ID` is set, commands are registered in that server and global commands are cleared to prevent duplicate slash commands. Without it, commands are registered globally.
+6. Start the bot:
 
-Global registration does not remove commands previously registered to a server; those can appear alongside the global commands. If you used the previous guild-based setup, run the following once in PowerShell from the repository directory after configuring `.env` and running `npm install`. Enable Developer Mode in Discord and copy the ID of the old test server. Replace `YOUR_OLD_SERVER_ID` below with that ID. This deletes only this application's guild-scoped `/ping` and `/help` in that server; it leaves global commands and other guild commands alone. Repeat for any other servers where the old commands were registered.
+   ```bash
+   npm start
+   ```
 
-```powershell
-$env:OLD_SERVER_ID = 'YOUR_OLD_SERVER_ID'
-@'
-import 'dotenv/config';
-import { REST, Routes } from 'discord.js';
-const { DISCORD_TOKEN, DISCORD_APPLICATION_ID, OLD_SERVER_ID } = process.env;
-if (!DISCORD_TOKEN || !DISCORD_APPLICATION_ID || !/^\d+$/.test(OLD_SERVER_ID || '')) throw new Error('Set credentials in .env and OLD_SERVER_ID to the old server ID.');
-const rest = new REST().setToken(DISCORD_TOKEN);
-const route = Routes.applicationGuildCommands(DISCORD_APPLICATION_ID, OLD_SERVER_ID);
-for (const command of await rest.get(route)) {
-  if (command.type === 1 && ['ping', 'help'].includes(command.name)) {
-    await rest.delete(Routes.applicationGuildCommand(DISCORD_APPLICATION_ID, OLD_SERVER_ID, command.id));
-    console.log(`Removed guild command /${command.name}.`);
-  }
-}
-'@ | node --input-type=module
-Remove-Item Env:OLD_SERVER_ID
+Never commit `.env` or `data/profiles.json`.
+
+For a persistent server deployment, see [docs/HOSTING.md](docs/HOSTING.md). The current command list and game notes are in [docs/GAME_DESIGN.md](docs/GAME_DESIGN.md).
+
+## Command guide
+
+### Profiles and progression
+
+- `/start` — create a profile.
+- `/profile` — view level, knowledge points, streak, and featured collectible.
+- `/inventory` — view Sciocoins, resources, and collectibles.
+- `/daily` — claim the daily reward and knowledge points.
+- `/leaderboard` — rank by knowledge points, Sciocoins, or streak.
+- `/privacy` — hide or show your leaderboard entry.
+
+Knowledge points are progression points: correct trivia answers give more, participation still gives some, and daily rewards give 5. Every 100 points adds a level.
+
+### Games and community
+
+- `/trivia` — answer science questions.
+- `/race create|join|start|answer|cancel` — run a friendly, non-wager science race.
+- `/poll status` — see the next weekly poll.
+- `/poll early` — admin-only early random poll.
+- `/poll override` — admin-only custom poll for the week.
+- `/frog` — receive a Frog of Wisdom quote when you own the collectible.
+- `/lore` — read, list, or search community stories.
+- `/report` — privately report a player to moderators.
+
+Weekly polls are selected from a question bank, protected from reuse for one year, and announced to the server owner 24 hours before the scheduled post. If the bank is exhausted, the owner is asked to add more prompts.
+
+### Collectibles and trading
+
+- `/shop` — view or buy collectibles.
+- `/craft` — craft collectibles from resources and Sciocoins.
+- `/equip` — feature an owned collectible.
+- `/sets` — view collectible set progress.
+- `/trade offer|accept|decline|cancel|list` — trade collectibles and Sciocoins with another player.
+
+The bot does not use gambling or random paid draws. Competition is based on answers and participation.
+
+### Camp resources
+
+- `/camp-resources` — students see instructors for courses matching their Discord roles.
+- `/camp-course add|remove` — server owner/admin manages course categories and linked roles.
+- `/camp-instructor add|remove` — server owner/admin manages course instructors.
+
+Instructor mentions are clickable but notifications are suppressed so viewing resources does not repeatedly ping instructors.
+
+## Lore contributions
+
+Add a validated `.json` story under `content/lore`. Follow [content/lore/README.md](content/lore/README.md), then run:
+
+```bash
+npm run check-content
 ```
 
-The cleanup uses Discord's separate [guild command endpoints](https://docs.discord.com/developers/docs/interactions/slash-commands#delete-guild-application-command). If there were no previous guild commands, no cleanup is needed.
+## Updating a PM2 deployment
 
-To add a command, create a module in `src/commands` exporting `data` and `execute`, add it to `src/commands/index.js`, update the help text, and run `npm run deploy-commands` again. Run `npm run check` for syntax checks.
+```bash
+bash scripts/manual-update.sh --commands
+pm2 logs scioworld
+```
+
+Use `pm2 status` to check the process and `pm2 restart scioworld` for a manual restart. Keep backups of `data/profiles.json`.
