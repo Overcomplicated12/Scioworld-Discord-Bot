@@ -1,0 +1,39 @@
+{
+  "id": "frog-of-wisdom-retrieves-the-merch",
+  "title": "The Frog of Wisdom Retrieves the Merch",
+  "author": "ScioVirtual lore team",
+  "description": "When the promised mid-October merch reception date becomes more mysterious than a release date, the Frog of Wisdom goes looking for answers.",
+  "tags": ["frog-of-wisdom", "merch", "quest", "comedy"],
+  "entries": [
+    {
+      "id": "the-date-that-waited",
+      "title": "The Date That Waited",
+      "text": "The merch was supposed to arrive in mid-October. Then mid-October arrived, looked around, and quietly left without bringing anything. Weeks passed. The reception date was now delayed more than GTA 6, which the Frog considered an impressive achievement in the field of postponement.",
+      "tags": ["delay", "opening"]
+    },
+    {
+      "id": "the-quest-begins",
+      "title": "The Quest Begins",
+      "text": "The Frog of Wisdom packed a map, a snack, and a strongly worded question. It marched toward the legendary Warehouse of Promised Merch, where every shipment was said to be ‘almost here.’ The Frog had heard ‘almost here’ so many times that it had begun to suspect the phrase was a geographic location.",
+      "tags": ["adventure", "warehouse"]
+    },
+    {
+      "id": "the-keeper-of-tracking-numbers",
+      "title": "The Keeper of Tracking Numbers",
+      "text": "At the warehouse gate, the Frog met the Keeper of Tracking Numbers. ‘Your merch is in transit,’ said the Keeper. ‘Where is transit?’ asked the Frog. The Keeper pointed toward a vast horizon filled with loading screens. The Frog meditated for seven minutes, then asked whether the stickers were at least having fun.",
+      "tags": ["tracking", "philosophy"]
+    },
+    {
+      "id": "the-promised-package",
+      "title": "The Promised Package",
+      "text": "After crossing the Valley of Delayed Updates, the Frog found a small package resting beneath a sign that read: ‘Arriving Soon.’ Inside were the promised merch items, perfectly safe and only slightly smug. The Frog carried them home and announced that patience is a virtue, but so is checking the tracking page with purpose.",
+      "tags": ["merch", "discovery"]
+    },
+    {
+      "id": "a-delivery-of-wisdom",
+      "title": "A Delivery of Wisdom",
+      "text": "When the Frog returned, everyone celebrated. Someone asked what it had learned. The Frog adjusted its tiny adventurer’s hat and replied, ‘A deadline is a promise wearing a calendar. If it vanishes, send a frog.’ Then it opened the package, distributed the merch, and kept one sticker for extremely important diplomatic purposes.",
+      "tags": ["lesson", "return"]
+    }
+  ]
+}
