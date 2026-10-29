@@ -1,6 +1,6 @@
 ﻿import 'dotenv/config';
 import { Client, Events, GatewayIntentBits, MessageFlags } from 'discord.js';
-import { commands, trivia } from './commands/index.js';
+import { commands, help, trivia } from './commands/index.js';
 import { checkPollSchedules } from './poll-scheduler.js';
 
 if (!process.env.DISCORD_TOKEN) {
@@ -24,6 +24,15 @@ client.on(Events.InteractionCreate, async interaction => {
     } catch (error) {
       console.error('Trivia button failed:', error);
       if (!interaction.replied && !interaction.deferred) await interaction.reply({ content: 'That trivia answer could not be processed.', flags: MessageFlags.Ephemeral });
+    }
+    return;
+  }
+  if (interaction.isButton() && interaction.customId.startsWith('help:')) {
+    try {
+      await help.handleButton(interaction);
+    } catch (error) {
+      console.error('Help page failed:', error);
+      if (!interaction.replied && !interaction.deferred) await interaction.reply({ content: 'That help page could not be opened.', flags: MessageFlags.Ephemeral });
     }
     return;
   }

@@ -22,4 +22,4 @@ import * as campInstructor from './camp-instructor.js';
 import * as poll from './poll.js';
 
 export const commands = [ping, help, start, profile, inventory, daily, frog, lore, trivia, shop, trade, leaderboard, privacy, craft, equip, report, race, sets, campResources, campCourse, campInstructor, poll];
-export { trivia };
+export { trivia, help };

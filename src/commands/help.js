@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, MessageFlags } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder, MessageFlags } from 'discord.js';
 
 export const data = new SlashCommandBuilder()
   .setName('help')
@@ -9,6 +9,24 @@ export const data = new SlashCommandBuilder()
     { name: 'Friendly play', value: 'friendly' },
   ));
 
+function pagesFor(canManage) {
+  const pages = [
+    ['**ScioVirtual help · 1/4**', '', '**Start here**', '`/start` — create your profile', '`/profile` — view level, points, streak, and featured collectible', '`/inventory` — view currencies, resources, and collectibles', '`/daily` — claim your daily reward'],
+    ['**ScioVirtual help · 2/4**', '', '**Play and explore**', '`/trivia` — answer a science question', '`/race` — compete in a friendly science race', '`/poll status` — see the next weekly community poll', '`/frog` — get a funny philosophical quote (30-minute cooldown)', '`/lore` — read ScioVirtual stories'],
+    ['**ScioVirtual help · 3/4**', '', '**Collectibles and economy**', '`/shop` — view or buy collectibles', '`/craft` — craft a collectible', '`/equip` — feature an owned collectible', '`/sets` — track collectible set progress', '`/trade` — offer, accept, decline, cancel, or list trades', '', '**Community**', '`/leaderboard` — view rankings', '`/privacy` — hide or show your ranking', '`/camp-resources` — see instructors for your course roles', '`/report` — send a player report to moderators'],
+    ['**ScioVirtual help · 4/4**', '', '`/ping` — check that the bot is online', '`/help topic:<start|economy|friendly>` — get a focused explanation'],
+  ];
+  if (canManage) pages[3].splice(1, 0, '', '**Admin tools**', '`/poll early` — post this week’s random poll now', '`/poll override` — post this week’s custom poll', '`/camp-course` — manage course categories', '`/camp-instructor` — manage course instructors');
+  return pages.map(lines => lines.join('\n'));
+}
+
+function pageButtons(page, total, userId) {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId(`help:${page - 1}:${userId}`).setLabel('Previous').setStyle(ButtonStyle.Secondary).setDisabled(page === 0),
+    new ButtonBuilder().setCustomId(`help:${page + 1}:${userId}`).setLabel('Next').setStyle(ButtonStyle.Primary).setDisabled(page === total - 1),
+  );
+}
+
 export async function execute(interaction) {
   const topic = interaction.options.getString('topic');
   const canManage = Boolean(interaction.guild && (interaction.guild.ownerId === interaction.user.id || interaction.memberPermissions?.has('Administrator')));
@@ -17,39 +35,22 @@ export async function execute(interaction) {
     economy: '**Economy**\nSciocoins are fictional server currency with no cash value. Earn them from trivia and daily rewards, then spend them on collectibles, crafting, and trades. Knowledge points track your learning progress and levels.',
     friendly: '**Friendly play**\nGames are opt-in. Keep competition welcoming, avoid spam, and celebrate good answers. Use `/report` if a player is behaving inappropriately.',
   };
-  const sections = [
-    '**ScioVirtual help**',
-    '',
-    '**Start here**',
-    '`/start` — create your profile',
-    '`/profile` — view level, points, streak, and featured collectible',
-    '`/inventory` — view currencies, resources, and collectibles',
-    '`/daily` — claim your daily reward',
-    '',
-    '**Play and explore**',
-    '`/trivia` — answer a science question',
-    '`/race` — compete in a friendly science race',
-    '`/poll status` — see the next weekly community poll',
-    '`/frog` — get a funny philosophical quote (30-minute cooldown)',
-    '`/lore` — read ScioVirtual stories',
-    '',
-    '**Collectibles and economy**',
-    '`/shop` — view or buy collectibles',
-    '`/craft` — craft a collectible',
-    '`/equip` — feature an owned collectible',
-    '`/sets` — track collectible set progress',
-    '`/trade` — offer, accept, decline, cancel, or list trades',
-    '',
-    '**Community**',
-    '`/leaderboard` — view rankings',
-    '`/privacy` — hide or show your ranking',
-    '`/camp-resources` — see instructors for your course roles',
-    '`/report` — send a player report to moderators',
-    '',
-    '`/ping` — check that the bot is online',
-    '`/help topic:<start|economy|friendly>` — get a focused explanation',
-  ];
-  if (canManage) sections.splice(-2, 0, '', '**Admin tools**', '`/poll early` — post this week’s random poll now', '`/poll override` — post this week’s custom poll', '`/camp-course` — manage course categories', '`/camp-instructor` — manage course instructors');
-  const content = messages[topic] || sections.join('\n');
-  await interaction.reply({ content, ...(topic ? { flags: MessageFlags.Ephemeral } : {}) });
+  if (messages[topic]) {
+    await interaction.reply({ content: messages[topic], flags: MessageFlags.Ephemeral });
+    return;
+  }
+  const pages = pagesFor(canManage);
+  await interaction.reply({ content: pages[0], components: [pageButtons(0, pages.length, interaction.user.id)], flags: MessageFlags.Ephemeral });
+}
+
+export async function handleButton(interaction) {
+  const [, pageText, userId] = interaction.customId.split(':');
+  if (interaction.user.id !== userId) {
+    await interaction.reply({ content: 'This help menu belongs to someone else. Run `/help` to open your own.', flags: MessageFlags.Ephemeral });
+    return;
+  }
+  const canManage = Boolean(interaction.guild && (interaction.guild.ownerId === interaction.user.id || interaction.memberPermissions?.has('Administrator')));
+  const pages = pagesFor(canManage);
+  const page = Math.max(0, Math.min(Number(pageText), pages.length - 1));
+  await interaction.update({ content: pages[page], components: [pageButtons(page, pages.length, interaction.user.id)] });
 }
