@@ -11,11 +11,45 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction) {
   const topic = interaction.options.getString('topic');
+  const canManage = Boolean(interaction.guild && (interaction.guild.ownerId === interaction.user.id || interaction.memberPermissions?.has('Administrator')));
   const messages = {
-    start: 'Start with `/start`, then use `/daily` for a reward, `/frog` for a philosopher quote, `/lore` for community stories, and `/profile` or `/inventory` to see your progress.',
-    economy: 'Sciocoins are fictional server currency. Earn them from activities and daily rewards; spend them on collectibles and crafting. They have no cash value.',
-    friendly: 'Games are opt-in and competition should stay kind. Celebrate good answers and do not spam or target other players.',
+    start: '**Getting started**\nUse `/start` to create your profile, `/daily` for a daily reward, `/trivia` to answer science questions, and `/profile` or `/inventory` to see your progress. Use `/help` any time you need this menu again.',
+    economy: '**Economy**\nSciocoins are fictional server currency with no cash value. Earn them from trivia and daily rewards, then spend them on collectibles, crafting, and trades. Knowledge points track your learning progress and levels.',
+    friendly: '**Friendly play**\nGames are opt-in. Keep competition welcoming, avoid spam, and celebrate good answers. Use `/report` if a player is behaving inappropriately.',
   };
-  const content = messages[topic] || '**ScioVirtual commands**\n`/start` — create your profile\n`/daily` — claim today\'s reward\n`/trivia` — answer a science question\n`/frog` — ask the Frog of Wisdom for a quote (30-minute cooldown)\n`/lore` — explore community stories\n`/shop` — view or buy collectibles\n`/trade` — offer, accept, decline, cancel, or list trades\n`/leaderboard` — view server rankings\n`/privacy` — hide or show your ranking\n`/craft` — craft a collectible\n`/equip` — feature a collectible\n`/race` — run a friendly science race\n`/camp-resources` — see instructors for courses in your roles\n`/camp-course` — admins manage course categories\n`/camp-instructor` — admins manage course instructors\n`/report` — report a player for moderator review\n`/sets` — view collectible set progress\n`/profile` — view a profile\n`/inventory` — view your items\n`/ping` — check that the bot is online\n`/help [topic]` — get guidance`';
+  const sections = [
+    '**ScioVirtual help**',
+    '',
+    '**Start here**',
+    '`/start` — create your profile',
+    '`/profile` — view level, points, streak, and featured collectible',
+    '`/inventory` — view currencies, resources, and collectibles',
+    '`/daily` — claim your daily reward',
+    '',
+    '**Play and explore**',
+    '`/trivia` — answer a science question',
+    '`/race` — compete in a friendly science race',
+    '`/poll status` — see the next weekly community poll',
+    '`/frog` — get a funny philosophical quote (30-minute cooldown)',
+    '`/lore` — read ScioVirtual stories',
+    '',
+    '**Collectibles and economy**',
+    '`/shop` — view or buy collectibles',
+    '`/craft` — craft a collectible',
+    '`/equip` — feature an owned collectible',
+    '`/sets` — track collectible set progress',
+    '`/trade` — offer, accept, decline, cancel, or list trades',
+    '',
+    '**Community**',
+    '`/leaderboard` — view rankings',
+    '`/privacy` — hide or show your ranking',
+    '`/camp-resources` — see instructors for your course roles',
+    '`/report` — send a player report to moderators',
+    '',
+    '`/ping` — check that the bot is online',
+    '`/help topic:<start|economy|friendly>` — get a focused explanation',
+  ];
+  if (canManage) sections.splice(-2, 0, '', '**Admin tools**', '`/poll early` — post this week’s random poll now', '`/poll override` — post this week’s custom poll', '`/camp-course` — manage course categories', '`/camp-instructor` — manage course instructors');
+  const content = messages[topic] || sections.join('\n');
   await interaction.reply({ content, ...(topic ? { flags: MessageFlags.Ephemeral } : {}) });
 }
