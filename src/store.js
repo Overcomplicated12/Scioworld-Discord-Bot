@@ -314,6 +314,22 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     save();
     return { removed: true, course, instructor };
   }
+  function exportCampResources(guildId) {
+    load();
+    return JSON.stringify(Object.values(state.campResources[guildId] || {}), null, 2);
+  }
+  function importCampResources(guildId, rawData) {
+    let parsed;
+    try { parsed = JSON.parse(rawData); } catch { return { imported: false, reason: 'invalid-json' }; }
+    if (!Array.isArray(parsed) || parsed.some(course => !course || typeof course.name !== 'string' || typeof course.roleId !== 'string' || typeof course.roleName !== 'string' || !Array.isArray(course.instructors))) return { imported: false, reason: 'invalid-shape' };
+    const courses = {};
+    for (const course of parsed) {
+      const id = course.name.trim().toLowerCase();
+      if (!id || courses[id] || course.instructors.some(instructor => !instructor || typeof instructor.userId !== 'string' || typeof instructor.username !== 'string')) return { imported: false, reason: 'invalid-shape' };
+      courses[id] = { id, name: course.name.trim(), roleId: course.roleId, roleName: course.roleName, instructors: course.instructors.map(instructor => ({ userId: instructor.userId, username: instructor.username })) };
+    }
+    load(); state.campResources[guildId] = courses; save(); return { imported: true, count: Object.keys(courses).length };
+  }
   function getPollSchedule(guildId, nowMs = Date.now()) {
     load();
     if (!state.pollSchedules[guildId]) {
@@ -397,7 +413,7 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
   function beginOmModePoll(guildId, activationKey, nowMs, channelId) { const schedule = getOmSchedule(guildId); schedule.modePoll = { activationKey, channelId, endsAt: nowMs + 60 * 60 * 1000, votes: {}, voters: [] }; save(); return schedule.modePoll; }
   function recordOmModeVote(guildId, userId, mode) { const schedule = getOmSchedule(guildId); if (!schedule.modePoll) return { recorded: false, reason: 'not-active' }; if (schedule.modePoll.voters.includes(userId)) return { recorded: false, reason: 'already-voted' }; schedule.modePoll.voters.push(userId); schedule.modePoll.votes[mode] = (schedule.modePoll.votes[mode] || 0) + 1; save(); return { recorded: true }; }
   function finishOmModePoll(guildId, nowMs) { const schedule = getOmSchedule(guildId); if (!schedule.modePoll || nowMs < schedule.modePoll.endsAt) return { finished: false }; const entries = Object.entries(schedule.modePoll.votes); schedule.mode = entries.length ? entries.sort((a, b) => b[1] - a[1])[0][0] : 'water-drop'; schedule.modePoll = null; save(); return { finished: true, mode: schedule.mode }; }
-  return { getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, createTradeOffer, settleTrade, pendingTrades, listProfiles, setLeaderboardPrivacy, equipCollectible, craftCollectible, createRace, joinRace, startRace, answerRace, cancelRace, getRace, expireRaces, getOperationalStatus, createReport, getCampResources, addCampCourse, removeCampCourse, addCampInstructor, removeCampInstructor, getPollSchedule, markPollReminderSent, markPollExhaustedReminderSent, markPollSent, pollOverrideAvailable, pollUsedWithinYear, getOmSchedule, setOmOptIn, setOmTarget, clearOmTarget, activateOm, recordOmMessage, beginOmModePoll, recordOmModeVote, finishOmModePoll };
+  return { getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, createTradeOffer, settleTrade, pendingTrades, listProfiles, setLeaderboardPrivacy, equipCollectible, craftCollectible, createRace, joinRace, startRace, answerRace, cancelRace, getRace, expireRaces, getOperationalStatus, createReport, getCampResources, addCampCourse, removeCampCourse, addCampInstructor, removeCampInstructor, exportCampResources, importCampResources, getPollSchedule, markPollReminderSent, markPollExhaustedReminderSent, markPollSent, pollOverrideAvailable, pollUsedWithinYear, getOmSchedule, setOmOptIn, setOmTarget, clearOmTarget, activateOm, recordOmMessage, beginOmModePoll, recordOmModeVote, finishOmModePoll };
 }
 
 export const store = createStore();
