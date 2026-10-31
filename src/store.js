@@ -229,6 +229,18 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     load(); const race = state.races.find(item => item.guildId === guildId && item.id.toLowerCase() === raceId.toLowerCase()); if (!race) return { cancelled: false, reason: 'not-found' }; if (!isModerator && race.hostId !== userId) return { cancelled: false, reason: 'not-host' }; if (!['lobby', 'active'].includes(race.status)) return { cancelled: false, reason: 'not-active' }; race.status = 'cancelled'; race.cancelledAt = new Date().toISOString(); save(); return { cancelled: true, race };
   }
   function getRace(guildId, raceId) { load(); return state.races.find(item => item.guildId === guildId && item.id.toLowerCase() === raceId.toLowerCase()); }
+  function getOperationalStatus(guildId, nowMs = Date.now()) {
+    load();
+    const poll = getPollSchedule(guildId, nowMs);
+    const om = getOmSchedule(guildId);
+    return {
+      activeRaces: state.races.filter(race => race.guildId === guildId && ['lobby', 'active'].includes(race.status)).length,
+      openReports: state.reports.filter(report => report.guildId === guildId && report.status === 'open').length,
+      nextPollAt: poll.nextDueAt,
+      omTargetId: om.targetId,
+      omActive: om.activeUntil > nowMs,
+    };
+  }
   function expireRaces(guildId, nowMs, lobbyMs = 15 * 60 * 1000, activeMs = 3 * 60 * 1000) {
     load();
     const expired = [];
@@ -381,7 +393,7 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
   function beginOmModePoll(guildId, activationKey, nowMs, channelId) { const schedule = getOmSchedule(guildId); schedule.modePoll = { activationKey, channelId, endsAt: nowMs + 60 * 60 * 1000, votes: {}, voters: [] }; save(); return schedule.modePoll; }
   function recordOmModeVote(guildId, userId, mode) { const schedule = getOmSchedule(guildId); if (!schedule.modePoll) return { recorded: false, reason: 'not-active' }; if (schedule.modePoll.voters.includes(userId)) return { recorded: false, reason: 'already-voted' }; schedule.modePoll.voters.push(userId); schedule.modePoll.votes[mode] = (schedule.modePoll.votes[mode] || 0) + 1; save(); return { recorded: true }; }
   function finishOmModePoll(guildId, nowMs) { const schedule = getOmSchedule(guildId); if (!schedule.modePoll || nowMs < schedule.modePoll.endsAt) return { finished: false }; const entries = Object.entries(schedule.modePoll.votes); schedule.mode = entries.length ? entries.sort((a, b) => b[1] - a[1])[0][0] : 'water-drop'; schedule.modePoll = null; save(); return { finished: true, mode: schedule.mode }; }
-  return { getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, createTradeOffer, settleTrade, pendingTrades, listProfiles, setLeaderboardPrivacy, equipCollectible, craftCollectible, createRace, joinRace, startRace, answerRace, cancelRace, getRace, expireRaces, createReport, getCampResources, addCampCourse, removeCampCourse, addCampInstructor, removeCampInstructor, getPollSchedule, markPollReminderSent, markPollExhaustedReminderSent, markPollSent, pollOverrideAvailable, pollUsedWithinYear, getOmSchedule, setOmOptIn, setOmTarget, clearOmTarget, activateOm, recordOmMessage, beginOmModePoll, recordOmModeVote, finishOmModePoll };
+  return { getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, createTradeOffer, settleTrade, pendingTrades, listProfiles, setLeaderboardPrivacy, equipCollectible, craftCollectible, createRace, joinRace, startRace, answerRace, cancelRace, getRace, expireRaces, getOperationalStatus, createReport, getCampResources, addCampCourse, removeCampCourse, addCampInstructor, removeCampInstructor, getPollSchedule, markPollReminderSent, markPollExhaustedReminderSent, markPollSent, pollOverrideAvailable, pollUsedWithinYear, getOmSchedule, setOmOptIn, setOmTarget, clearOmTarget, activateOm, recordOmMessage, beginOmModePoll, recordOmModeVote, finishOmModePoll };
 }
 
 export const store = createStore();

@@ -16,7 +16,7 @@ function pagesFor(canManage) {
     ['**ScioVirtual help · 3/4**', '', '**Collectibles and economy**', '`/shop` — view or buy collectibles', '`/craft` — craft a collectible', '`/equip` — feature an owned collectible', '`/sets` — track collectible set progress', '`/trade` — offer, accept, decline, cancel, or list trades', '', '**Community**', '`/leaderboard` — view rankings', '`/privacy` — hide or show your ranking', '`/camp-resources` — see instructors for your course roles', '`/report` — send a player report to moderators'],
     ['**ScioVirtual help · 4/4**', '', '`/ping` — check that the bot is online', '`/help topic:<start|economy|friendly>` — get a focused explanation'],
   ];
-  if (canManage) pages[3].splice(1, 0, '', '**Admin tools**', '`/poll early` — post this week’s random poll now', '`/poll override` — post this week’s custom poll', '`/om target|stop` — manage the opted-in Om challenge', '`/om-test` — run the temporary one-minute test', '`/camp-course` — manage course categories', '`/camp-instructor` — manage course instructors');
+  if (canManage) pages[3].splice(1, 0, '', '**Admin tools**', '`/bot-status` — view scheduler and moderation health', '`/poll early` — post this week’s random poll now', '`/poll override` — post this week’s custom poll', '`/om target|stop` — manage the opted-in Om challenge', '`/om-test` — run the temporary one-minute test', '`/camp-course` — manage course categories', '`/camp-instructor` — manage course instructors');
   return pages.map(lines => lines.join('\n'));
 }
 

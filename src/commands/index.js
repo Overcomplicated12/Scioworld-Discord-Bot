@@ -22,7 +22,8 @@ import * as campInstructor from './camp-instructor.js';
 import * as poll from './poll.js';
 import * as om from './om.js';
 import * as omTest from './om-test.js';
+import * as botStatus from './bot-status.js';
 
-export const commands = [ping, help, start, profile, inventory, daily, frog, lore, trivia, shop, trade, leaderboard, privacy, craft, equip, report, race, sets, campResources, campCourse, campInstructor, poll, om, omTest];
+export const commands = [ping, help, start, profile, inventory, daily, frog, lore, trivia, shop, trade, leaderboard, privacy, craft, equip, report, race, sets, campResources, campCourse, campInstructor, poll, om, omTest, botStatus];
 export { trivia, help };
 export { omTest };
