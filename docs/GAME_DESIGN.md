@@ -62,6 +62,7 @@ Suggested starting balance: 100 Sciocoins, one starter collectible, and a small 
 - `/race create [category]` — open a friendly time-limited race.
 - `/race join` — join an open race.
 - `/race answer` — answer the current question through a button or modal where possible.
+- `/camp-trivia ask` — answer a course-specific question created by an instructor.
 
 ### Spending and collecting
 
@@ -76,6 +77,7 @@ Suggested starting balance: 100 Sciocoins, one starter collectible, and a small 
 - `/camp-resources` — show instructors for courses matching the player’s Discord roles.
 - `/camp-course add|remove` — owner/admin management of course categories and linked roles.
 - `/camp-instructor add|remove` — owner/admin management of course instructors.
+- `/camp-trivia add|list|remove` — instructors manage question sets for their own courses; administrators can manage all sets.
 - `/poll status` — view the next weekly poll and its reminder schedule.
 - `/poll early|override` — owner/admin controls for the weekly poll, limited to one override per week.
 - `/report` — submit a private report; moderators and the server owner receive a DM, with anti-spam limits.

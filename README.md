@@ -51,6 +51,7 @@ Knowledge points are progression points: correct trivia answers give more, parti
 ### Games and community
 
 - `/trivia` — answer science questions.
+- `/camp-trivia ask` — answer a course-specific trivia question.
 - `/race create|join|start|answer|cancel` — run a friendly, non-wager science race.
 - `/poll status` — see the next weekly poll.
 - `/poll early` — admin-only early random poll.
@@ -76,6 +77,7 @@ The bot does not use gambling, wagers, random paid draws, or cash-value rewards.
 - `/camp-resources` — students see instructors for courses matching their Discord roles.
 - `/camp-course add|remove` — server owner/admin manages course categories and linked roles.
 - `/camp-instructor add|remove` — server owner/admin manages course instructors.
+- `/camp-trivia add|list|remove` — instructors create and manage questions for their course; admins can manage every course.
 
 Instructor mentions are clickable but notifications are suppressed so viewing resources does not repeatedly ping instructors.
 
