@@ -44,7 +44,7 @@ For a persistent server deployment, see [docs/HOSTING.md](docs/HOSTING.md). The 
 - `/inventory` — view Sciocoins, resources, and collectibles.
 - `/daily` — claim the daily reward, knowledge points, and a rotating science fact.
 - `/leaderboard` — rank by knowledge points, Sciocoins, or streak.
-- `/privacy` — hide or show your leaderboard entry.
+- `/privacy` — control leaderboard visibility, public recognition, or camp features.
 
 Knowledge points are progression points: correct trivia answers give more, participation still gives some, and daily rewards give 5. Every 100 points adds a level.
 

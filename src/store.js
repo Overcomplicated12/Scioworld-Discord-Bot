@@ -56,6 +56,8 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     if (profile.bestTriviaStreak === undefined) profile.bestTriviaStreak = profile.triviaStreak;
     if (profile.reportCooldownUntil === undefined) profile.reportCooldownUntil = 0;
     if (profile.leaderboardOptOut === undefined) profile.leaderboardOptOut = false;
+    if (profile.recognitionOptOut === undefined) profile.recognitionOptOut = false;
+    if (profile.campOptOut === undefined) profile.campOptOut = false;
     return profile;
   }
   function hasProfile(guildId, userId) {
@@ -181,6 +183,12 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
   }
   function setLeaderboardPrivacy(guildId, userId, optedOut) {
     const profile = getOrCreate(guildId, userId); profile.leaderboardOptOut = optedOut; save(); return profile;
+  }
+  function setPrivacy(guildId, userId, scope, optedOut) {
+    const profile = getOrCreate(guildId, userId);
+    const fields = { leaderboard: 'leaderboardOptOut', recognition: 'recognitionOptOut', camp: 'campOptOut' };
+    if (!fields[scope]) return { updated: false, reason: 'invalid-scope', profile };
+    profile[fields[scope]] = optedOut; save(); return { updated: true, profile };
   }
   function equipCollectible(guildId, userId, itemId) {
     const profile = getOrCreate(guildId, userId);
@@ -435,7 +443,7 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
   function beginOmModePoll(guildId, activationKey, nowMs, channelId) { const schedule = getOmSchedule(guildId); schedule.modePoll = { activationKey, channelId, endsAt: nowMs + 60 * 60 * 1000, votes: {}, voters: [] }; save(); return schedule.modePoll; }
   function recordOmModeVote(guildId, userId, mode) { const schedule = getOmSchedule(guildId); if (!schedule.modePoll) return { recorded: false, reason: 'not-active' }; if (schedule.modePoll.voters.includes(userId)) return { recorded: false, reason: 'already-voted' }; schedule.modePoll.voters.push(userId); schedule.modePoll.votes[mode] = (schedule.modePoll.votes[mode] || 0) + 1; save(); return { recorded: true }; }
   function finishOmModePoll(guildId, nowMs) { const schedule = getOmSchedule(guildId); if (!schedule.modePoll || nowMs < schedule.modePoll.endsAt) return { finished: false }; const entries = Object.entries(schedule.modePoll.votes); schedule.mode = entries.length ? entries.sort((a, b) => b[1] - a[1])[0][0] : 'water-drop'; schedule.modePoll = null; save(); return { finished: true, mode: schedule.mode }; }
-  return { getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, createTradeOffer, settleTrade, pendingTrades, listProfiles, setLeaderboardPrivacy, equipCollectible, craftCollectible, createRace, joinRace, startRace, answerRace, cancelRace, getRace, expireRaces, getOperationalStatus, createReport, listReports, updateReport, getCampResources, addCampCourse, removeCampCourse, addCampInstructor, removeCampInstructor, exportCampResources, importCampResources, getPollSchedule, markPollReminderSent, markPollExhaustedReminderSent, markPollSent, pollOverrideAvailable, pollUsedWithinYear, getOmSchedule, setOmOptIn, setOmTarget, clearOmTarget, activateOm, recordOmMessage, beginOmModePoll, recordOmModeVote, finishOmModePoll };
+  return { getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, createTradeOffer, settleTrade, pendingTrades, listProfiles, setLeaderboardPrivacy, setPrivacy, equipCollectible, craftCollectible, createRace, joinRace, startRace, answerRace, cancelRace, getRace, expireRaces, getOperationalStatus, createReport, listReports, updateReport, getCampResources, addCampCourse, removeCampCourse, addCampInstructor, removeCampInstructor, exportCampResources, importCampResources, getPollSchedule, markPollReminderSent, markPollExhaustedReminderSent, markPollSent, pollOverrideAvailable, pollUsedWithinYear, getOmSchedule, setOmOptIn, setOmTarget, clearOmTarget, activateOm, recordOmMessage, beginOmModePoll, recordOmModeVote, finishOmModePoll };
 }
 
 export const store = createStore();

@@ -51,7 +51,7 @@ Suggested starting balance: 100 Sciocoins, one starter collectible, and a small 
 - `/profile [player]` — show level, title, streak, and selected collectible.
 - `/inventory` — show currencies, resources, and collectibles.
 - `/leaderboard [knowledge points|Sciocoins|daily streak]` — friendly public rankings.
-- `/privacy` — hide or show your leaderboard entry.
+- `/privacy scope:leaderboard|recognition|camp hide:true|false` — control leaderboard visibility, public profile recognition, or camp feature participation.
 
 ### Earning
 

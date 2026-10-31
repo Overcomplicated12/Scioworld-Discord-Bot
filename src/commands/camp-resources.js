@@ -6,6 +6,8 @@ export const data = new SlashCommandBuilder().setName('camp-resources').setDescr
 
 export async function execute(interaction) {
   if (!requireGuild(interaction)) return;
+  const profile = store.getOrCreate(interaction.guildId, interaction.user.id);
+  if (profile.campOptOut) { await interaction.reply({ content: 'You have opted out of camp features. Use `/privacy scope:camp hide:false` to re-enable them.', flags: MessageFlags.Ephemeral }); return; }
   const roleIds = new Set(interaction.member.roles.cache.keys());
   const visible = store.getCampResources(interaction.guildId).filter(course => roleIds.has(course.roleId));
   if (!visible.length) {
