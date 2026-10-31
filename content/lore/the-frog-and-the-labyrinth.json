@@ -1,0 +1,27 @@
+{
+  "id": "the-frog-and-the-labyrinth",
+  "title": "The Frog and the Labyrinth of Labels",
+  "author": "ScioVirtual lore team",
+  "description": "The Frog of Wisdom learns that the shortest route to a solution begins with labeling the samples.",
+  "tags": ["frog-of-wisdom", "science", "camp", "comedy"],
+  "entries": [
+    {
+      "id": "the-mysterious-samples",
+      "title": "The Mysterious Samples",
+      "text": "The Frog found four cups on a lab bench and announced that one contained a breakthrough. A student asked whether any of them were labeled. The Frog admitted that they were labeled ‘maybe,’ ‘probably,’ ‘definitely,’ and ‘do not drink.’",
+      "tags": ["beginning", "lab"]
+    },
+    {
+      "id": "the-power-of-a-sticker",
+      "title": "The Power of a Sticker",
+      "text": "After labeling the cups properly, the group discovered that three held water and one held lemonade. The Frog called this a triumph of organization. The student called it lunch. Both agreed the labels had saved the experiment.",
+      "tags": ["lesson", "teamwork"]
+    },
+    {
+      "id": "wisdom-in-the-margin",
+      "title": "Wisdom in the Margin",
+      "text": "The Frog wrote a final note in the lab book: ‘A hypothesis is allowed to be wrong, but a sample label should not be mysterious.’ Then it put a sticker on its own notebook and felt scientifically unstoppable.",
+      "tags": ["reflection", "punchline"]
+    }
+  ]
+}
