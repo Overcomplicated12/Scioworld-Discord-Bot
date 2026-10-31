@@ -46,6 +46,7 @@ export async function handleButton(interaction) {
     await interaction.reply({ content: 'That trivia question has expired or was already answered.', flags: MessageFlags.Ephemeral });
     return;
   }
-  const outcome = result.correct ? `Correct! **+${result.coins} Sciocoins** and **+${result.knowledgePoints} knowledge points**.` : `Not quite. You still earned **+${result.knowledgePoints} knowledge points** for playing.`;
+  const streak = result.correct && result.triviaStreak > 1 ? ` Your trivia streak is now **${result.triviaStreak}**!` : result.correct && result.triviaStreak === 1 ? ' Your trivia streak has started!' : '';
+  const outcome = result.correct ? `Correct! **+${result.coins} Sciocoins** and **+${result.knowledgePoints} knowledge points**.${streak}` : `Not quite. You still earned **+${result.knowledgePoints} knowledge points** for playing. Your trivia streak reset.`;
   await interaction.reply({ content: `${outcome}\n${question.explanation}` });
 }

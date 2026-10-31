@@ -10,5 +10,6 @@ export async function execute(interaction) {
   const user = interaction.options.getUser('player') || interaction.user;
   const profile = store.getOrCreate(interaction.guildId, user.id);
   const level = Math.floor(profile.knowledgePoints / 100) + 1;
-  await interaction.reply(`**${mentionOrName(user)}'s ScioVirtual profile**\nLevel ${level} · ${profile.knowledgePoints} knowledge points · ${profile.streak}-day daily streak\nSciocoins: **${profile.coins}**\nFeatured collectible: **${formatCollectible(profile.equippedCollectible)}**`);
+  const title = profile.knowledgePoints >= 500 ? 'Lore Scholar' : profile.knowledgePoints >= 250 ? 'Curious Researcher' : profile.knowledgePoints >= 100 ? 'Question Asker' : 'New Explorer';
+  await interaction.reply(`**${mentionOrName(user)}'s ScioVirtual profile**\n**${title}** · Level ${level} · ${profile.knowledgePoints} knowledge points · ${profile.streak}-day daily streak\nSciocoins: **${profile.coins}**\nTrivia streak: **${profile.triviaStreak || 0}** (best ${profile.bestTriviaStreak || 0})\nFeatured collectible: **${formatCollectible(profile.equippedCollectible)}**`);
 }

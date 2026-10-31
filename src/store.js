@@ -11,7 +11,7 @@ function newProfile(guildId, userId) {
     guildId, userId, coins: 100, knowledgePoints: 0, streak: 0, lastDailyAt: null,
     resources: { 'starter-kit': 1 }, collectibles: ['frog-of-wisdom'],
     frogLastUsedAt: null, frogQuoteHistory: [],
-    triviaCooldownUntil: 0, pendingTrivia: null,
+    triviaCooldownUntil: 0, pendingTrivia: null, triviaStreak: 0, bestTriviaStreak: 0,
     reportCooldownUntil: 0,
     equippedCollectible: 'frog-of-wisdom', createdAt: new Date().toISOString(),
   };
@@ -51,6 +51,8 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     if (!Array.isArray(profile.frogQuoteHistory)) profile.frogQuoteHistory = [];
     if (profile.triviaCooldownUntil === undefined) profile.triviaCooldownUntil = 0;
     if (profile.pendingTrivia === undefined) profile.pendingTrivia = null;
+    if (profile.triviaStreak === undefined) profile.triviaStreak = 0;
+    if (profile.bestTriviaStreak === undefined) profile.bestTriviaStreak = profile.triviaStreak;
     if (profile.reportCooldownUntil === undefined) profile.reportCooldownUntil = 0;
     if (profile.leaderboardOptOut === undefined) profile.leaderboardOptOut = false;
     return profile;
@@ -103,10 +105,12 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     profile.pendingTrivia = null;
     const coins = correct ? 15 : 0;
     const knowledgePoints = correct ? 10 : 2;
+    profile.triviaStreak = correct ? (profile.triviaStreak || 0) + 1 : 0;
+    profile.bestTriviaStreak = Math.max(profile.bestTriviaStreak || 0, profile.triviaStreak);
     profile.coins += coins;
     profile.knowledgePoints += knowledgePoints;
     save();
-    return { accepted: true, correct, coins, knowledgePoints, profile };
+    return { accepted: true, correct, coins, knowledgePoints, triviaStreak: profile.triviaStreak, profile };
   }
   function buyCollectible(guildId, userId, itemId, cost) {
     const profile = getOrCreate(guildId, userId);
