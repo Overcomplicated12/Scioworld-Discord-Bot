@@ -226,7 +226,17 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     for (const player of race.players) if (race.answers[race.round][player] === question.answer) race.scores[player] += 1;
     race.round += 1;
     if (race.round >= race.questionIds.length) {
-      race.status = 'finished'; race.finishedAt = new Date(nowMs).toISOString(); const max = Math.max(...Object.values(race.scores)); const winners = race.players.filter(player => race.scores[player] === max); save(); return { answered: true, complete: true, finished: true, winners, race };
+      race.status = 'finished'; race.finishedAt = new Date(nowMs).toISOString(); const max = Math.max(...Object.values(race.scores)); const winners = race.players.filter(player => race.scores[player] === max);
+      const rewards = {};
+      for (const playerId of race.players) {
+        const profileKey = keyFor(guildId, playerId);
+        if (!state.profiles[profileKey]) state.profiles[profileKey] = newProfile(guildId, playerId);
+        const reward = winners.includes(playerId) ? { coins: 20, knowledgePoints: 12 } : { coins: 10, knowledgePoints: 5 };
+        state.profiles[profileKey].coins += reward.coins;
+        state.profiles[profileKey].knowledgePoints += reward.knowledgePoints;
+        rewards[playerId] = reward;
+      }
+      race.rewardsAwarded = true; save(); return { answered: true, complete: true, finished: true, winners, rewards, race };
     }
     save(); return { answered: true, complete: true, finished: false, nextQuestionId: race.questionIds[race.round], race };
   }

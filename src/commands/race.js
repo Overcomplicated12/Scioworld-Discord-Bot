@@ -30,6 +30,6 @@ export async function execute(interaction) {
   const question = questions.find(item => item.id === race.questionIds[race.round]); const result = raceState(interaction.guildId, interaction.user.id, raceId, interaction.options.getInteger('choice'), question, now);
   if (!result.answered) { await interaction.reply({ content: result.reason === 'already-answered' ? 'You already answered this round.' : 'You cannot answer that race.', flags: MessageFlags.Ephemeral }); return; }
   if (!result.complete) { await interaction.reply({ content: result.correct ? 'Your answer is correct. Waiting for the other racers.' : 'Answer recorded. Waiting for the other racers.' }); return; }
-  if (result.finished) { await interaction.reply(`Race **${raceId}** finished! Winners: ${result.winners.map(id => `<@${id}>`).join(', ')}.`, { allowedMentions: { users: result.winners } }); return; }
+  if (result.finished) { const rewardText = Object.entries(result.rewards).map(([id, reward]) => `<@${id}> +${reward.coins} coins, +${reward.knowledgePoints} knowledge`).join('\n'); await interaction.reply(`Race **${raceId}** finished! Winners: ${result.winners.map(id => `<@${id}>`).join(', ')}.\n\n**Race rewards**\n${rewardText}`, { allowedMentions: { users: result.winners } }); return; }
   const next = questions.find(item => item.id === result.nextQuestionId); await interaction.reply(`${result.correct ? 'Correct!' : 'Answer recorded.'}\n${showQuestion(result.race, next)}`);
 }
