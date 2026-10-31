@@ -18,11 +18,11 @@ function newProfile(guildId, userId) {
 }
 
 export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.json')) {
-  let state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], nextReportId: 1, campResources: {}, pollSchedules: {}, omSchedules: {} };
+  let state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], nextReportId: 1, campResources: {}, campTrivia: {}, nextCampTriviaId: 1, campTriviaAnswers: {}, pollSchedules: {}, omSchedules: {} };
   function load() {
     try {
       state = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-      if (!state || typeof state !== 'object' || !state.profiles || typeof state.profiles !== 'object') state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], nextReportId: 1, campResources: {}, pollSchedules: {}, omSchedules: {} };
+      if (!state || typeof state !== 'object' || !state.profiles || typeof state.profiles !== 'object') state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], nextReportId: 1, campResources: {}, campTrivia: {}, nextCampTriviaId: 1, campTriviaAnswers: {}, pollSchedules: {}, omSchedules: {} };
       if (!Array.isArray(state.trades)) state.trades = [];
       if (!Number.isInteger(state.nextTradeId) || state.nextTradeId < 1) state.nextTradeId = 1;
       if (!Array.isArray(state.races)) state.races = [];
@@ -30,11 +30,14 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
       if (!Array.isArray(state.reports)) state.reports = [];
       if (!Number.isInteger(state.nextReportId) || state.nextReportId < 1) state.nextReportId = state.reports.length + 1;
       if (!state.campResources || typeof state.campResources !== 'object') state.campResources = {};
+      if (!state.campTrivia || typeof state.campTrivia !== 'object') state.campTrivia = {};
+      if (!Number.isInteger(state.nextCampTriviaId) || state.nextCampTriviaId < 1) state.nextCampTriviaId = 1;
+      if (!state.campTriviaAnswers || typeof state.campTriviaAnswers !== 'object') state.campTriviaAnswers = {};
       if (!state.pollSchedules || typeof state.pollSchedules !== 'object') state.pollSchedules = {};
       if (!state.omSchedules || typeof state.omSchedules !== 'object') state.omSchedules = {};
     } catch (error) {
       if (error.code !== 'ENOENT') throw error;
-      state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], nextReportId: 1, campResources: {}, pollSchedules: {}, omSchedules: {} };
+      state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], nextReportId: 1, campResources: {}, campTrivia: {}, nextCampTriviaId: 1, campTriviaAnswers: {}, pollSchedules: {}, omSchedules: {} };
     }
   }
   function save() {
@@ -360,6 +363,42 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     }
     load(); state.campResources[guildId] = courses; save(); return { imported: true, count: Object.keys(courses).length };
   }
+  function isCampInstructor(guildId, courseName, userId) {
+    load();
+    const course = (state.campResources[guildId] || {})[courseName.trim().toLowerCase()];
+    return Boolean(course?.instructors?.some(instructor => instructor.userId === userId));
+  }
+  function addCampTriviaQuestion(guildId, courseName, authorId, prompt, choices, answer) {
+    load();
+    const courseId = courseName.trim().toLowerCase();
+    if (!(state.campResources[guildId] || {})[courseId]) return { added: false, reason: 'course-not-found' };
+    if (!Array.isArray(choices) || choices.length !== 4 || !Number.isInteger(answer) || answer < 0 || answer > 3) return { added: false, reason: 'invalid-question' };
+    if (!state.campTrivia[guildId]) state.campTrivia[guildId] = {};
+    if (!Array.isArray(state.campTrivia[guildId][courseId])) state.campTrivia[guildId][courseId] = [];
+    const question = { id: `CT${String(state.nextCampTriviaId++).padStart(4, '0')}`, courseId, authorId, prompt: prompt.trim(), choices: choices.map(choice => choice.trim()), answer, createdAt: new Date().toISOString() };
+    state.campTrivia[guildId][courseId].push(question); save(); return { added: true, question };
+  }
+  function listCampTriviaQuestions(guildId, courseName) {
+    load(); return [...((state.campTrivia[guildId] || {})[courseName.trim().toLowerCase()] || [])];
+  }
+  function removeCampTriviaQuestion(guildId, courseName, questionId) {
+    load(); const courseId = courseName.trim().toLowerCase(); const questions = (state.campTrivia[guildId] || {})[courseId] || []; const index = questions.findIndex(question => question.id.toLowerCase() === questionId.toLowerCase());
+    if (index < 0) return { removed: false, reason: 'not-found' }; const [question] = questions.splice(index, 1); save(); return { removed: true, question };
+  }
+  function answerCampTrivia(guildId, userId, questionId, answerIndex) {
+    load();
+    const questions = Object.values(state.campTrivia[guildId] || {}).flat();
+    const question = questions.find(item => item.id.toLowerCase() === questionId.toLowerCase());
+    if (!question) return { accepted: false, reason: 'not-found' };
+    const key = `${guildId}:${userId}:${question.id}`;
+    if (state.campTriviaAnswers[key]) return { accepted: false, reason: 'already-answered' };
+    const profile = getOrCreate(guildId, userId);
+    state.campTriviaAnswers[key] = true;
+    const correct = answerIndex === question.answer;
+    const reward = correct ? { coins: 10, knowledgePoints: 8 } : { coins: 0, knowledgePoints: 2 };
+    profile.coins += reward.coins; profile.knowledgePoints += reward.knowledgePoints; save();
+    return { accepted: true, correct, reward, question };
+  }
   function getPollSchedule(guildId, nowMs = Date.now()) {
     load();
     if (!state.pollSchedules[guildId]) {
@@ -443,7 +482,7 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
   function beginOmModePoll(guildId, activationKey, nowMs, channelId) { const schedule = getOmSchedule(guildId); schedule.modePoll = { activationKey, channelId, endsAt: nowMs + 60 * 60 * 1000, votes: {}, voters: [] }; save(); return schedule.modePoll; }
   function recordOmModeVote(guildId, userId, mode) { const schedule = getOmSchedule(guildId); if (!schedule.modePoll) return { recorded: false, reason: 'not-active' }; if (schedule.modePoll.voters.includes(userId)) return { recorded: false, reason: 'already-voted' }; schedule.modePoll.voters.push(userId); schedule.modePoll.votes[mode] = (schedule.modePoll.votes[mode] || 0) + 1; save(); return { recorded: true }; }
   function finishOmModePoll(guildId, nowMs) { const schedule = getOmSchedule(guildId); if (!schedule.modePoll || nowMs < schedule.modePoll.endsAt) return { finished: false }; const entries = Object.entries(schedule.modePoll.votes); schedule.mode = entries.length ? entries.sort((a, b) => b[1] - a[1])[0][0] : 'water-drop'; schedule.modePoll = null; save(); return { finished: true, mode: schedule.mode }; }
-  return { getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, createTradeOffer, settleTrade, pendingTrades, listProfiles, setLeaderboardPrivacy, setPrivacy, equipCollectible, craftCollectible, createRace, joinRace, startRace, answerRace, cancelRace, getRace, expireRaces, getOperationalStatus, createReport, listReports, updateReport, getCampResources, addCampCourse, removeCampCourse, addCampInstructor, removeCampInstructor, exportCampResources, importCampResources, getPollSchedule, markPollReminderSent, markPollExhaustedReminderSent, markPollSent, pollOverrideAvailable, pollUsedWithinYear, getOmSchedule, setOmOptIn, setOmTarget, clearOmTarget, activateOm, recordOmMessage, beginOmModePoll, recordOmModeVote, finishOmModePoll };
+  return { getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, createTradeOffer, settleTrade, pendingTrades, listProfiles, setLeaderboardPrivacy, setPrivacy, equipCollectible, craftCollectible, createRace, joinRace, startRace, answerRace, cancelRace, getRace, expireRaces, getOperationalStatus, createReport, listReports, updateReport, getCampResources, addCampCourse, removeCampCourse, addCampInstructor, removeCampInstructor, exportCampResources, importCampResources, isCampInstructor, addCampTriviaQuestion, listCampTriviaQuestions, removeCampTriviaQuestion, answerCampTrivia, getPollSchedule, markPollReminderSent, markPollExhaustedReminderSent, markPollSent, pollOverrideAvailable, pollUsedWithinYear, getOmSchedule, setOmOptIn, setOmTarget, clearOmTarget, activateOm, recordOmMessage, beginOmModePoll, recordOmModeVote, finishOmModePoll };
 }
 
 export const store = createStore();

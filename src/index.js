@@ -1,6 +1,6 @@
 ﻿import 'dotenv/config';
 import { Client, Events, GatewayIntentBits, MessageFlags } from 'discord.js';
-import { commands, help, omTest, trivia } from './commands/index.js';
+import { commands, campTrivia, help, omTest, trivia } from './commands/index.js';
 import { checkOmSchedules, checkPollSchedules } from './poll-scheduler.js';
 import { backupProfileData } from './backups.js';
 import { store } from './store.js';
@@ -60,6 +60,10 @@ client.on(Events.InteractionCreate, async interaction => {
     if (interaction.guildId !== guildId) return;
     const result = store.recordOmModeVote(guildId, interaction.user.id, mode);
     await interaction.reply({ content: result.recorded ? 'Your Om challenge style vote was recorded.' : result.reason === 'already-voted' ? 'You already voted in this poll.' : 'That Om poll is not active.', flags: MessageFlags.Ephemeral });
+    return;
+  }
+  if (interaction.isButton() && interaction.customId.startsWith('camp-trivia:')) {
+    try { await campTrivia.handleButton(interaction); } catch (error) { console.error('Camp trivia button failed:', error); if (!interaction.replied && !interaction.deferred) await interaction.reply({ content: 'That camp trivia answer could not be processed.', flags: MessageFlags.Ephemeral }); }
     return;
   }
   if (!interaction.isChatInputCommand()) return;
