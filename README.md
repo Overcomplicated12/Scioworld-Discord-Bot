@@ -42,7 +42,7 @@ For a persistent server deployment, see [docs/HOSTING.md](docs/HOSTING.md). The 
 - `/start` — create a profile.
 - `/profile` — view level, knowledge points, streak, and featured collectible.
 - `/inventory` — view Sciocoins, resources, and collectibles.
-- `/daily` — claim the daily reward and knowledge points.
+- `/daily` — claim the daily reward, knowledge points, and a rotating science fact.
 - `/leaderboard` — rank by knowledge points, Sciocoins, or streak.
 - `/privacy` — hide or show your leaderboard entry.
 
@@ -59,7 +59,7 @@ Knowledge points are progression points: correct trivia answers give more, parti
 - `/lore` — read, list, or search community stories.
 - `/report` — privately report a player to moderators.
 
-Weekly polls are selected from a question bank, protected from reuse for one year, and announced to the server owner 24 hours before the scheduled post. If the bank is exhausted, the owner is asked to add more prompts.
+Weekly polls are selected from a question bank, protected from reuse for one year, and announced to the server owner 24 hours before the scheduled post. If the bank is exhausted, the owner is asked to add more prompts. The day after a weekly poll, an opt-in Om challenge style poll may run before its capped fictional DMs begin.
 
 ### Collectibles and trading
 
@@ -69,7 +69,7 @@ Weekly polls are selected from a question bank, protected from reuse for one yea
 - `/sets` — view collectible set progress.
 - `/trade offer|accept|decline|cancel|list` — trade collectibles and Sciocoins with another player.
 
-The bot does not use gambling or random paid draws. Competition is based on answers and participation.
+The bot does not use gambling, wagers, random paid draws, or cash-value rewards. Competition is based on answers and participation.
 
 ### Camp resources
 

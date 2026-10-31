@@ -12,11 +12,11 @@ export const data = new SlashCommandBuilder()
 function pagesFor(canManage) {
   const pages = [
     ['**ScioVirtual help · 1/4**', '', '**Start here**', '`/start` — create your profile', '`/profile` — view level, points, streak, and featured collectible', '`/inventory` — view currencies, resources, and collectibles', '`/daily` — claim your daily reward'],
-    ['**ScioVirtual help · 2/4**', '', '**Play and explore**', '`/trivia` — answer a science question', '`/race` — compete in a friendly science race', '`/poll status` — see the next weekly community poll', '`/frog` — get a funny philosophical quote (30-minute cooldown)', '`/lore` — read ScioVirtual stories'],
+    ['**ScioVirtual help · 2/4**', '', '**Play and explore**', '`/trivia` — answer a science question', '`/race` — compete in a friendly science race', '`/poll status` — see the next weekly community poll', '`/om opt-in|opt-out` — manage the fictional Om challenge', '`/frog` — get a funny philosophical quote (30-minute cooldown)', '`/lore` — read ScioVirtual stories'],
     ['**ScioVirtual help · 3/4**', '', '**Collectibles and economy**', '`/shop` — view or buy collectibles', '`/craft` — craft a collectible', '`/equip` — feature an owned collectible', '`/sets` — track collectible set progress', '`/trade` — offer, accept, decline, cancel, or list trades', '', '**Community**', '`/leaderboard` — view rankings', '`/privacy` — hide or show your ranking', '`/camp-resources` — see instructors for your course roles', '`/report` — send a player report to moderators'],
     ['**ScioVirtual help · 4/4**', '', '`/ping` — check that the bot is online', '`/help topic:<start|economy|friendly>` — get a focused explanation'],
   ];
-  if (canManage) pages[3].splice(1, 0, '', '**Admin tools**', '`/poll early` — post this week’s random poll now', '`/poll override` — post this week’s custom poll', '`/camp-course` — manage course categories', '`/camp-instructor` — manage course instructors');
+  if (canManage) pages[3].splice(1, 0, '', '**Admin tools**', '`/poll early` — post this week’s random poll now', '`/poll override` — post this week’s custom poll', '`/om target|stop` — manage the opted-in Om challenge', '`/om-test` — run the temporary one-minute test', '`/camp-course` — manage course categories', '`/camp-instructor` — manage course instructors');
   return pages.map(lines => lines.join('\n'));
 }
 

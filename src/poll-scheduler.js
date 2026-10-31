@@ -1,5 +1,7 @@
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { pollBank } from './polls.js';
 import { store } from './store.js';
+import { omModes, randomOmMessageForMode } from './om.js';
 
 const DAY = 24 * 60 * 60 * 1000;
 const YEAR = 366 * DAY;
@@ -53,6 +55,39 @@ export async function checkPollSchedules(client, nowMs = Date.now()) {
       if (nowMs >= schedule.nextDueAt) await sendScheduledPoll(guild, nowMs);
     } catch (error) {
       console.error(`Weekly poll scheduler failed for guild ${guild.id}:`, error);
+    }
+  }
+}
+
+export async function checkOmSchedules(client, nowMs = Date.now()) {
+  for (const guild of client.guilds.cache.values()) {
+    try {
+      const pollSchedule = store.getPollSchedule(guild.id, nowMs);
+      const activationAt = pollSchedule.nextDueAt + DAY;
+      const activationKey = String(pollSchedule.nextDueAt);
+      const omSchedule = store.getOmSchedule(guild.id);
+      if (nowMs >= activationAt && omSchedule.targetId && omSchedule.optedIn.includes(omSchedule.targetId) && omSchedule.activatedFor !== activationKey) {
+        if (!omSchedule.modePoll) {
+          const channel = await findChannel(guild, pollSchedule.channelId);
+          if (channel) {
+            const choices = omModes.map(mode => `**${mode.label}**`).join('\n');
+            const row = new ActionRowBuilder().addComponents(omModes.map(mode => new ButtonBuilder().setCustomId(`om-mode:${guild.id}:${mode.id}`).setLabel(mode.label).setStyle(ButtonStyle.Primary)));
+            await channel.send({ content: `🧪 **Choose this week’s Om challenge style**\nVote by using the buttons below. The poll closes in one hour.\n${choices}`, components: [row] });
+            store.beginOmModePoll(guild.id, activationKey, nowMs, channel.id);
+          }
+          continue;
+        }
+        if (nowMs >= omSchedule.modePoll.endsAt) {
+          store.finishOmModePoll(guild.id, nowMs);
+          store.activateOm(guild.id, activationKey, nowMs);
+        }
+      }
+      const result = store.recordOmMessage(guild.id, nowMs);
+      if (!result.sent) continue;
+      const target = await client.users.fetch(result.targetId);
+      await target.send(`🧪 **Om challenge**\n${randomOmMessageForMode(result.mode)}\n\nYou are receiving this because you opted in. Use /om opt-out at any time.`);
+    } catch (error) {
+      console.error(`Om challenge scheduler failed for guild ${guild.id}:`, error);
     }
   }
 }

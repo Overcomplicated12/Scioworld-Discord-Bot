@@ -20,6 +20,9 @@ import * as campResources from './camp-resources.js';
 import * as campCourse from './camp-course.js';
 import * as campInstructor from './camp-instructor.js';
 import * as poll from './poll.js';
+import * as om from './om.js';
+import * as omTest from './om-test.js';
 
-export const commands = [ping, help, start, profile, inventory, daily, frog, lore, trivia, shop, trade, leaderboard, privacy, craft, equip, report, race, sets, campResources, campCourse, campInstructor, poll];
+export const commands = [ping, help, start, profile, inventory, daily, frog, lore, trivia, shop, trade, leaderboard, privacy, craft, equip, report, race, sets, campResources, campCourse, campInstructor, poll, om, omTest];
 export { trivia, help };
+export { omTest };

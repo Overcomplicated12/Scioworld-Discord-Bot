@@ -36,9 +36,9 @@ Keep the first version small:
 | **Knowledge points** | Answering questions, especially new categories | Levels, titles, leaderboard recognition |
 | **Camp resources** | Minigames and camp integration | Recipes, discounts, or camp-specific rewards |
 | **Collectibles** | Shop purchases, crafting, and events | Profile display, badges, set completion |
-| **Torture Om charges** | Approved integration rewards | A limited camp feature, subject to per-player limits |
+| **Om challenge access** | Explicit opt-in and weekly style poll | Harmless fictional DM challenges with strict caps |
 
-Sciocoins are fictional and have no cash value. Do not sell them, allow cash-out, or make spending money part of the game. Wagers should be optional and capped so a player cannot lose all progress in one round.
+Sciocoins are fictional and have no cash value. Do not sell them, allow cash-out, or make spending money or wagers part of the game.
 
 Suggested starting balance: 100 Sciocoins, one starter collectible, and a small amount of camp resources. A new player should be able to try every core feature without grinding first.
 
@@ -50,7 +50,8 @@ Suggested starting balance: 100 Sciocoins, one starter collectible, and a small 
 - `/help [topic]` — show commands or explain economy, minigames, collectibles, or etiquette.
 - `/profile [player]` — show level, title, streak, and selected collectible.
 - `/inventory` — show currencies, resources, and collectibles.
-- `/leaderboard [weekly|all-time]` — planned friendly rankings.
+- `/leaderboard [knowledge points|Sciocoins|daily streak]` — friendly public rankings.
+- `/privacy` — hide or show your leaderboard entry.
 
 ### Earning
 
@@ -68,17 +69,30 @@ Suggested starting balance: 100 Sciocoins, one starter collectible, and a small 
 - `/craft [recipe]` — exchange resources for a known item.
 - `/equip [collectible]` — display a collectible on the profile.
 - `/trade offer|accept|decline|cancel|list` — exchange collectibles and Sciocoins with explicit confirmation from both players.
+- `/sets` — view progress toward collectible sets.
 
-The implemented foundation includes profiles, trivia, daily rewards, collectibles, crafting, trading, races, leaderboards, polls, camp resources, reports, and lore.
+### Camp, moderation, and scheduled community features
+
+- `/camp-resources` — show instructors for courses matching the player’s Discord roles.
+- `/camp-course add|remove` — owner/admin management of course categories and linked roles.
+- `/camp-instructor add|remove` — owner/admin management of course instructors.
+- `/poll status` — view the next weekly poll and its reminder schedule.
+- `/poll early|override` — owner/admin controls for the weekly poll, limited to one override per week.
+- `/report` — submit a private report; moderators and the server owner receive a DM, with anti-spam limits.
+- `/om opt-in|opt-out|status` — manage consent for the harmless fictional Om challenge.
+- `/om target|stop` — owner/admin controls for an opted-in target.
+- `/om-test` — temporary owner/admin test for the one-minute consent flow.
+
+The implemented foundation includes profiles, trivia, daily rewards with rotating facts, collectibles, crafting, trading, races, leaderboards, polls, camp resources, reports, lore, and the consent-based Om challenge.
 
 ## Race minigame
 
-The race is a social event, not a high-pressure gambling system:
+The race is a social event with no wagering:
 
 1. A player creates a race with a topic.
 2. Other players join before the lobby closes.
 3. The bot posts one question at a time. Players answer with buttons or a short response; the first correct answer gets a point.
-4. After 5–10 questions, the highest score wins. Ties receive an equal split or a rematch.
+4. After three questions, the highest score wins. Ties receive a friendly rematch invitation.
 5. The bot announces the result and gives a positive sportsmanship message.
 
 Guardrails:
@@ -86,7 +100,7 @@ Guardrails:
 - no player can join their own race with multiple accounts;
 - answers are accepted only during the active question and are rate-limited;
 - the host or a moderator can cancel before the first question;
-- disconnects and timeouts have a documented refund rule;
+- hosts or moderators can cancel a lobby or active race when a player disconnects;
 - harassment, spam, answer flooding, and targeting another player are not part of the game.
 
 ## Collectibles
@@ -134,9 +148,9 @@ The current foundation uses a local JSON profile store with regular backups. Mov
 
 Start with an adapter that can read the camp resource catalog and write only approved rewards. Cache the catalog, validate item IDs, and fall back to a local reward table if the service is unavailable. Do not let an external outage block trivia or profile commands.
 
-### Torture Om
+### Om challenge
 
-Make this opt-in and quota based. Store a per-player allowance, record every grant and use, and enforce a server-wide daily ceiling. The bot should display the remaining allowance and return a clear message when the integration is unavailable. No collectible or wager should bypass these limits.
+Keep this fictional, harmless, and opt-in. The weekly poll chooses a message style, and a selected target receives at most three DMs spaced about 20 minutes apart. `/om opt-out` and the admin stop command end participation immediately. No collectible or wager changes these limits.
 
 ## Success criteria
 
@@ -153,12 +167,12 @@ The first release is ready when:
 
 | Day | Deliverable |
 | --- | --- |
-| Monday | Repository and testing server complete. Finish this design and agree on the first command list. |
+| Monday | Repository and testing server complete. Design document and command list are maintained here. |
 | Tuesday | Implement `/start`, `/help`, `/profile`, `/inventory`, `/daily`, and persistent profiles. |
 | Wednesday | Add trivia, rewards, the basic economy, and the first collectible set. |
 | Thursday | Add race lobbies, leaderboards, cooldowns, moderation controls, and friendly social features. |
-| Friday | Add the camp resource adapter and a limited Torture Om adapter behind feature flags. |
-| Saturday | Test edge cases, restart persistence, duplicate rewards, permissions, and channel behavior; polish copy. |
+| Friday | Add the local camp resource adapter and the consent-based Om challenge behind weekly scheduling and caps. |
+| Saturday | Run syntax, content, workflow, persistence, duplicate-reward, permission, and channel checks; polish copy. |
 | Sunday | Run a clean deployment test, verify commands in Discord, back up data, and prepare the submission demo. |
 
 If time gets tight, keep trivia, profiles, inventory, daily rewards, and collectibles as the submission MVP. Races and external integrations can be marked as the next milestone without weakening the core cultural experience.

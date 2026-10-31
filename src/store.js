@@ -18,11 +18,11 @@ function newProfile(guildId, userId) {
 }
 
 export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.json')) {
-  let state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], campResources: {}, pollSchedules: {} };
+  let state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], campResources: {}, pollSchedules: {}, omSchedules: {} };
   function load() {
     try {
       state = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-      if (!state || typeof state !== 'object' || !state.profiles || typeof state.profiles !== 'object') state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], campResources: {}, pollSchedules: {} };
+      if (!state || typeof state !== 'object' || !state.profiles || typeof state.profiles !== 'object') state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], campResources: {}, pollSchedules: {}, omSchedules: {} };
       if (!Array.isArray(state.trades)) state.trades = [];
       if (!Number.isInteger(state.nextTradeId) || state.nextTradeId < 1) state.nextTradeId = 1;
       if (!Array.isArray(state.races)) state.races = [];
@@ -30,9 +30,10 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
       if (!Array.isArray(state.reports)) state.reports = [];
       if (!state.campResources || typeof state.campResources !== 'object') state.campResources = {};
       if (!state.pollSchedules || typeof state.pollSchedules !== 'object') state.pollSchedules = {};
+      if (!state.omSchedules || typeof state.omSchedules !== 'object') state.omSchedules = {};
     } catch (error) {
       if (error.code !== 'ENOENT') throw error;
-      state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], campResources: {}, pollSchedules: {} };
+      state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], campResources: {}, pollSchedules: {}, omSchedules: {} };
     }
   }
   function save() {
@@ -326,7 +327,48 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     const schedule = getPollSchedule(guildId, nowMs);
     return schedule.history.some(item => item.pollId === pollId && item.usedAt > nowMs - 366 * 24 * 60 * 60 * 1000);
   }
-  return { getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, createTradeOffer, settleTrade, pendingTrades, listProfiles, setLeaderboardPrivacy, equipCollectible, craftCollectible, createRace, joinRace, startRace, answerRace, cancelRace, getRace, createReport, getCampResources, addCampCourse, removeCampCourse, addCampInstructor, removeCampInstructor, getPollSchedule, markPollReminderSent, markPollExhaustedReminderSent, markPollSent, pollOverrideAvailable, pollUsedWithinYear };
+  function getOmSchedule(guildId) {
+    load();
+    if (!state.omSchedules[guildId]) { state.omSchedules[guildId] = { optedIn: [], targetId: null, activatedFor: null, activeUntil: 0, lastSentAt: 0, sentDate: null, sentToday: 0, sentThisActivation: 0, nextSendAt: 0, mode: null, modePoll: null }; save(); }
+    const schedule = state.omSchedules[guildId];
+    if (!Array.isArray(schedule.optedIn)) schedule.optedIn = [];
+    return schedule;
+  }
+  function setOmOptIn(guildId, userId, optedIn) {
+    const schedule = getOmSchedule(guildId);
+    if (optedIn && !schedule.optedIn.includes(userId)) schedule.optedIn.push(userId);
+    if (!optedIn) { schedule.optedIn = schedule.optedIn.filter(id => id !== userId); if (schedule.targetId === userId) schedule.targetId = null; }
+    save(); return schedule;
+  }
+  function setOmTarget(guildId, userId) {
+    const schedule = getOmSchedule(guildId);
+    if (!schedule.optedIn.includes(userId)) return { set: false, reason: 'not-opted-in' };
+    schedule.targetId = userId; save(); return { set: true, schedule };
+  }
+  function clearOmTarget(guildId) { const schedule = getOmSchedule(guildId); schedule.targetId = null; schedule.activeUntil = 0; save(); return schedule; }
+  function activateOm(guildId, activationKey, nowMs) {
+    const schedule = getOmSchedule(guildId);
+    if (!schedule.targetId || !schedule.optedIn.includes(schedule.targetId) || schedule.activatedFor === activationKey) return { active: false, schedule };
+    schedule.activatedFor = activationKey; schedule.activeUntil = nowMs + 60 * 60 * 1000; schedule.nextSendAt = nowMs + Math.floor(Math.random() * 5 * 60 * 1000); schedule.lastSentAt = 0; schedule.sentDate = null; schedule.sentToday = 0; schedule.sentThisActivation = 0; save(); return { active: true, schedule };
+  }
+  function recordOmMessage(guildId, nowMs) {
+    const schedule = getOmSchedule(guildId);
+    if (!schedule.targetId || !schedule.activeUntil || nowMs > schedule.activeUntil) return { sent: false, reason: 'inactive', schedule };
+    if (schedule.nextSendAt && nowMs < schedule.nextSendAt) return { sent: false, reason: 'waiting', schedule };
+    if (schedule.lastSentAt && nowMs - schedule.lastSentAt < 20 * 60 * 1000) return { sent: false, reason: 'spacing-cap', schedule };
+    const date = new Date(nowMs).toISOString().slice(0, 10);
+    if (schedule.sentDate !== date) { schedule.sentDate = date; schedule.sentToday = 0; }
+    if (schedule.sentToday >= 6) return { sent: false, reason: 'daily-cap', schedule };
+    if ((schedule.sentThisActivation || 0) >= 3) { schedule.activeUntil = nowMs; save(); return { sent: false, reason: 'activation-cap', schedule }; }
+    schedule.lastSentAt = nowMs; schedule.sentToday += 1; schedule.sentThisActivation = (schedule.sentThisActivation || 0) + 1;
+    if (schedule.sentThisActivation >= 3) schedule.activeUntil = nowMs;
+    else schedule.nextSendAt = nowMs + 20 * 60 * 1000;
+    save(); return { sent: true, targetId: schedule.targetId, mode: schedule.mode, schedule };
+  }
+  function beginOmModePoll(guildId, activationKey, nowMs, channelId) { const schedule = getOmSchedule(guildId); schedule.modePoll = { activationKey, channelId, endsAt: nowMs + 60 * 60 * 1000, votes: {}, voters: [] }; save(); return schedule.modePoll; }
+  function recordOmModeVote(guildId, userId, mode) { const schedule = getOmSchedule(guildId); if (!schedule.modePoll) return { recorded: false, reason: 'not-active' }; if (schedule.modePoll.voters.includes(userId)) return { recorded: false, reason: 'already-voted' }; schedule.modePoll.voters.push(userId); schedule.modePoll.votes[mode] = (schedule.modePoll.votes[mode] || 0) + 1; save(); return { recorded: true }; }
+  function finishOmModePoll(guildId, nowMs) { const schedule = getOmSchedule(guildId); if (!schedule.modePoll || nowMs < schedule.modePoll.endsAt) return { finished: false }; const entries = Object.entries(schedule.modePoll.votes); schedule.mode = entries.length ? entries.sort((a, b) => b[1] - a[1])[0][0] : 'water-drop'; schedule.modePoll = null; save(); return { finished: true, mode: schedule.mode }; }
+  return { getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, createTradeOffer, settleTrade, pendingTrades, listProfiles, setLeaderboardPrivacy, equipCollectible, craftCollectible, createRace, joinRace, startRace, answerRace, cancelRace, getRace, createReport, getCampResources, addCampCourse, removeCampCourse, addCampInstructor, removeCampInstructor, getPollSchedule, markPollReminderSent, markPollExhaustedReminderSent, markPollSent, pollOverrideAvailable, pollUsedWithinYear, getOmSchedule, setOmOptIn, setOmTarget, clearOmTarget, activateOm, recordOmMessage, beginOmModePoll, recordOmModeVote, finishOmModePoll };
 }
 
 export const store = createStore();
