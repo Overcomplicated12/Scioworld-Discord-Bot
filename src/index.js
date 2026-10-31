@@ -2,6 +2,7 @@
 import { Client, Events, GatewayIntentBits, MessageFlags } from 'discord.js';
 import { commands, help, omTest, trivia } from './commands/index.js';
 import { checkOmSchedules, checkPollSchedules } from './poll-scheduler.js';
+import { backupProfileData } from './backups.js';
 import { store } from './store.js';
 
 if (!process.env.DISCORD_TOKEN) {
@@ -14,12 +15,16 @@ const commandsByName = new Map(commands.map(command => [command.data.name, comma
 
 client.once(Events.ClientReady, readyClient => {
   console.log(`Logged in as ${readyClient.user.tag}.`);
+  try { backupProfileData(); } catch (error) { console.error('Initial profile backup failed:', error); }
   checkPollSchedules(readyClient).catch(error => console.error('Initial poll schedule check failed:', error));
   checkOmSchedules(readyClient).catch(error => console.error('Initial Om schedule check failed:', error));
   setInterval(() => {
     checkPollSchedules(readyClient).catch(error => console.error('Poll schedule check failed:', error));
     checkOmSchedules(readyClient).catch(error => console.error('Om schedule check failed:', error));
   }, 15 * 60 * 1000);
+  setInterval(() => {
+    try { backupProfileData(); } catch (error) { console.error('Profile backup failed:', error); }
+  }, 24 * 60 * 60 * 1000);
 });
 
 client.on(Events.InteractionCreate, async interaction => {
