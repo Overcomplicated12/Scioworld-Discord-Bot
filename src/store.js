@@ -18,22 +18,23 @@ function newProfile(guildId, userId) {
 }
 
 export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.json')) {
-  let state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], campResources: {}, pollSchedules: {}, omSchedules: {} };
+  let state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], nextReportId: 1, campResources: {}, pollSchedules: {}, omSchedules: {} };
   function load() {
     try {
       state = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-      if (!state || typeof state !== 'object' || !state.profiles || typeof state.profiles !== 'object') state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], campResources: {}, pollSchedules: {}, omSchedules: {} };
+      if (!state || typeof state !== 'object' || !state.profiles || typeof state.profiles !== 'object') state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], nextReportId: 1, campResources: {}, pollSchedules: {}, omSchedules: {} };
       if (!Array.isArray(state.trades)) state.trades = [];
       if (!Number.isInteger(state.nextTradeId) || state.nextTradeId < 1) state.nextTradeId = 1;
       if (!Array.isArray(state.races)) state.races = [];
       if (!Number.isInteger(state.nextRaceId) || state.nextRaceId < 1) state.nextRaceId = 1;
       if (!Array.isArray(state.reports)) state.reports = [];
+      if (!Number.isInteger(state.nextReportId) || state.nextReportId < 1) state.nextReportId = state.reports.length + 1;
       if (!state.campResources || typeof state.campResources !== 'object') state.campResources = {};
       if (!state.pollSchedules || typeof state.pollSchedules !== 'object') state.pollSchedules = {};
       if (!state.omSchedules || typeof state.omSchedules !== 'object') state.omSchedules = {};
     } catch (error) {
       if (error.code !== 'ENOENT') throw error;
-      state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], campResources: {}, pollSchedules: {}, omSchedules: {} };
+      state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], nextReportId: 1, campResources: {}, pollSchedules: {}, omSchedules: {} };
     }
   }
   function save() {
@@ -265,12 +266,23 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     const hourAgo = nowMs - 60 * 60 * 1000;
     const recentReports = state.reports.filter(report => report.guildId === guildId && report.reporterId === reporterId && Date.parse(report.createdAt) > hourAgo);
     if (recentReports.length >= 5) return { created: false, reason: 'hourly-limit' };
-    state.reports.push({ guildId, reporterId, reportedUserId, reason, createdAt: new Date(nowMs).toISOString(), status: 'open' });
+    state.reports.push({ id: `P${String(state.nextReportId++).padStart(4, '0')}`, guildId, reporterId, reportedUserId, reason, createdAt: new Date(nowMs).toISOString(), status: 'open' });
     const profileKey = keyFor(guildId, reporterId);
     if (!state.profiles[profileKey]) state.profiles[profileKey] = newProfile(guildId, reporterId);
     state.profiles[profileKey].reportCooldownUntil = nowMs + 60 * 1000;
     save();
     return { created: true };
+  }
+  function listReports(guildId, status = 'open') {
+    load();
+    return state.reports.filter(report => report.guildId === guildId && (!status || report.status === status)).sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  }
+  function updateReport(guildId, reportId, status) {
+    load();
+    const report = state.reports.find(item => item.guildId === guildId && item.id?.toLowerCase() === reportId.toLowerCase());
+    if (!report) return { updated: false, reason: 'not-found' };
+    if (!['open', 'closed'].includes(status)) return { updated: false, reason: 'invalid-status' };
+    report.status = status; report.updatedAt = new Date().toISOString(); save(); return { updated: true, report };
   }
   function getCampResources(guildId) {
     load();
@@ -413,7 +425,7 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
   function beginOmModePoll(guildId, activationKey, nowMs, channelId) { const schedule = getOmSchedule(guildId); schedule.modePoll = { activationKey, channelId, endsAt: nowMs + 60 * 60 * 1000, votes: {}, voters: [] }; save(); return schedule.modePoll; }
   function recordOmModeVote(guildId, userId, mode) { const schedule = getOmSchedule(guildId); if (!schedule.modePoll) return { recorded: false, reason: 'not-active' }; if (schedule.modePoll.voters.includes(userId)) return { recorded: false, reason: 'already-voted' }; schedule.modePoll.voters.push(userId); schedule.modePoll.votes[mode] = (schedule.modePoll.votes[mode] || 0) + 1; save(); return { recorded: true }; }
   function finishOmModePoll(guildId, nowMs) { const schedule = getOmSchedule(guildId); if (!schedule.modePoll || nowMs < schedule.modePoll.endsAt) return { finished: false }; const entries = Object.entries(schedule.modePoll.votes); schedule.mode = entries.length ? entries.sort((a, b) => b[1] - a[1])[0][0] : 'water-drop'; schedule.modePoll = null; save(); return { finished: true, mode: schedule.mode }; }
-  return { getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, createTradeOffer, settleTrade, pendingTrades, listProfiles, setLeaderboardPrivacy, equipCollectible, craftCollectible, createRace, joinRace, startRace, answerRace, cancelRace, getRace, expireRaces, getOperationalStatus, createReport, getCampResources, addCampCourse, removeCampCourse, addCampInstructor, removeCampInstructor, exportCampResources, importCampResources, getPollSchedule, markPollReminderSent, markPollExhaustedReminderSent, markPollSent, pollOverrideAvailable, pollUsedWithinYear, getOmSchedule, setOmOptIn, setOmTarget, clearOmTarget, activateOm, recordOmMessage, beginOmModePoll, recordOmModeVote, finishOmModePoll };
+  return { getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, createTradeOffer, settleTrade, pendingTrades, listProfiles, setLeaderboardPrivacy, equipCollectible, craftCollectible, createRace, joinRace, startRace, answerRace, cancelRace, getRace, expireRaces, getOperationalStatus, createReport, listReports, updateReport, getCampResources, addCampCourse, removeCampCourse, addCampInstructor, removeCampInstructor, exportCampResources, importCampResources, getPollSchedule, markPollReminderSent, markPollExhaustedReminderSent, markPollSent, pollOverrideAvailable, pollUsedWithinYear, getOmSchedule, setOmOptIn, setOmTarget, clearOmTarget, activateOm, recordOmMessage, beginOmModePoll, recordOmModeVote, finishOmModePoll };
 }
 
 export const store = createStore();
