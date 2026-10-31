@@ -194,7 +194,7 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     if (state.races.some(race => race.guildId === guildId && ['lobby', 'active'].includes(race.status))) return { created: false, reason: 'active-race' };
     const host = getOrCreate(guildId, hostId);
     const id = `R${String(state.nextRaceId++).padStart(4, '0')}`;
-    const race = { id, guildId, hostId, category, questionIds, players: [hostId], scores: { [hostId]: 0 }, answers: {}, round: -1, status: 'lobby', createdAt: new Date(nowMs).toISOString() };
+    const race = { id, guildId, hostId, category, questionIds, players: [hostId], scores: { [hostId]: 0 }, answers: {}, round: -1, status: 'lobby', createdAt: new Date(nowMs).toISOString(), lastActivityAt: nowMs };
     state.races.push(race); save(); return { created: true, race };
   }
   function joinRace(guildId, userId, raceId) {
@@ -203,19 +203,19 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     const profileKey = keyFor(guildId, userId);
     if (!state.profiles[profileKey]) state.profiles[profileKey] = newProfile(guildId, userId);
     const profile = state.profiles[profileKey];
-    race.players.push(userId); race.scores[userId] = 0; save(); return { joined: true, race };
+    race.players.push(userId); race.scores[userId] = 0; race.lastActivityAt = Date.now(); save(); return { joined: true, race };
   }
   function startRace(guildId, userId, raceId, nowMs) {
     load(); const race = state.races.find(item => item.guildId === guildId && item.id.toLowerCase() === raceId.toLowerCase());
     if (!race) return { started: false, reason: 'not-found' }; if (race.hostId !== userId) return { started: false, reason: 'not-host' }; if (race.players.length < 2) return { started: false, reason: 'not-enough-players' };
-    race.status = 'active'; race.round = 0; race.answers = {}; race.startedAt = new Date(nowMs).toISOString(); save(); return { started: true, race, questionId: race.questionIds[0] };
+    race.status = 'active'; race.round = 0; race.answers = {}; race.startedAt = new Date(nowMs).toISOString(); race.lastActivityAt = nowMs; save(); return { started: true, race, questionId: race.questionIds[0] };
   }
   function answerRace(guildId, userId, raceId, answerIndex, question, nowMs) {
     load(); const race = state.races.find(item => item.guildId === guildId && item.id.toLowerCase() === raceId.toLowerCase());
     if (!race) return { answered: false, reason: 'not-found' }; if (race.status !== 'active') return { answered: false, reason: 'not-active' }; if (!race.players.includes(userId)) return { answered: false, reason: 'not-player' };
     if (!race.answers[race.round]) race.answers[race.round] = {};
     if (race.answers[race.round][userId] !== undefined) return { answered: false, reason: 'already-answered' };
-    race.answers[race.round][userId] = answerIndex;
+    race.answers[race.round][userId] = answerIndex; race.lastActivityAt = nowMs;
     const complete = race.players.every(player => race.answers[race.round][player] !== undefined);
     if (!complete) { save(); return { answered: true, complete: false, correct: answerIndex === question.answer, race }; }
     for (const player of race.players) if (race.answers[race.round][player] === question.answer) race.scores[player] += 1;
@@ -229,6 +229,19 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     load(); const race = state.races.find(item => item.guildId === guildId && item.id.toLowerCase() === raceId.toLowerCase()); if (!race) return { cancelled: false, reason: 'not-found' }; if (!isModerator && race.hostId !== userId) return { cancelled: false, reason: 'not-host' }; if (!['lobby', 'active'].includes(race.status)) return { cancelled: false, reason: 'not-active' }; race.status = 'cancelled'; race.cancelledAt = new Date().toISOString(); save(); return { cancelled: true, race };
   }
   function getRace(guildId, raceId) { load(); return state.races.find(item => item.guildId === guildId && item.id.toLowerCase() === raceId.toLowerCase()); }
+  function expireRaces(guildId, nowMs, lobbyMs = 15 * 60 * 1000, activeMs = 3 * 60 * 1000) {
+    load();
+    const expired = [];
+    for (const race of state.races.filter(item => item.guildId === guildId && ['lobby', 'active'].includes(item.status))) {
+      const lastActivity = race.lastActivityAt || Date.parse(race.startedAt || race.createdAt);
+      const limit = race.status === 'lobby' ? lobbyMs : activeMs;
+      if (Number.isFinite(lastActivity) && nowMs - lastActivity >= limit) {
+        race.status = 'expired'; race.expiredAt = new Date(nowMs).toISOString(); expired.push(race);
+      }
+    }
+    if (expired.length) save();
+    return expired;
+  }
   function createReport(guildId, reporterId, reportedUserId, reason, nowMs) {
     const reporter = getOrCreate(guildId, reporterId);
     if (reporter.reportCooldownUntil > nowMs) return { created: false, reason: 'cooldown', remainingMs: reporter.reportCooldownUntil - nowMs };
@@ -368,7 +381,7 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
   function beginOmModePoll(guildId, activationKey, nowMs, channelId) { const schedule = getOmSchedule(guildId); schedule.modePoll = { activationKey, channelId, endsAt: nowMs + 60 * 60 * 1000, votes: {}, voters: [] }; save(); return schedule.modePoll; }
   function recordOmModeVote(guildId, userId, mode) { const schedule = getOmSchedule(guildId); if (!schedule.modePoll) return { recorded: false, reason: 'not-active' }; if (schedule.modePoll.voters.includes(userId)) return { recorded: false, reason: 'already-voted' }; schedule.modePoll.voters.push(userId); schedule.modePoll.votes[mode] = (schedule.modePoll.votes[mode] || 0) + 1; save(); return { recorded: true }; }
   function finishOmModePoll(guildId, nowMs) { const schedule = getOmSchedule(guildId); if (!schedule.modePoll || nowMs < schedule.modePoll.endsAt) return { finished: false }; const entries = Object.entries(schedule.modePoll.votes); schedule.mode = entries.length ? entries.sort((a, b) => b[1] - a[1])[0][0] : 'water-drop'; schedule.modePoll = null; save(); return { finished: true, mode: schedule.mode }; }
-  return { getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, createTradeOffer, settleTrade, pendingTrades, listProfiles, setLeaderboardPrivacy, equipCollectible, craftCollectible, createRace, joinRace, startRace, answerRace, cancelRace, getRace, createReport, getCampResources, addCampCourse, removeCampCourse, addCampInstructor, removeCampInstructor, getPollSchedule, markPollReminderSent, markPollExhaustedReminderSent, markPollSent, pollOverrideAvailable, pollUsedWithinYear, getOmSchedule, setOmOptIn, setOmTarget, clearOmTarget, activateOm, recordOmMessage, beginOmModePoll, recordOmModeVote, finishOmModePoll };
+  return { getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, createTradeOffer, settleTrade, pendingTrades, listProfiles, setLeaderboardPrivacy, equipCollectible, craftCollectible, createRace, joinRace, startRace, answerRace, cancelRace, getRace, expireRaces, createReport, getCampResources, addCampCourse, removeCampCourse, addCampInstructor, removeCampInstructor, getPollSchedule, markPollReminderSent, markPollExhaustedReminderSent, markPollSent, pollOverrideAvailable, pollUsedWithinYear, getOmSchedule, setOmOptIn, setOmTarget, clearOmTarget, activateOm, recordOmMessage, beginOmModePoll, recordOmModeVote, finishOmModePoll };
 }
 
 export const store = createStore();

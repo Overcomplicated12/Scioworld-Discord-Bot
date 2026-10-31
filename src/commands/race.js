@@ -18,6 +18,8 @@ export const data = new SlashCommandBuilder().setName('race').setDescription('Co
 export async function execute(interaction) {
   if (!requireGuild(interaction)) return;
   const action = interaction.options.getSubcommand(); const now = Date.now();
+  const expired = store.expireRaces(interaction.guildId, now);
+  if (expired.length && action === 'create') await interaction.channel.send(`⏱️ ${expired.map(race => `Race **${race.id}**`).join(' and ')} expired after inactivity. Start a new lobby whenever you are ready.`);
   if (action === 'create') { const race = store.createRace(interaction.guildId, interaction.user.id, interaction.options.getString('category'), pickQuestions(interaction.options.getString('category')), now); if (!race.created) { await interaction.reply({ content: 'There is already an active race in this server.', flags: MessageFlags.Ephemeral }); return; } await interaction.reply(`🏁 Race **${race.race.id}** created by <@${interaction.user.id}>. Join with **/race join race_id:${race.race.id}**, then the host starts it.`, { allowedMentions: { users: [interaction.user.id] } }); return; }
   const raceId = interaction.options.getString('race_id');
   if (action === 'join') { const result = store.joinRace(interaction.guildId, interaction.user.id, raceId); const messages = { 'not-found': 'Race not found.', 'not-lobby': 'That race already started or ended.', 'already-joined': 'You already joined that race.' }; await interaction.reply({ content: result.joined ? `<@${interaction.user.id}> joined **${raceId}**. Players: ${result.race.players.length}` : messages[result.reason], allowedMentions: { users: [interaction.user.id] } }); return; }
