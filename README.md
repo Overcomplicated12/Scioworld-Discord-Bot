@@ -35,18 +35,24 @@ Never commit `.env` or `data/profiles.json`.
 
 For a persistent server deployment, see [docs/HOSTING.md](docs/HOSTING.md). The current command list and game notes are in [docs/GAME_DESIGN.md](docs/GAME_DESIGN.md). The engagement plan is in [docs/ENGAGEMENT_PLAN.md](docs/ENGAGEMENT_PLAN.md), and the ready-to-post announcement is in [docs/ANNOUNCEMENT.md](docs/ANNOUNCEMENT.md).
 
+## Two-week science pilot
+
+The bot now includes `/weekly`, `/passport`, and an administrator-only `/pilot` command group. One shared activity engine supports predictions, Two Truths and a Lie, and opinions. Three seasonal Contribution Stamps qualify for an organizer-reviewed sticker claim; stamps cannot be bought or traded. Existing data and commands are retained.
+
+Start with a **draft simulation** using the configuration in `content/pilot/season.json`. Nothing activates or issues merchandise at startup. Read [the pilot operator guide](docs/PILOT.md) for setup, privacy, claims, simulation, and reporting. Run `npm test` to check all workflows; `npm run test:pilot` runs isolated pilot tests without production writes.
+
 ## Command guide
 
 ### Profiles and progression
 
 - `/start` — create a profile.
-- `/profile` — view level, knowledge points, streak, and featured collectible.
+- `/profile` — view level, knowledge points, and featured collectible.
 - `/inventory` — view Sciocoins, resources, and collectibles.
 - `/daily` — claim the daily reward, knowledge points, and a rotating science fact.
 - `/leaderboard` — rank by knowledge points, Sciocoins, or streak.
 - `/privacy` — control leaderboard visibility, public recognition, or camp features.
 
-Knowledge points are progression points: correct trivia answers give more, participation still gives some, and daily rewards give 5. Every 100 points adds a level.
+Knowledge points track levels (100 KP per level). Ordinary trivia pays 2 coins/3 KP for up to five different correct answers per UTC day. Optional daily rewards are flat at 2 coins/1 KP; there is no streak bonus or penalty. Weekly activity and contribution rewards are listed in the pilot guide.
 
 ### Games and community
 
@@ -77,7 +83,7 @@ Lore chapters unlock through key clues. The clue and answer are attached to the 
 - `/sets` — view collectible set progress.
 - `/trade offer|accept|decline|cancel|list` — trade collectibles and Sciocoins with another player.
 
-The bot does not use gambling, wagers, random paid draws, or cash-value rewards. Competition is based on answers and participation.
+The shop sells digital cosmetics only. Physical sticker claims are separate, require seasonal stamps and organizer approval, and cannot be purchased with coins or KP. The bot has no gambling, wagers, or random paid draws.
 
 ### Camp resources
 

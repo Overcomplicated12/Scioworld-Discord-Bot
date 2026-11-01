@@ -1,18 +1,13 @@
-# ScioCulture announcement
+# ScioCulture pilot announcement
 
-Meet **ScioCulture**, a temporary ScioVirtual community experiment living in Discord.
+Meet **ScioCulture** in **#scioculture** 🐸
 
-ScioCulture turns the jokes, questions, people, and lore already around camp into small activities everyone can join. Answer a science question, vote on a strange community prompt, race a friend, help build a course trivia set, or add to the Frog of Wisdom’s growing story. You earn fictional Sciocoins and knowledge points along the way, then use them for cosmetic collectibles, titles, crafting, and lore recognition.
+For two weeks, the Frog is bringing us one science question each week. Make a prediction, see what happens, and share your reasoning if you feel like it. You can also help write the next piece of ScioLore.
 
-There are no bets, gambling mechanics, paid draws, or cash-value prizes. The reward is a reason to participate, learn something, make a friend laugh, and leave a little more ScioVirtual lore behind.
+Try `/start`, then `/weekly`. Your private `/passport view` tracks Contribution Stamps: one for a weekly answer, one for an approved explanation, or two for an original lore contribution approved for rewards. Three stamps qualify for a seasonal sticker claim when organizers open claims.
 
-Try it in **#scioculture**:
+**Sticker availability and eligibility will be announced by organizers. Qualification does not automatically mean a mailed sticker. Simulation seasons are clearly labeled and issue no real merchandise.** Mailing details are handled outside the bot.
 
-- `/start` to join
-- `/help` for the menu
-- `/trivia` for a science question
-- `/daily` for a small reward and a rotating fact
-- `/camp-trivia ask` for course-specific questions
-- `/lore` to read the community stories
+Your Sciocoins and Knowledge Points still belong to you and remain separate from stamps. Keep enjoying trivia, lore, and friendly games whenever you have time. No daily check-in, gambling, or grind required.
 
-The project is being built in stages: a playable bot first, camp usefulness next, then testing and polishing. It is intentionally lightweight. You never need to grind, spend real money, or be the best player to belong here.
+Use `/passport feedback` to tell organizers how it feels, or `/passport opt-out` to opt out of the pilot. Reading along is welcome too.

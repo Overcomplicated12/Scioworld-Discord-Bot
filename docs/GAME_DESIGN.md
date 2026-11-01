@@ -4,7 +4,7 @@
 
 ScioCulture is a social layer for ScioVirtual. It turns the questions, jokes, camp knowledge, and stories already in the community into short activities people can join when they are already in Discord. It is a lightweight community experiment, not a replacement for Roblox, a standalone RPG, or an obligation to check in every day.
 
-The bot’s promise is simple: **participate, learn something, make the community more fun, and leave a little lore behind.** There are no bets, gambling mechanics, paid random draws, or cash-value prizes.
+The bot’s promise is simple: **participate, learn something, make the community more fun, and leave a little lore behind.** There are no bets, gambling mechanics, paid random draws, or currency cash-out. Seasonal physical sticker eligibility is handled separately through organizer review.
 
 ## Product story
 
@@ -12,29 +12,15 @@ ScioCulture helps a community tell its own story. A member can answer a question
 
 The engagement loop is **notice → participate → understand → contribute → return**. Returning should be attractive because there is new community content, not because missing a day causes a loss.
 
-## Why play?
+## Current pilot loop
 
-The bot's advantage is that it lives in the community's conversation:
+1. `/start`, then `/weekly`: answer one science activity each week.
+2. Optionally explain a prediction or contribute original lore for human review.
+3. `/passport view`: see Contribution Stamps and eligibility for one seasonal sticker claim.
+4. Organizers review claims and handle mailing externally. Simulation issues no real merchandise.
+5. Return for the next question and explanation; there is no daily attendance requirement.
 
-- **Instant social play:** a round takes seconds to join and is visible to everyone in the channel.
-- **Shared culture:** questions, item names, titles, and rewards refer to Sciovirtual, camp memories, and recurring jokes.
-- **Friendly status:** players can collect badges, earn titles, build a streak, and appear on a weekly leaderboard without needing to be the best at a large game.
-- **Small, repeatable goals:** there is always one more daily question, item, recipe, or rematch.
-- **Recognition:** rare collectibles and cosmetic titles give people something to show off and talk about.
-
-The game should reward showing up and helping the community as much as winning.
-
-For the research-informed engagement plan and pilot schedule, see [docs/ENGAGEMENT_PLAN.md](ENGAGEMENT_PLAN.md). The ready-to-post announcement is in [docs/ANNOUNCEMENT.md](ANNOUNCEMENT.md).
-
-## Core player loop
-
-1. A player uses `/start` and receives a short welcome and starter inventory.
-2. They use `/daily`, `/frog`, `/trivia`, or join `/race` to earn **Sciocoins** and knowledge.
-3. They spend resources on crafting, saving, trading, or cosmetic collectibles.
-4. They use `/inventory`, `/profile`, and `/leaderboard` to see progress.
-5. They return for a daily bonus, a new question set, an event, or a rematch with friends.
-
-Every action should produce a clear result in one Discord message. A player should be able to understand the first loop in under two minutes.
+See [PILOT.md](PILOT.md) for the implemented two-week schedule, exact reward amounts, moderation, claims, and reporting. It supersedes the original daily-game progression plan below. Existing games and cosmetics remain optional side activities. Physical stickers cannot be purchased using Sciocoins or KP.
 
 ## Currencies and resources
 
@@ -44,7 +30,7 @@ Keep the first version small:
 | --- | --- | --- |
 | **Sciocoins** | Correct answers, activities, daily bonus | Basic shop items, crafting, and trades |
 | **Knowledge points** | Answering questions, especially new categories | Levels, titles, leaderboard recognition |
-| **Camp resources** | Minigames and camp integration | Recipes, discounts, or camp-specific rewards |
+| **Camp resources** | Minigames and camp integration | Existing digital recipes only |
 | **Collectibles** | Shop purchases, crafting, and events | Profile display, badges, set completion |
 | **Om challenge access** | Explicit opt-in and weekly style poll | Harmless fictional DM challenges with strict caps |
 
@@ -115,7 +101,7 @@ The race is a social event with no wagering:
 
 Guardrails:
 
-- no player can join their own race with multiple accounts;
+- Discord IDs cannot join the same race twice; organizers handle suspected alternate-account abuse;
 - answers are accepted only during the active question and are rate-limited;
 - the host or a moderator can cancel before the first question;
 - hosts or moderators can cancel a lobby or active race when a player disconnects;
@@ -158,7 +144,7 @@ question: id, category, prompt, answers, explanation, difficulty, active
 item: id, name, rarity, description, source, tradeable
 ```
 
-The current foundation uses a local JSON profile store with regular backups. Move to SQLite when races and larger inventories need transactions. Keep the game logic independent from Discord and from external camp/Torture Om integrations so either integration can be disabled without losing profiles.
+The current foundation uses a local JSON profile store with regular backups. Pilot rewards and balances share one synchronous atomic JSON write; SQLite is deferred while hosting uses one process. Keep the game logic independent from Discord and from external camp/Torture Om integrations so either integration can be disabled without losing profiles.
 
 ## Integration plan
 

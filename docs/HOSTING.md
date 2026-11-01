@@ -94,3 +94,11 @@ From another directory, invoke the script by its absolute path. The script requi
 - **Commands fail to register:** check both `.env` values and network access to Discord. If commands do not appear, check the bot's server installation and permissions, then refresh Discord's command picker.
 - **Bot is offline:** check `pm2 status` and `pm2 logs scioworld`, the token, and Discord connectivity. PM2 may restart a process repeatedly if configuration is invalid.
 - **Bot does not return after reboot:** run `pm2 startup` and its printed command, then `pm2 save` under the same account that started the bot. Check the generated systemd service and PM2 logs.
+
+## Deploying the seasonal pilot
+
+The pilot uses the existing single PM2 process and `data/profiles.json`; no new dependencies or database migration are needed. Do not run multiple writers against the file. The first pilot write creates a `.pre-pilot.bak` backup; keep normal backups too.
+
+Before an authorized deployment, run `npm test`, back up data, and inspect `content/pilot/season.json`. Then register the new `/weekly`, `/passport`, and `/pilot` commands and restart PM2. Give the bot View Channel, Send Messages, Embed Links, Attach Files, and Read Message History in the selected activity channel.
+
+No season starts automatically. Test a draft simulation in a staging server before creating and explicitly activating a real season. Review [PILOT.md](PILOT.md) for exact timestamps, eligibility, stock, claims, quiet mode, and recovery. Never put student addresses in this bot. Deployment approval does not itself activate a season or open physical claims.

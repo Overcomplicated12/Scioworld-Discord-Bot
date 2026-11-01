@@ -50,3 +50,7 @@ Copy this shape and replace the values:
 4. Submit the file for review before it is added to a public event or collectible. The check rejects malformed JSON, tabs, trailing whitespace, missing final newlines, and incomplete story shapes.
 
 The example story in this folder is a template as well as a playable lore concept. Copy it when starting a new story, then change the IDs and content.
+
+## Seasonal contribution rewards
+
+Student submissions use `/lore action:submit`. `/lore-review approve` approves publication only. An administrator uses `/pilot reward-lore submission:<id> reason:<reason>` separately to approve originality, substance, and community relevance for seasonal stamps. Only one original contribution per student per season earns the reward; splitting a story earns nothing extra. Existing repository stories and clue unlocks do not automatically grant stamps. See [the pilot guide](../../docs/PILOT.md).
