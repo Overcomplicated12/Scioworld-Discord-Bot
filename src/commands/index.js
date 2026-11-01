@@ -33,3 +33,4 @@ export { trivia, help };
 export { omTest };
 export { campTrivia };
 export { menu };
+export { lore };

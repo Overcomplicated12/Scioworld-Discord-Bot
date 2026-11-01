@@ -69,6 +69,8 @@ Suggested starting balance: 100 Sciocoins, one starter collectible, and a small 
 - `/frog` — if the player owns the Frog of Wisdom, reveal a philosopher quote; use a per-player cooldown to prevent spam.
 - `/lore [action] [query]` — reveal a random community story, list stories, or search contributed entries.
 - `/lore action:submit title:<title> query:<story text>` — submit a student-created story for review.
+- `/lore action:discuss` — start a conversation that can unlock the next story chapter.
+- `/lore action:progress` — see the server’s chapter progress.
 - `/trivia [category]` — start a short question for the channel or an ephemeral solo question.
 - `/race create [category]` — open a friendly time-limited race.
 - `/race join` — join an open race.
@@ -98,6 +100,8 @@ Suggested starting balance: 100 Sciocoins, one starter collectible, and a small 
 - `/om-test` — temporary owner/admin test for the one-minute consent flow.
 
 The implemented foundation includes profiles, trivia, daily rewards with rotating facts, collectibles, crafting, trading, races, leaderboards, polls, camp resources, reports, lore, and the consent-based Om challenge.
+
+Lore uses community progression rather than a daily grind. Each story begins with one available entry. A discussion prompt asks a social question about the next entry; three distinct participants unlock that chapter. The discussion grants no currency, and each chapter can be unlocked only once per server.
 
 ## Race minigame
 
