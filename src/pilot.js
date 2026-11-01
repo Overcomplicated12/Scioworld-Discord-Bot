@@ -89,7 +89,7 @@ export function pilotReport(state, s) {
     reports: (state.reports || []).filter(x => x.guildId === s.guildId && inSeason(s, Date.parse(x.createdAt))).length,
   };
 }
-const ADMIN = new Set(['create', 'activate', 'quiet', 'publish', 'close', 'review', 'queue', 'reward-lore', 'claims-open', 'claim-review', 'report', 'status']);
+const ADMIN = new Set(['create', 'activate', 'quiet', 'publish', 'close', 'review', 'queue', 'reward-lore', 'claims-open', 'claim-review', 'report', 'status', 'stock']);
 export function runPilot(state, guildId, userId, action, args = {}, now = Date.now(), canManage = false) {
   requireThat(guildId && Number.isFinite(now), 'Run this inside a server.');
   if (ADMIN.has(action)) requireThat(canManage, 'Only the server owner or administrators can manage the pilot.');
@@ -109,7 +109,7 @@ export function runPilot(state, guildId, userId, action, args = {}, now = Date.n
     return { quiet: args.enabled };
   }
   if (action === 'is-quiet') return db.quietGuilds.includes(guildId);
-  if (action === 'history') return db.seasons.filter(s => s.guildId === guildId).map(s => passport(s, userId, now));
+  if (action === 'history') return db.seasons.filter(s => s.guildId === guildId).map(s => { advance(state, s, now); return passport(s, userId, now); });
   const s = args.season ? db.seasons.find(s => s.guildId === guildId && s.id === args.season) : [...db.seasons].reverse().find(s => s.guildId === guildId && s.status === 'active') || [...db.seasons].reverse().find(s => s.guildId === guildId);
   requireThat(s, 'No season yet. An administrator can create the draft with /pilot create.');
   advance(state, s, now);
@@ -129,6 +129,10 @@ export function runPilot(state, guildId, userId, action, args = {}, now = Date.n
     requireThat(typeof args.text === 'string' && args.text.trim().length > 0 && args.text.length <= 1000, 'Feedback must be 1–1000 characters.');
     requireThat(!s.feedback.some(f => f.userId === userId), 'You already sent feedback for this season.');
     s.feedback.push({ userId, text: args.text.trim(), at: now }); return { saved: true };
+  }
+  if (action === 'stock') {
+    requireThat(Number.isInteger(args.count) && args.count >= s.claims.filter(c => ['approved', 'fulfilled'].includes(c.status)).length, 'Inventory cannot be below already reserved stickers.');
+    s.inventory = args.count; return { inventory: s.inventory };
   }
   if (action === 'claims-open') {
     requireThat(s.status !== 'draft', 'Activate the season first.');
@@ -203,7 +207,7 @@ export function runPilot(state, guildId, userId, action, args = {}, now = Date.n
     if (!answer) { answer = { userId, activityId: a.id, at: now }; s.answers.push(answer); }
     answer.choice = args.choice; answer.updatedAt = now;
     award(state, s, userId, `answer:${a.id}`, 'answer', now, answer.at);
-    return { saved: true, choice: a.choices[args.choice], qualified: stamps(s, userId) >= s.threshold };
+    return { saved: true, simulation: s.simulation, choice: a.choices[args.choice], qualified: stamps(s, userId) >= s.threshold };
   }
   if (action === 'discuss') {
     requireThat(now >= a.opensAt, 'This activity has not opened.');

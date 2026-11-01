@@ -40,7 +40,7 @@ export async function handleInteraction(interaction) {
     }
     if (action === 'answer') {
       const result = store.pilot(interaction.guildId, interaction.user.id, 'answer', { season, activity, choice: Number(choice) });
-      await interaction.reply(privateReply(`Saved: **${result.choice}**. You can revise before the deadline. Your answer stamp is awarded only once. Check /passport for progress.`));
+      await interaction.reply(privateReply(`${result.simulation ? 'Simulation: ' : ''}Saved: **${result.choice}**. You can revise before the deadline. Your answer stamp is awarded only once. Check /passport for progress.`));
     } else if (action === 'submit' && interaction.isModalSubmit()) {
       store.pilot(interaction.guildId, interaction.user.id, 'discuss', { season, activity, text: interaction.fields.getTextInputValue('reasoning') });
       await interaction.reply(privateReply('Your explanation is in the private review queue. Check /weekly for feedback. It will not be published automatically.'));

@@ -20,6 +20,7 @@ export const data = new SlashCommandBuilder().setName('pilot').setDescription('O
   .addSubcommand(c=>seasonOption(c.setName('reward-lore').setDescription('Award seasonal lore stamps separately from publication approval.').addStringOption(o=>o.setName('submission').setDescription('Lore submission ID').setRequired(true)).addStringOption(o=>o.setName('reason').setDescription('Confirm originality, substance, and community relevance').setMaxLength(500).setRequired(true))))
   .addSubcommand(c=>seasonOption(c.setName('claims-open').setDescription('Open claims after publishing a fair eligibility and capacity policy.').addStringOption(o=>o.setName('policy').setDescription('Discord message link to your published policy; required for real claims'))))
   .addSubcommand(c=>seasonOption(decisionOption(c.setName('claim-review').setDescription('Review or fulfill a sticker claim. Mailing is handled externally.').addUserOption(o=>o.setName('student').setDescription('Student whose claim is being reviewed').setRequired(true)),['approved','rejected','fulfilled']).addStringOption(o=>o.setName('reason').setDescription('Short review reason (never include an address)').setRequired(true).setMaxLength(500))))
+  .addSubcommand(c=>seasonOption(c.setName('stock').setDescription('Update sticker capacity without changing existing reservations.').addIntegerOption(o=>o.setName('count').setDescription('Total available stickers for the season').setRequired(true).setMinValue(0))))
   .addSubcommand(c=>seasonOption(c.setName('engagement').setDescription('View aggregate participation and Week 1 → Week 2 retention.')));
 export async function execute(i) {
   if(!requireGuild(i))return;
@@ -35,6 +36,7 @@ export async function execute(i) {
       if(!channel?.isTextBased() || channel.isThread?.()) throw new PilotError('Choose a server text channel, not a thread.');
       args.channelId=channel.id;
     }
+    if(action==='stock')args.count=i.options.getInteger('count');
     if(action==='quiet')args.enabled=i.options.getBoolean('enabled');
     if(['publish','close'].includes(action))args.activity=i.options.getString('activity');
     if(['review','claim-review','reward-lore'].includes(action))args.reason=i.options.getString('reason');
