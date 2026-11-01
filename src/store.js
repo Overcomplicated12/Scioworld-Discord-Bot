@@ -459,6 +459,12 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     load(); const submission = state.loreSubmissions.find(item => item.guildId === guildId && item.id.toLowerCase() === submissionId.toLowerCase());
     if (!submission) return { updated: false, reason: 'not-found' };
     if (!['approved', 'rejected'].includes(status)) return { updated: false, reason: 'invalid-status' };
+    if (submission.status !== status) {
+      if (status === 'approved' && !submission.approvalNotifiedAt) {
+        submission.approvalNoticePending = true;
+        delete submission.approvalNoticeNextAt;
+      } else if (status !== 'approved') submission.approvalNoticePending = false;
+    }
     submission.status = status; submission.reviewedAt = new Date().toISOString(); save(); return { updated: true, submission };
   }
   function loreKey(storyId, entryId) { return `${storyId}:${entryId}`; }

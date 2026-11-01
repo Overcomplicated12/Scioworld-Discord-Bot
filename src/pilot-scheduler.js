@@ -14,6 +14,16 @@ export async function checkPilotSchedules(client, now = Date.now(), persistence 
       catch (e) { console.error('Pilot schedule read failed:', guild.id, e.message); continue; }
       for (const job of jobs) {
         try {
+          if (job.kind === 'lore-approved') {
+            let delivered = false;
+            try {
+              const author = await client.users.fetch(job.userId);
+              await author.send({ content: `🐸 **Your lore was approved!**\nYour submission **${job.id} — ${job.title}** was approved for publication in **${guild.name}**. You can find it with /lore action:search in the server.\n\nSeasonal stamps, if applicable, are reviewed separately.`, allowedMentions: { parse: [] } });
+              delivered = true;
+            } catch (error) { console.warn(`Lore approval DM failed for ${job.id}; retrying in 15 minutes:`, error.message); }
+            persistence.ackPilotJob(guild.id, job, { delivered, now });
+            continue;
+          }
           if (job.kind === 'staff-submission') {
             const delivered = await notifySubmissionStaff(guild, job);
             persistence.ackPilotJob(guild.id, job, { delivered, now });
