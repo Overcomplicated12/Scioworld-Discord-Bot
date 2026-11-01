@@ -85,7 +85,7 @@ export async function checkOmSchedules(client, nowMs = Date.now()) {
       const result = store.recordOmMessage(guild.id, nowMs);
       if (!result.sent) continue;
       const target = await client.users.fetch(result.targetId);
-      await target.send(`🧪 **Om challenge**\n${randomOmMessageForMode(result.mode)}\n\nYou are receiving this because you opted in. Use /om opt-out at any time.`);
+      await target.send(`🧪 **Om challenge**\n${randomOmMessageForMode(result.mode)}\n\nYou are receiving this because you opted in. Use /torture-om opt-out at any time.`);
     } catch (error) {
       console.error(`Om challenge scheduler failed for guild ${guild.id}:`, error);
     }

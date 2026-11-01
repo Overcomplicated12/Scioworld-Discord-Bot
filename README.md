@@ -57,6 +57,7 @@ Knowledge points are progression points: correct trivia answers give more, parti
 - `/poll early` — admin-only early random poll.
 - `/poll override` — admin-only custom poll for the week.
 - `/frog` — receive a Frog of Wisdom quote when you own the collectible.
+- `/torture-om opt-in|opt-out|status` — manage the fictional, consent-based Om challenge.
 - `/lore` — read, list, or search community stories.
 - `/lore action:submit title:<title> query:<story text>` — submit a student-created story for review.
 - `/lore-review list|approve|reject` — moderator review of student submissions.

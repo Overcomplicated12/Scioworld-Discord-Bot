@@ -3,7 +3,7 @@ import { store } from '../store.js';
 import { requireGuild } from './utils.js';
 
 const adminOnly = interaction => interaction.guild?.ownerId === interaction.user.id || interaction.memberPermissions?.has(PermissionFlagsBits.Administrator);
-export const data = new SlashCommandBuilder().setName('om').setDescription('Manage the opt-in fictional Om challenge.')
+export const data = new SlashCommandBuilder().setName('torture-om').setDescription('Manage the opt-in fictional Om challenge.')
   .addSubcommand(command => command.setName('opt-in').setDescription('Consent to receive harmless Om challenge messages.'))
   .addSubcommand(command => command.setName('opt-out').setDescription('Stop receiving Om challenge messages.'))
   .addSubcommand(command => command.setName('status').setDescription('View the Om challenge status.'))
@@ -27,5 +27,5 @@ export async function execute(interaction) {
   if (action === 'stop') { store.clearOmTarget(interaction.guildId); await interaction.reply({ content: 'The Om challenge was stopped.', flags: MessageFlags.Ephemeral }); return; }
   const user = interaction.options.getUser('user');
   const result = store.setOmTarget(interaction.guildId, user.id);
-  await interaction.reply({ content: result.set ? `Set <@${user.id}> as the Om challenge target. They have opted in.` : 'That user has not opted in. They must use `/om opt-in` first.', flags: MessageFlags.Ephemeral, allowedMentions: { users: [] } });
+  await interaction.reply({ content: result.set ? `Set <@${user.id}> as the Om challenge target. They have opted in.` : 'That user has not opted in. They must use `/torture-om opt-in` first.', flags: MessageFlags.Ephemeral, allowedMentions: { users: [] } });
 }

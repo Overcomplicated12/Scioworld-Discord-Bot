@@ -93,8 +93,8 @@ Suggested starting balance: 100 Sciocoins, one starter collectible, and a small 
 - `/poll early|override` — owner/admin controls for the weekly poll, limited to one override per week.
 - `/report` — submit a private report; moderators and the server owner receive a DM, with anti-spam limits.
 - `/lore-review list|approve|reject` — moderators review student lore before it enters the public archive.
-- `/om opt-in|opt-out|status` — manage consent for the harmless fictional Om challenge.
-- `/om target|stop` — owner/admin controls for an opted-in target.
+- `/torture-om opt-in|opt-out|status` — manage consent for the harmless fictional Om challenge.
+- `/torture-om target|stop` — owner/admin controls for an opted-in target.
 - `/om-test` — temporary owner/admin test for the one-minute consent flow.
 
 The implemented foundation includes profiles, trivia, daily rewards with rotating facts, collectibles, crafting, trading, races, leaderboards, polls, camp resources, reports, lore, and the consent-based Om challenge.
@@ -164,7 +164,7 @@ Start with an adapter that can read the camp resource catalog and write only app
 
 ### Om challenge
 
-Keep this fictional, harmless, and opt-in. The weekly poll chooses a message style, and a selected target receives at most three DMs spaced about 20 minutes apart. `/om opt-out` and the admin stop command end participation immediately. No collectible or wager changes these limits.
+Keep this fictional, harmless, and opt-in. The weekly poll chooses a message style, and a selected target receives at most three DMs spaced about 20 minutes apart. `/torture-om opt-out` and the admin stop command end participation immediately. No collectible or wager changes these limits.
 
 ## Success criteria
 
