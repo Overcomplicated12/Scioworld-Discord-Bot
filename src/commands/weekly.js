@@ -34,7 +34,7 @@ export async function handleInteraction(interaction) {
   const [, action, season, activity, choice] = interaction.customId.split(':');
   try {
     if (action === 'explain') {
-      const text = new TextInputBuilder().setCustomId('reasoning').setLabel('Your reasoning, experiment, or follow-up question').setStyle(TextInputStyle.Paragraph).setMaxLength(1000).setRequired(true);
+      const text = new TextInputBuilder().setCustomId('reasoning').setLabel('Your reasoning or follow-up question').setStyle(TextInputStyle.Paragraph).setMaxLength(1000).setRequired(true);
       await interaction.showModal(new ModalBuilder().setCustomId(`weekly:submit:${season}:${activity}`).setTitle('Share your reasoning').addComponents(new ActionRowBuilder().addComponents(text)));
       return;
     }

@@ -1,9 +1,13 @@
 import assert from 'node:assert/strict';
 import { commands } from '../src/commands/index.js';
-import { activityMessage } from '../src/commands/weekly.js';
+import { activityMessage, handleInteraction } from '../src/commands/weekly.js';
 import { execute as pilotCommand } from '../src/commands/pilot.js';
 import { checkPilotSchedules } from '../src/pilot-scheduler.js';
 for(const command of commands) command.data.toJSON();
+let modal;
+await handleInteraction({guildId:'g',user:{id:'student'},customId:'weekly:explain:test:activity',showModal:async value=>{modal=value.toJSON();}});
+assert.equal(modal.custom_id,'weekly:submit:test:activity');
+assert(modal.components[0].components[0].label.length<=45);
 let denied;
 await pilotCommand({guildId:'g',guild:{ownerId:'owner'},user:{id:'student'},memberPermissions:{has:()=>false},reply:async value=>{denied=value;}});
 assert.match(denied.content,/Only/);
