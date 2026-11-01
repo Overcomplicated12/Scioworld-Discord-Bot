@@ -10,7 +10,7 @@ const pages = {
   },
   learn: { content: '**Learn**\n`/trivia` — answer a short science question\n`/camp-trivia ask` — try a course-specific question\n`/daily` — get a small reward and rotating fact\n\nAnswers give explanations, so a wrong answer still teaches you.', buttons: [['home', 'Back', ButtonStyle.Secondary]] },
   connect: { content: '**Connect**\n`/race create` — start a friendly science race\n`/poll status` — see the weekly community poll\n`/lore` — read shared ScioVirtual stories\n\nInvite people into the conversation and celebrate good answers.', buttons: [['home', 'Back', ButtonStyle.Secondary]] },
-  create: { content: '**Create**\nAdd a lore story through the reviewed lore contribution workflow.\n`/camp-trivia add` — instructors add course questions\n`/poll override` — admins shape this week’s prompt\n\nThe best reward is leaving something behind for the next person.', buttons: [['home', 'Back', ButtonStyle.Secondary]] },
+  create: { content: '**Create**\n`/lore action:submit` — submit a story entry for review\n`/camp-trivia add` — instructors add course questions\n`/poll override` — admins shape this week’s prompt\n\nThe best reward is leaving something behind for the next person.', buttons: [['home', 'Back', ButtonStyle.Secondary]] },
   collect: { content: '**Collect**\n`/shop` — browse cosmetic collectibles\n`/craft` — make items from resources\n`/trade` — exchange items with friends\n`/sets` — track collection progress\n\nCollectibles are cultural souvenirs, not power or cash prizes.', buttons: [['home', 'Back', ButtonStyle.Secondary]] },
 };
 
