@@ -3,37 +3,81 @@
   "title": "Frog of Wisdom Celebrates Christmas",
   "author": "ScioVirtual Lore Team",
   "description": "The Frog of Wisdom devises a plan to catch Santa, only to discover a shocking secret.",
-  "tags": ["christmas", "frog-of-wisdom", "sehej", "elf"],
+  "tags": [
+    "christmas",
+    "frog-of-wisdom",
+    "sehej",
+    "elf"
+  ],
   "entries": [
     {
       "id": "christmas-eve",
       "title": "Christmas Eve",
       "text": "’Twas the night before Christmas, and the Frog of Wisdom decided to stay up to catch Santa. He’d heard rumors that Santa was secretly Sehej, the legendary founder of ScioVirtual, and wanted to ask when his merch would be arriving.",
-      "tags": ["mission", "beginning"]
+      "tags": [
+        "mission",
+        "beginning"
+      ]
     },
     {
       "id": "strange-noises-at-midnight",
       "title": "Strange Noises at Midnight",
       "text": "At midnight, the Frog suddenly heard loud noises coming from the roof. He hid behind the tree, excitedly anticipating Sehej’s arrival. A few minutes later, two small figures emerged from the chimney.",
-      "tags": ["elves", "eager"]
+      "tags": [
+        "elves",
+        "eager"
+      ],
+      "unlockClue": "What arrived through the roof at midnight?",
+      "unlockAnswer": "Strange Noises at Midnight",
+      "unlockAliases": [
+        "strange noises",
+        "two small figures"
+      ]
     },
     {
       "id": "reveal-of-the-elves",
       "title": "Reveal of the Elves",
       "text": "The two figures seemed familiar, but the Frog was unable to discern their identities. They slowly drew closer to munch on the cookies he had left out as bait. When the time was right, the Frog jumped out, pulling back their hoods to reveal…Cody and Kedar?",
-      "tags": ["climax", "chuds"]
+      "tags": [
+        "climax",
+        "chuds"
+      ],
+      "unlockClue": "Who were the two chimney visitors?",
+      "unlockAnswer": "Reveal of the Elves",
+      "unlockAliases": [
+        "Cody and Kedar",
+        "cody kedar"
+      ]
     },
     {
       "id": "a-gift-to-remember",
       "title": "A Gift to Remember",
       "text": "The Frog paused. ‘You’re not Sehej,’ he said. ‘Sehej is busy ordering merch,’ Kedar said. ‘It will come soon. For now, just be patient.’ The Frog was disappointed that he would not receive his merch today, but he knew that Santa and his elves were incredibly busy and could not attend to everyone’s needs at once.",
-      "tags": ["patience", "respect"]
+      "tags": [
+        "patience",
+        "respect"
+      ],
+      "unlockClue": "What lesson does the Frog need while waiting for merch?",
+      "unlockAnswer": "A Gift to Remember",
+      "unlockAliases": [
+        "patience",
+        "be patient"
+      ]
     },
     {
       "id": "merry-sciochristmas",
       "title": "Merry ScioChristmas",
       "text": "Cody placed a small box under the tree and, without saying a word, he and Kedar climbed back up the chimney. The Frog hurriedly opened the box and found a Jellycat frog with a note attached. The note read, ‘Merry ScioChristmas FoW! -The Director Team, ScioVirtual.’",
-      "tags": ["gift", "christmas"]
+      "tags": [
+        "gift",
+        "christmas"
+      ],
+      "unlockClue": "What was waiting under the tree?",
+      "unlockAnswer": "Merry ScioChristmas",
+      "unlockAliases": [
+        "Jellycat frog",
+        "a jellycat frog"
+      ]
     }
   ]
 }

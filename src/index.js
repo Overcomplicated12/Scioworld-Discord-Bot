@@ -70,10 +70,6 @@ client.on(Events.InteractionCreate, async interaction => {
     try { await menu.handleButton(interaction); } catch (error) { console.error('Menu button failed:', error); if (!interaction.replied && !interaction.deferred) await interaction.reply({ content: 'That menu could not be opened.', flags: MessageFlags.Ephemeral }); }
     return;
   }
-  if (interaction.isButton() && interaction.customId.startsWith('lore-discuss:')) {
-    try { await lore.handleButton(interaction); } catch (error) { console.error('Lore discussion button failed:', error); if (!interaction.replied && !interaction.deferred) await interaction.reply({ content: 'That lore discussion could not be processed.', flags: MessageFlags.Ephemeral }); }
-    return;
-  }
   if (!interaction.isChatInputCommand()) return;
   const command = commandsByName.get(interaction.commandName);
   if (!command) return;

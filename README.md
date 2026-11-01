@@ -60,14 +60,14 @@ Knowledge points are progression points: correct trivia answers give more, parti
 - `/torture-om opt-in|opt-out|status` — manage the fictional, consent-based Om challenge.
 - `/lore` — read, list, or search community stories.
 - `/lore action:submit title:<title> query:<story text>` — submit a student-created story for review.
-- `/lore action:discuss` — start a discussion that can unlock the next story chapter.
+- `/lore action:solve story:<story id>` — get a key clue and solve it to unlock the next story chapter.
 - `/lore action:progress` — see which chapters the server has unlocked.
 - `/lore-review list|approve|reject` — moderator review of student submissions.
 - `/report` — privately report a player to moderators.
 
 Weekly polls are selected from a question bank, protected from reuse for one year, and announced to the server owner 24 hours before the scheduled post. If the bank is exhausted, the owner is asked to add more prompts. The day after a weekly poll, an opt-in Om challenge style poll may run before its capped fictional DMs begin.
 
-Lore chapters unlock through discussion: three distinct people join the chapter prompt, and the next entry becomes available. There is no daily lore quota or reward for repeatedly clicking the discussion button.
+Lore chapters unlock through key clues. The clue and answer are attached to the story entry, each player gets a cooldown after a wrong attempt, and solving grants no currency. There is no daily lore quota or benefit to repeated clicking.
 
 ### Collectibles and trading
 
