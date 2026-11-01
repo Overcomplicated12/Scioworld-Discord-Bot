@@ -2,7 +2,15 @@
 
 ## Goal
 
-The bot should make ScioVirtual culture easier to participate in when people are already hanging out in Discord. It is a lightweight social game, not a replacement for Roblox or a large standalone RPG. The best outcome is a busy channel where people learn small science facts, recognize shared jokes and lore, compete kindly, and have a reason to return tomorrow.
+ScioCulture is a social layer for ScioVirtual. It turns the questions, jokes, camp knowledge, and stories already in the community into short activities people can join when they are already in Discord. It is a lightweight community experiment, not a replacement for Roblox, a standalone RPG, or an obligation to check in every day.
+
+The bot’s promise is simple: **participate, learn something, make the community more fun, and leave a little lore behind.** There are no bets, gambling mechanics, paid random draws, or cash-value prizes.
+
+## Product story
+
+ScioCulture helps a community tell its own story. A member can answer a question, teach a course fact, vote on a strange prompt, race a friend, collect a cosmetic artifact, or contribute a lore chapter. The bot connects those small actions to shared recognition: explanations, titles, story entries, course sets, and collectibles that refer back to ScioVirtual culture.
+
+The engagement loop is **notice → participate → understand → contribute → return**. Returning should be attractive because there is new community content, not because missing a day causes a loss.
 
 ## Why play?
 
@@ -15,6 +23,8 @@ The bot's advantage is that it lives in the community's conversation:
 - **Recognition:** rare collectibles and cosmetic titles give people something to show off and talk about.
 
 The game should reward showing up and helping the community as much as winning.
+
+For the research-informed engagement plan and pilot schedule, see [docs/ENGAGEMENT_PLAN.md](ENGAGEMENT_PLAN.md). The ready-to-post announcement is in [docs/ANNOUNCEMENT.md](ANNOUNCEMENT.md).
 
 ## Core player loop
 

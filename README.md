@@ -33,7 +33,7 @@ A Discord bot for ScioVirtual culture, science trivia, community lore, collectib
 
 Never commit `.env` or `data/profiles.json`.
 
-For a persistent server deployment, see [docs/HOSTING.md](docs/HOSTING.md). The current command list and game notes are in [docs/GAME_DESIGN.md](docs/GAME_DESIGN.md).
+For a persistent server deployment, see [docs/HOSTING.md](docs/HOSTING.md). The current command list and game notes are in [docs/GAME_DESIGN.md](docs/GAME_DESIGN.md). The engagement plan is in [docs/ENGAGEMENT_PLAN.md](docs/ENGAGEMENT_PLAN.md), and the ready-to-post announcement is in [docs/ANNOUNCEMENT.md](docs/ANNOUNCEMENT.md).
 
 ## Command guide
 
