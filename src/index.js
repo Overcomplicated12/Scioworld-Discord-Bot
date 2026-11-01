@@ -1,6 +1,6 @@
 ﻿import 'dotenv/config';
 import { Client, Events, GatewayIntentBits, MessageFlags } from 'discord.js';
-import { commands, campTrivia, help, omTest, trivia } from './commands/index.js';
+import { commands, campTrivia, help, menu, omTest, trivia } from './commands/index.js';
 import { checkOmSchedules, checkPollSchedules } from './poll-scheduler.js';
 import { backupProfileData } from './backups.js';
 import { store } from './store.js';
@@ -64,6 +64,10 @@ client.on(Events.InteractionCreate, async interaction => {
   }
   if (interaction.isButton() && interaction.customId.startsWith('camp-trivia:')) {
     try { await campTrivia.handleButton(interaction); } catch (error) { console.error('Camp trivia button failed:', error); if (!interaction.replied && !interaction.deferred) await interaction.reply({ content: 'That camp trivia answer could not be processed.', flags: MessageFlags.Ephemeral }); }
+    return;
+  }
+  if (interaction.isButton() && interaction.customId.startsWith('menu:')) {
+    try { await menu.handleButton(interaction); } catch (error) { console.error('Menu button failed:', error); if (!interaction.replied && !interaction.deferred) await interaction.reply({ content: 'That menu could not be opened.', flags: MessageFlags.Ephemeral }); }
     return;
   }
   if (!interaction.isChatInputCommand()) return;
