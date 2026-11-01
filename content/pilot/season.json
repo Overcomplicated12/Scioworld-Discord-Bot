@@ -9,10 +9,26 @@
   "inventory": 0,
   "eligibility": "Simulation only: no physical merchandise is promised or mailed.",
   "rewards": {
-    "answer": { "stamps": 1, "coins": 2, "kp": 2 },
-    "correct": { "stamps": 0, "coins": 3, "kp": 4 },
-    "discussion": { "stamps": 1, "coins": 3, "kp": 2 },
-    "lore": { "stamps": 2, "coins": 15, "kp": 0 }
+    "answer": {
+      "stamps": 1,
+      "coins": 2,
+      "kp": 2
+    },
+    "correct": {
+      "stamps": 0,
+      "coins": 3,
+      "kp": 4
+    },
+    "discussion": {
+      "stamps": 1,
+      "coins": 3,
+      "kp": 2
+    },
+    "lore": {
+      "stamps": 2,
+      "coins": 15,
+      "kp": 0
+    }
   },
   "activities": [
     {
@@ -21,9 +37,17 @@
       "openDay": 0,
       "closeDay": 5,
       "prompt": "The Frog drops an ordinary freshwater ice cube into liquid freshwater. Before it melts, what happens?",
-      "choices": ["It floats with most of it underwater", "It sinks to the bottom", "Exactly half stays above water"],
+      "choices": [
+        "It floats with most of it underwater",
+        "It sinks to the bottom",
+        "Exactly half stays above water"
+      ],
       "correct": 0,
-      "explanations": ["Ice is less dense than liquid water, so it floats, mostly submerged.", "Sinking would require the ice to be denser than the water.", "The submerged fraction depends on relative densities; it is much more than half."],
+      "explanations": [
+        "Ice is less dense than liquid water, so it floats, mostly submerged.",
+        "Sinking would require the ice to be denser than the water.",
+        "The submerged fraction depends on relative densities; it is much more than half."
+      ],
       "source": "https://www.usgs.gov/water-science-school/science/water-density"
     },
     {
@@ -32,9 +56,17 @@
       "openDay": 7,
       "closeDay": 12,
       "prompt": "The Frog is selling Moon facts. Which ONE is false?",
-      "choices": ["The Moon has a very thin atmosphere", "The Moon never rotates", "The Moon has no moons of its own"],
+      "choices": [
+        "The Moon has a very thin atmosphere",
+        "The Moon never rotates",
+        "The Moon has no moons of its own"
+      ],
       "correct": 1,
-      "explanations": ["True: the Moon has an extremely thin atmosphere called an exosphere.", "False: the Moon rotates once per orbit, which keeps roughly the same face toward Earth.", "True: the Moon has no natural moons of its own."],
+      "explanations": [
+        "True: the Moon has an extremely thin atmosphere called an exosphere.",
+        "False: the Moon rotates once per orbit, which keeps roughly the same face toward Earth.",
+        "True: the Moon has no natural moons of its own."
+      ],
       "source": "https://science.nasa.gov/moon/facts/"
     }
   ],
@@ -44,8 +76,26 @@
     "openDay": 7,
     "closeDay": 12,
     "prompt": "The Frog has funding for one science exhibit. What would you choose, and why?",
-    "choices": ["A tiny ecosystem", "A telescope", "A chemistry demonstration"],
-    "explanations": ["Ecosystems invite questions about interdependence.", "Telescopes invite questions about our place in space.", "Demonstrations invite predictions and experiments."],
+    "choices": [
+      "A tiny ecosystem",
+      "A telescope",
+      "A chemistry demonstration"
+    ],
+    "explanations": [
+      "Ecosystems invite questions about interdependence.",
+      "Telescopes invite questions about our place in space.",
+      "Demonstrations invite predictions and experiments."
+    ],
     "source": ""
+  },
+  "economy": {
+    "triviaDailyLimit": 5,
+    "triviaCoins": 2,
+    "triviaKP": 3,
+    "raceWeeklyLimit": 2,
+    "raceCoins": 5,
+    "raceKP": 5,
+    "dailyCoins": 2,
+    "dailyKP": 1
   }
 }

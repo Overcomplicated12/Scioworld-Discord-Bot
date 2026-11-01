@@ -3,6 +3,11 @@ import { runPilot, pilotJobs, acknowledgePilotJob } from './pilot.js';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+const economy = JSON.parse(fs.readFileSync(new URL('../content/pilot/season.json', import.meta.url), 'utf8')).economy;
+for (const key of ['triviaDailyLimit','triviaCoins','triviaKP','raceWeeklyLimit','raceCoins','raceKP','dailyCoins','dailyKP']) {
+  if (!Number.isInteger(economy?.[key]) || economy[key] < 0) throw new Error(`Invalid economy setting: ${key}`);
+}
+
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 function keyFor(guildId, userId) { return `${guildId}:${userId}`; }
@@ -94,11 +99,11 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
   function claimDaily(guildId, userId, today, yesterday) {
     const profile = getOrCreate(guildId, userId);
     if (profile.lastDailyAt === today) return { profile, claimed: false };
-    profile.streak = profile.lastDailyAt === yesterday ? profile.streak + 1 : 1;
-    const reward = 25 + Math.min(profile.streak - 1, 6) * 5;
-    profile.coins += reward; profile.knowledgePoints += 5; profile.lastDailyAt = today;
+    // Preserve the historical streak value, but remove streak pressure and escalating rewards.
+    const reward = economy.dailyCoins;
+    profile.coins += reward; profile.knowledgePoints += economy.dailyKP; profile.lastDailyAt = today;
     save();
-    return { profile, claimed: true, reward };
+    return { profile, claimed: true, reward, knowledgePoints: economy.dailyKP };
   }
   function claimFrogQuote(guildId, userId, nowMs, quoteCount) {
     const profile = getOrCreate(guildId, userId);
@@ -133,8 +138,12 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     if (pending.questionId !== questionId) return { accepted: false, reason: 'different-question', profile };
     const correct = answerIndex === correctAnswer;
     profile.pendingTrivia = null;
-    const coins = correct ? 15 : 0;
-    const knowledgePoints = correct ? 10 : 2;
+    const day = new Date(nowMs).toISOString().slice(0, 10);
+    if (profile.triviaRewardDay !== day) { profile.triviaRewardDay = day; profile.triviaRewardQuestions = []; }
+    const eligible = correct && !profile.triviaRewardQuestions.includes(questionId) && profile.triviaRewardQuestions.length < economy.triviaDailyLimit;
+    const coins = eligible ? economy.triviaCoins : 0;
+    const knowledgePoints = eligible ? economy.triviaKP : 0;
+    if (eligible) profile.triviaRewardQuestions.push(questionId);
     profile.triviaStreak = correct ? (profile.triviaStreak || 0) + 1 : 0;
     profile.bestTriviaStreak = Math.max(profile.bestTriviaStreak || 0, profile.triviaStreak);
     profile.coins += coins;
@@ -247,12 +256,13 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
   }
   function startRace(guildId, userId, raceId, nowMs) {
     load(); const race = state.races.find(item => item.guildId === guildId && item.id.toLowerCase() === raceId.toLowerCase());
-    if (!race) return { started: false, reason: 'not-found' }; if (race.hostId !== userId) return { started: false, reason: 'not-host' }; if (race.players.length < 2) return { started: false, reason: 'not-enough-players' };
+    if (!race) return { started: false, reason: 'not-found' }; if (race.hostId !== userId) return { started: false, reason: 'not-host' }; if (race.status !== 'lobby') return { started: false, reason: 'not-lobby' }; if (race.players.length < 2) return { started: false, reason: 'not-enough-players' };
     race.status = 'active'; race.round = 0; race.answers = {}; race.startedAt = new Date(nowMs).toISOString(); race.lastActivityAt = nowMs; save(); return { started: true, race, questionId: race.questionIds[0] };
   }
   function answerRace(guildId, userId, raceId, answerIndex, question, nowMs) {
     load(); const race = state.races.find(item => item.guildId === guildId && item.id.toLowerCase() === raceId.toLowerCase());
     if (!race) return { answered: false, reason: 'not-found' }; if (race.status !== 'active') return { answered: false, reason: 'not-active' }; if (!race.players.includes(userId)) return { answered: false, reason: 'not-player' };
+    if (!question || question.id !== race.questionIds[race.round] || !Number.isInteger(answerIndex) || answerIndex < 0 || answerIndex >= question.choices.length) return { answered: false, reason: 'invalid-answer' };
     if (!race.answers[race.round]) race.answers[race.round] = {};
     if (race.answers[race.round][userId] !== undefined) return { answered: false, reason: 'already-answered' };
     race.answers[race.round][userId] = answerIndex; race.lastActivityAt = nowMs;
@@ -266,7 +276,14 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
       for (const playerId of race.players) {
         const profileKey = keyFor(guildId, playerId);
         if (!state.profiles[profileKey]) state.profiles[profileKey] = newProfile(guildId, playerId);
-        const reward = winners.includes(playerId) ? { coins: 20, knowledgePoints: 12 } : { coins: 10, knowledgePoints: 5 };
+        const p = state.profiles[profileKey];
+        const date = new Date(nowMs); const day = date.getUTCDay();
+        date.setUTCDate(date.getUTCDate() - (day + 6) % 7); date.setUTCHours(0, 0, 0, 0);
+        const week = date.toISOString();
+        if (p.raceRewardWeek !== week) { p.raceRewardWeek = week; p.raceRewardCount = 0; }
+        const eligible = p.raceRewardCount < economy.raceWeeklyLimit;
+        p.raceRewardCount += 1;
+        const reward = eligible && max > 0 && winners.includes(playerId) ? { coins: economy.raceCoins, knowledgePoints: economy.raceKP } : { coins: 0, knowledgePoints: 0 };
         state.profiles[profileKey].coins += reward.coins;
         state.profiles[profileKey].knowledgePoints += reward.knowledgePoints;
         rewards[playerId] = reward;

@@ -30,6 +30,7 @@ export async function execute(interaction) {
     const title = interaction.options.getString('title')?.trim();
     const text = interaction.options.getString('query')?.trim();
     if (!title || !text) { await interaction.reply({ content: 'For a submission, provide both `title` and `query` as the story text.', flags: MessageFlags.Ephemeral }); return; }
+    store.getOrCreate(interaction.guildId, interaction.user.id);
     const submission = store.createLoreSubmission(interaction.guildId, interaction.user.id, title, text, []);
     await interaction.reply({ content: `Submitted **${submission.id}** for lore review. A moderator will decide whether it becomes part of the public archive.`, flags: MessageFlags.Ephemeral });
     return;
@@ -37,7 +38,7 @@ export async function execute(interaction) {
   const progress = store.getLoreProgress(interaction.guildId, stories);
   if (action === 'progress') {
     const lines = stories.map(story => `**${safe(story.title)}** — ${Math.min(progress[story.id] + 1, story.entries.length)}/${story.entries.length} chapters available`);
-    await interaction.reply({ content: `**Lore progress**\n${lines.join('\n')}\n\nUnlock the next chapter by discussing it with two other people, then joining the discussion prompt.`, flags: MessageFlags.Ephemeral, allowedMentions: { parse: [] } });
+    await interaction.reply({ content: `**Lore progress**\n${lines.join('\n')}\n\nUse /lore action:solve to solve the key clue and unlock the next chapter.`, flags: MessageFlags.Ephemeral, allowedMentions: { parse: [] } });
     return;
   }
   const approved = store.listLoreSubmissions(interaction.guildId, 'approved').map(submission => ({ story: { title: 'Community submissions', author: `<@${submission.authorId}>`, tags: submission.tags }, id: submission.id, title: submission.title, text: submission.text, tags: submission.tags }));

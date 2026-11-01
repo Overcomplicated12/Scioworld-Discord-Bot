@@ -47,6 +47,6 @@ export async function handleButton(interaction) {
     return;
   }
   const streak = result.correct && result.triviaStreak > 1 ? ` Your trivia streak is now **${result.triviaStreak}**!` : result.correct && result.triviaStreak === 1 ? ' Your trivia streak has started!' : '';
-  const outcome = result.correct ? `Correct! **+${result.coins} Sciocoins** and **+${result.knowledgePoints} knowledge points**.${streak}` : `Not quite. You still earned **+${result.knowledgePoints} knowledge points** for playing. Your trivia streak reset.`;
-  await interaction.reply({ content: `${outcome}\n${question.explanation}` });
+  const outcome = result.correct ? `Correct! **+${result.coins} Sciocoins** and **+${result.knowledgePoints} knowledge points**.${streak}` : `Not quite. Take a look at the explanation below.`;
+  await interaction.reply({ content: `${outcome}\n${question.explanation}\nRewards apply to up to five different correct questions per UTC day. You can keep playing for fun.` });
 }

@@ -13,5 +13,5 @@ export async function execute(interaction) {
     const item = collectibleById.get(id);
     return item ? `${itemName(id)} (${rarityLabel(item.rarity)})` : itemName(id);
   }).join(', ') || 'None';
-  await interaction.reply({ content: `**Your inventory**\nSciocoins: **${profile.coins}**\nKnowledge points: **${profile.knowledgePoints}**\nResources: ${resources}\nCollectibles: ${collectibles}`, flags: MessageFlags.Ephemeral });
+  await interaction.reply({ content: `**Your inventory**\nSciocoins: **${profile.coins}**\nKnowledge points: **${profile.knowledgePoints}**\nResources: ${resources}\nCollectibles: ${collectibles}\nSeasonal stickers: ${(profile.seasonStickers || []).map(s => `${s.name} (${s.season})`).join(', ') || 'None yet — use /passport'}`, flags: MessageFlags.Ephemeral });
 }

@@ -23,7 +23,7 @@ try {
   const answer = store.answerTrivia(guild, alice, 'question-1', 0, now + 1000, 0);
   assert.equal(answer.accepted, true);
   assert.equal(answer.correct, true);
-  assert.equal(answer.knowledgePoints, 10);
+  assert.equal(answer.knowledgePoints, 3);
 
   const bobProfile = store.getOrCreate(guild, bob);
   assert.equal(bobProfile.collectibles.includes('frog-of-wisdom'), true);
