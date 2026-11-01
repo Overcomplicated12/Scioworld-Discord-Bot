@@ -232,7 +232,7 @@ export function runPilot(state, guildId, userId, action, args = {}, now = Date.n
 export function pilotJobs(state, guildId, now) {
   const jobs = [];
   for (const l of state.loreSubmissions || []) {
-    if (l.guildId === guildId && l.status === 'pending' && l.staffNoticePending && (!l.staffNoticeNextAt || now >= l.staffNoticeNextAt)) jobs.push({ kind: 'staff-submission', type: 'lore', id: l.id, userId: l.authorId });
+    if (l.guildId === guildId && l.status === 'pending' && l.staffNoticePending !== false && (!l.staffNoticeNextAt || now >= l.staffNoticeNextAt)) jobs.push({ kind: 'staff-submission', type: 'lore', id: l.id, userId: l.authorId });
   }
   for (const s of state.pilot?.seasons || []) {
     if (s.guildId !== guildId || s.status === 'draft') continue;
@@ -256,7 +256,7 @@ export function acknowledgePilotJob(state, guildId, job, messageId) {
       ? state.loreSubmissions.find(l => l.guildId === guildId && l.id === job.id)
       : state.pilot?.seasons.find(s => s.guildId === guildId && s.id === job.season)?.discussions.find(d => d.id === job.id && d.updatedAt === job.version);
     if (!item) return;
-    if (messageId.delivered) { item.staffNoticePending = false; item.staffNotifiedAt = job.version; }
+    if (messageId.delivered) { item.staffNoticePending = false; item.staffNotifiedAt = job.version ?? messageId.now; }
     else item.staffNoticeNextAt = messageId.now + 15 * 60_000;
     return;
   }

@@ -1,3 +1,4 @@
+import { checkPilotSchedules } from '../pilot-scheduler.js';
 import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { loadLore } from '../lore.js';
 import { requireGuild } from './utils.js';
@@ -21,7 +22,7 @@ export const data = new SlashCommandBuilder()
 
 function safe(text) { return text.replaceAll('@', '@\u200b'); }
 
-export async function execute(interaction) {
+export async function execute(interaction, persistence = store, dispatch = checkPilotSchedules) {
   if (!requireGuild(interaction)) return;
   const { stories, entries } = loadLore();
   const action = interaction.options.getString('action') || 'random';
@@ -30,8 +31,10 @@ export async function execute(interaction) {
     const title = interaction.options.getString('title')?.trim();
     const text = interaction.options.getString('query')?.trim();
     if (!title || !text) { await interaction.reply({ content: 'For a submission, provide both `title` and `query` as the story text.', flags: MessageFlags.Ephemeral }); return; }
-    store.getOrCreate(interaction.guildId, interaction.user.id);
-    const submission = store.createLoreSubmission(interaction.guildId, interaction.user.id, title, text, []);
+    persistence.getOrCreate(interaction.guildId, interaction.user.id);
+    const submission = persistence.createLoreSubmission(interaction.guildId, interaction.user.id, title, text, []);
+    // Save first, then dispatch without delaying the Discord interaction acknowledgment.
+    void dispatch(interaction.client).catch(error => console.error('Immediate lore notification failed; queued for retry:', error.message));
     await interaction.reply({ content: `Submitted **${submission.id}** for lore review. A moderator will decide whether it becomes part of the public archive.`, flags: MessageFlags.Ephemeral });
     return;
   }
