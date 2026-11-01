@@ -7,6 +7,7 @@ const inSeason = (s, at) => at >= s.start && at < s.end;
 export function validatePilot(config) {
   requireThat(config && /^[a-z0-9-]{1,32}$/.test(config.id), 'Use a short lowercase season ID.');
   requireThat(typeof config.name === 'string' && config.name.length > 0 && config.name.length <= 80, 'Season name must be 1–80 characters.');
+  requireThat(typeof config.timezone === 'string' && config.timezone.length > 0, 'Specify a timezone.');
   try { new Intl.DateTimeFormat('en', { timeZone: config.timezone }).format(); } catch { throw new PilotError('Set a valid timezone.'); }
   requireThat(Number.isInteger(config.durationDays) && config.durationDays >= 1 && config.durationDays <= 366, 'Season duration must be 1–366 days.');
   requireThat(Number.isInteger(config.threshold) && config.threshold > 0 && config.threshold <= 100, 'Stamp threshold must be 1–100.');

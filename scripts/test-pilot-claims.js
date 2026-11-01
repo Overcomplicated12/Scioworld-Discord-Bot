@@ -43,5 +43,12 @@ try {
  assert.throws(()=>s.pilot('other','a','passport',{season:config.id},now),/No season/);
  run('opt-out',{enabled:true},'b');assert.throws(()=>run('discuss',{text:'hello'},'b'),/opted out/);
  run('feedback',{text:'I enjoyed the weekly pace.'},'a');assert.throws(()=>run('feedback',{text:'again'},'a'),/already/);
+ fs.mkdirSync(`${file}.tmp`);
+ assert.throws(()=>run('stock',{count:5}));
+ fs.rmdirSync(`${file}.tmp`);
+ assert.equal(run('status').inventory,2,'A failed write must not leave a partial operation');
+ const invalidFile=path.join(dir,'invalid.json');fs.writeFileSync(invalidFile,'{"unexpected":"data"}');
+ assert.throws(()=>createStore(invalidFile).getOrCreate('g','a'),/refusing to overwrite/);
+ assert.equal(fs.readFileSync(invalidFile,'utf8'),'{"unexpected":"data"}');
  console.log('Claim checks passed: lore publication independence and cap, real balances, inventory, retries, fulfilled collection, privacy, backups, guild isolation.');
 }finally{fs.rmSync(dir,{recursive:true,force:true});}

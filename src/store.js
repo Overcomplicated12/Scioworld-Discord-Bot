@@ -28,7 +28,7 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
   function load() {
     try {
       state = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-      if (!state || typeof state !== 'object' || !state.profiles || typeof state.profiles !== 'object') state = { profiles: {}, trades: [], nextTradeId: 1, races: [], nextRaceId: 1, reports: [], nextReportId: 1, campResources: {}, campTrivia: {}, nextCampTriviaId: 1, campTriviaAnswers: {}, loreSubmissions: [], nextLoreSubmissionId: 1, loreProgress: {}, loreDiscussions: {}, loreChallenges: {}, pollSchedules: {}, omSchedules: {} };
+      if (!state || typeof state !== 'object' || !state.profiles || typeof state.profiles !== 'object' || Array.isArray(state.profiles)) throw new Error('Profile store is invalid; refusing to overwrite existing data. Restore a verified backup.');
       if (!Array.isArray(state.trades)) state.trades = [];
       if (!Number.isInteger(state.nextTradeId) || state.nextTradeId < 1) state.nextTradeId = 1;
       if (!Array.isArray(state.races)) state.races = [];
@@ -54,8 +54,14 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
   function save() {
     fs.mkdirSync(path.dirname(filePath), { recursive: true, mode: 0o700 });
     const temporaryPath = `${filePath}.tmp`;
-    fs.writeFileSync(temporaryPath, `${JSON.stringify(state, null, 2)}\n`, { mode: 0o600 });
+    const descriptor = fs.openSync(temporaryPath, 'w', 0o600);
+    try {
+      fs.writeFileSync(descriptor, `${JSON.stringify(state, null, 2)}\n`);
+      fs.fsyncSync(descriptor);
+    } finally { fs.closeSync(descriptor); }
     fs.renameSync(temporaryPath, filePath);
+    const directory = fs.openSync(path.dirname(filePath), 'r');
+    try { fs.fsyncSync(directory); } finally { fs.closeSync(directory); }
   }
   // All pilot operations run synchronously without awaits, in this one PM2 process.
   // Save the complete ledger and balances together, so retries cannot double-pay.
