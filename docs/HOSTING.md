@@ -99,6 +99,6 @@ From another directory, invoke the script by its absolute path. The script requi
 
 The pilot uses the existing single PM2 process and `data/profiles.json`; no new dependencies or database migration are needed. Do not run multiple writers against the file. The first pilot write creates a `.pre-pilot.bak` backup; keep normal backups too.
 
-Before an authorized deployment, run `npm test`, back up data, and inspect `content/pilot/season.json`. Then register the new `/question`, `/passport`, and `/pilot` commands and restart PM2. Give the bot View Channel, Send Messages, Embed Links, Attach Files, and Read Message History in the selected activity channel.
+Before an authorized deployment, run `npm test`, back up data, and inspect `content/pilot/season.json`. Then register the new `/question`, `/passport`, and `/pilot` commands and restart PM2. Give the bot View Channel, Send Messages, Embed Links, Attach Files, Read Message History, Create Public Threads, and Send Messages in Threads in the selected activity channel.
 
 No season starts automatically. Test a draft simulation in a staging server before creating and explicitly activating a real season. Review [PILOT.md](PILOT.md) for exact timestamps, eligibility, stock, claims, quiet mode, and recovery. Never put student addresses in this bot. Deployment approval does not itself activate a season or open physical claims.

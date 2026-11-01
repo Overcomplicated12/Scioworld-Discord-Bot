@@ -2,7 +2,7 @@
 
 Meet **ScioCulture** in **#scioculture** 🐸
 
-For two weeks, the Frog is bringing us one optional science question each day. Make a prediction, see what happens, and share your reasoning if you feel like it. You can also help write the next piece of ScioLore.
+For two weeks, the Frog is bringing us one optional science question each day. Make a prediction, see what happens, and use **Join discussion** to compare ideas publicly if you feel like it. Submit a link to your own thread message if you want it reviewed for a stamp. You can also help write the next piece of ScioLore.
 
 Try `/start`, then `/question`. Your private `/passport view` tracks Contribution Stamps: one for a daily answer, one for an approved explanation, or two for an original lore contribution approved for rewards. Three stamps qualify for a seasonal sticker claim when organizers open claims.
 

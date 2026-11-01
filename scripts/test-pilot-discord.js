@@ -24,7 +24,7 @@ assert.match(payload.embeds[0].description,/SIMULATION/);
 let sends=0,edits=0,acks=0,failAck=true;
 const messages=[];
 const channel={isTextBased:()=>true,messages:{fetch:async()=>({find:fn=>messages.find(fn)})},send:async p=>{
-  sends++; const message={id:'m',author:{id:'bot'},embeds:p.embeds,edit:async q=>{edits++;message.embeds=q.embeds;}};messages.push(message);return message;
+  sends++; const message={id:'m',author:{id:'bot'},embeds:p.embeds,startThread:async()=>({id:'thread'}),edit:async q=>{edits++;message.embeds=q.embeds;}};messages.push(message);return message;
 }};
 const client={user:{id:'bot'},guilds:{cache:new Map([['g',{id:'g',channels:{fetch:async()=>channel}}]])}};
 const jobs=[{kind:'activity',season:'test',channelId:'c',activity:a,simulation:true}];
@@ -32,5 +32,6 @@ const persistence={getPilotJobs:()=>jobs,pilotQuiet:()=>false,ackPilotJob:()=>{i
 await checkPilotSchedules(client,10,persistence);
 await checkPilotSchedules(client,10,persistence);
 assert.equal(sends,1,'Restart reconciliation must reuse the posted message');
-assert.equal(edits,1);assert.equal(acks,1);
+assert.equal(edits,2);assert.equal(acks,2);
+assert.equal(a.threadId,'thread');
 console.log('Discord pilot checks passed: schemas, permissions, buttons, and send-before-save recovery.');

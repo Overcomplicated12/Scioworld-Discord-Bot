@@ -187,7 +187,7 @@ export function runPilot(state, guildId, userId, action, args = {}, now = Date.n
   requireThat(a, 'No daily activity is available yet.');
   if (action === 'weekly') {
     requireThat(s.status !== 'draft', 'The season is still a draft.');
-    return { season: s.id, simulation: s.simulation, activity: publicActivity(a, now), answer: s.answers.find(x => x.activityId === a.id && x.userId === userId), discussion: s.discussions.find(x => x.activityId === a.id && x.userId === userId), distribution: now >= a.closesAt ? a.choices.map((_, i) => s.answers.filter(x => x.activityId === a.id && x.choice === i).length) : undefined };
+    return { guildId, season: s.id, seasonEnd: s.end, simulation: s.simulation, activity: publicActivity(a, now), answer: s.answers.find(x => x.activityId === a.id && x.userId === userId), discussion: s.discussions.find(x => x.activityId === a.id && x.userId === userId), distribution: now >= a.closesAt ? a.choices.map((_, i) => s.answers.filter(x => x.activityId === a.id && x.choice === i).length) : undefined };
   }
   if (action === 'publish') {
     requireThat(s.status === 'active' && inSeason(s, now) && !a.closed && now < a.closesAt, 'Only an upcoming or open activity in an active season can be published.');
@@ -213,9 +213,15 @@ export function runPilot(state, guildId, userId, action, args = {}, now = Date.n
   if (action === 'discuss') {
     requireThat(now >= a.opensAt, 'This activity has not opened.');
     requireThat(typeof args.text === 'string' && args.text.trim().length > 0 && args.text.length <= 1000, 'Explain your reasoning in 1–1000 characters.');
+    if (args.sourceMessage) {
+      const m = args.sourceMessage;
+      requireThat(m.guildId === guildId && m.threadId === a.threadId && m.authorId === userId && m.createdAt >= a.opensAt && m.createdAt < s.end && m.url === `https://discord.com/channels/${guildId}/${a.threadId}/${m.messageId}`, 'Invalid discussion message reference.');
+    }
     let d = s.discussions.find(x => x.userId === userId && x.activityId === a.id);
     requireThat(!d || d.status === 'revision', 'You already submitted for this activity. Check /question for feedback.');
     if (!d) { d = { id: `D${s.discussions.length + 1}`, userId, activityId: a.id, at: now }; s.discussions.push(d); }
+    if (args.sourceMessage) { d.sourceMessage = args.sourceMessage; d.at = args.sourceMessage.createdAt; }
+    else delete d.sourceMessage;
     d.text = args.text.trim(); d.status = 'pending'; d.updatedAt = now; delete d.reason;
     return { saved: true, id: d.id };
   }
@@ -232,8 +238,8 @@ export function pilotJobs(state, guildId, now) {
     for (const a of s.activities) {
       if (now < a.opensAt) continue;
       const revealed = now >= a.closesAt;
-      if (!revealed && a.messageId || revealed && a.revealed) continue;
-      jobs.push({ kind: 'activity', season: s.id, channelId: s.channelId, activity: publicActivity(a, now), revealed, simulation: s.simulation, distribution: revealed ? a.choices.map((_, i) => s.answers.filter(x => x.activityId === a.id && x.choice === i).length) : undefined });
+      if ((!revealed && a.messageId && a.threadId) || (revealed && a.revealed)) continue;
+      jobs.push({ kind: 'activity', guildId, season: s.id, channelId: s.channelId, activity: publicActivity(a, now), revealed, simulation: s.simulation, distribution: revealed ? a.choices.map((_, i) => s.answers.filter(x => x.activityId === a.id && x.choice === i).length) : undefined });
     }
     for (const userId of new Set(s.ledger.map(e => e.userId))) if (stamps(s, userId) >= s.threshold && !s.notifications.includes(userId) && !s.optOuts.includes(userId)) jobs.push({ kind: 'qualified', season: s.id, userId, simulation: s.simulation });
   }
@@ -244,5 +250,5 @@ export function acknowledgePilotJob(state, guildId, job, messageId) {
   if (!s) return;
   if (job.kind === 'qualified') { if (!s.notifications.includes(job.userId)) s.notifications.push(job.userId); return; }
   const a = s.activities.find(a => a.id === job.activity.id);
-  if (a) { a.messageId = messageId; if (job.revealed) a.revealed = true; }
+  if (a) { a.messageId = messageId; if (job.activity.threadId) a.threadId = job.activity.threadId; if (job.revealed) a.revealed = true; }
 }

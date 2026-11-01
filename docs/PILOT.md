@@ -6,7 +6,7 @@ Build scope: one week. Initial evaluation: two weeks. Students answer one option
 
 1. `/start` creates the existing profile. Balances and inventories are preserved.
 2. `/question` shows the current question privately. Public scheduled posts have the same buttons. Choose an answer; revise it until the displayed deadline. Only the final answer determines the correctness bonus, paid at reveal.
-3. **Explain your answer** opens a short modal. Explain a prediction, suggest an experiment, ask a relevant scientific question, or constructively respond to someone’s reasoning. Moderators approve, request revision, or reject with feedback. No word-count minimum or AI judge is used. Text remains private.
+3. **Join discussion** opens a public thread under the daily question. Explain a prediction, suggest an experiment, or reply constructively to someone else. Your button choice remains private, but anything you post in the thread is visible to people who can access that channel. To request a stamp, copy your message link and use **Submit discussion for review**. Moderators approve, request revision, or reject with private feedback. Message counts do not earn rewards.
 4. `/passport view` shows stamps, dates, opportunities, eligibility, and claim status. `/passport history` lists past seasons; `/passport view season:<id>` opens one.
 5. Once qualified and claims are open, `/passport claim` submits one claim for organizer review. No mailing address belongs in Discord or this bot.
 
@@ -79,9 +79,9 @@ Only the server owner or members with Administrator permission may use `/pilot`.
 
 All season-specific operations accept an optional `season` ID (except creation). Otherwise the active season, or most recent draft/closed season, is selected. Use explicit IDs when handling old claims. A pending or approved claim may be rejected with a reason. Fulfilled claims are final; rejected claims are retained and cannot be resubmitted. Resolve mistakes with the project maintainer rather than deleting audit records.
 
-Quiet mode suppresses automatic messages, not deadlines or private commands. Opening early is refused if another activity is active. Closing early is explicit. If moderation requests revision, the student can use the explanation button again before the season ends. Pending reviews can be processed after closing, but new submissions/revisions cannot.
+Quiet mode suppresses automatic messages, not deadlines or private commands. Opening early is refused if another activity is active. Closing early is explicit. If moderation requests revision, the student can edit their public message and submit its link again before the season ends. Pending reviews can be processed after closing, but new submissions/revisions cannot.
 
-Students receive private review feedback when DMs work; `/question` and `/passport` retain their status if DMs fail. Automatic qualification DMs fall back to the passport when a student blocks DMs. Contributions are never automatically highlighted publicly.
+Students receive private review feedback when DMs work; `/question` and `/passport` retain their status if DMs fail. Automatic qualification DMs fall back to the passport when a student blocks DMs. The bot never republishes private explanations. Old private submissions remain in the same private review queue. Public submissions store an author-verified message reference; moderators read the original thread message, which may have been edited. The bot rechecks that the linked message still exists and belongs to the student before approval. Deleting it later does not automatically revoke an already approved reward.
 
 ## Real sticker claims
 
@@ -112,7 +112,7 @@ There is one JSON store and one PM2 process. Season state, ledger entries, and p
 
 SQLite was evaluated and deferred: one small, single-process bot does not need a second store or a balance migration. **Do not run multiple bot processes or simultaneous writers against this file.** Move all state to a transactional database before scaling to multiple workers. Existing daily backups include pilot state; the first pilot write also saves `data/profiles.json.pre-pilot.bak`. All profile, inventory, and lore history fields are preserved. Seasons and ledgers are retained after closing.
 
-The scheduler checks deadlines on startup and every minute. Missed reveals settle once after restart. Public results edit the original activity message; after a send-before-save interruption the bot looks for its marker among the last 100 channel messages and uses a stable Discord nonce to reduce duplicate sends. Discord delivery is not an exactly-once transaction: a sufficiently old unrecorded post outside that window may be duplicated, but rewards cannot. Posting failures retry; operators should check logs. The bot needs View Channel, Send Messages, Embed Links, Attach Files, and Read Message History in the configured channel.
+The scheduler checks deadlines on startup and every minute. Missed reveals settle once after restart. Public results edit the original activity message; after a send-before-save interruption the bot looks for its marker among the last 100 channel messages and uses a stable Discord nonce to reduce duplicate sends. Discord delivery is not an exactly-once transaction: a sufficiently old unrecorded post outside that window may be duplicated, but rewards cannot. Posting failures retry; operators should check logs. The bot needs View Channel, Send Messages, Embed Links, Attach Files, Read Message History, Create Public Threads, and Send Messages in Threads in the configured channel. Students need View Channel and Send Messages in Threads.
 
 ```bash
 npm test
@@ -122,3 +122,10 @@ npm run test:pilot
 Tests create temporary isolated stores and simulated dates, covering the full two-week flow without changing production data or mailing merchandise. They include both simulation and real-accounting fixtures, caps, wrong permissions, restarts, answer revisions, claim duplicates, stock, and opinion behavior. Discord transport tests use mocks; a staging-server smoke test is still required before production launch.
 
 After deployment authorization, back up the existing data, register commands, and restart the existing PM2 process using [HOSTING.md](HOSTING.md). No new dependency or database migration is required. In staging, create a simulation draft, activate it, answer, request a revision, approve, close an activity, and inspect `/passport` and `/pilot engagement`. Check that students cannot use admin commands and that bot DMs/embeds work. Then create the real season with reviewed dates and eligibility.
+
+
+### Discussion threads and privacy
+
+Each open daily question gets one public thread. The bot reuses that thread after restarts and does not post or copy student text into it. Public links must reference the submitting student's own non-bot message in that exact question's thread and within the season. Cross-server links, other students' messages, and unavailable messages are rejected. A private submission and public submission share one review/reward slot per student and question.
+
+No Message Content privileged intent or passive conversation monitoring is needed. The bot fetches author/timestamp metadata only for explicitly submitted links; moderators read the linked content in Discord. Public thread participation is optional and does not automatically generate a reward. Existing private modal buttons continue to work privately, but new posts show the public discussion workflow.

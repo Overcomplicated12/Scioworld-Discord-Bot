@@ -1,3 +1,4 @@
+import { ensureDiscussionThread } from './discussion-links.js';
 import { createHash } from 'node:crypto';
 import { store } from './store.js';
 import { activityMessage } from './commands/weekly.js';
@@ -39,7 +40,15 @@ export async function checkPilotSchedules(client, now = Date.now(), persistence 
           payload.embeds[0].footer = { text: marker };
           if (message) await message.edit(payload);
           else message = await channel.send({ ...payload, nonce: createHash('sha256').update(`${guild.id}:${marker}`).digest('hex').slice(0,24), enforceNonce: true });
+          // Persist the post before thread creation, so a permissions failure never loses its ID.
           persistence.ackPilotJob(guild.id,job,message.id);
+          if (!job.activity.threadId && !job.revealed) {
+            job.activity.threadId = await ensureDiscussionThread(message, channel, job.activity);
+            const withThread = activityMessage(job, now);
+            withThread.embeds[0].footer = { text: marker };
+            await message.edit(withThread);
+            persistence.ackPilotJob(guild.id,job,message.id);
+          }
         } catch (e) { console.error('Pilot delivery failed; will retry:', guild.id,job.season,e.message); }
       }
     }

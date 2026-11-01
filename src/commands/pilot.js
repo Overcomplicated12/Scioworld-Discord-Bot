@@ -1,3 +1,4 @@
+import { verifyDiscussionLink } from '../discussion-links.js';
 import fs from 'node:fs';
 import { AttachmentBuilder, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { store } from '../store.js';
@@ -50,6 +51,14 @@ export async function execute(i) {
         if(!match || match[1]!==i.guildId)throw new PilotError('Link a policy message in this server.');
         const channel=await i.guild.channels.fetch(match[2]); const message=await channel?.messages?.fetch(match[3]);
         if(!message)throw new PilotError('The policy message could not be verified.');
+      }
+    }
+    if(action==='review' && args.decision==='approved') {
+      const queue=store.pilot(i.guildId,i.user.id,'queue',{season:args.season},Date.now(),true);
+      const discussion=queue.discussions.find(d=>d.id===args.id);
+      if(discussion?.sourceMessage){
+        const question=store.pilot(i.guildId,i.user.id,'weekly',{season:args.season,activity:discussion.activityId});
+        await verifyDiscussionLink(i.guild,discussion.userId,discussion.sourceMessage.url,question.activity,question.seasonEnd);
       }
     }
     const result=store.pilot(i.guildId,i.user.id,action==='engagement'?'report':action,args,Date.now(),true);
