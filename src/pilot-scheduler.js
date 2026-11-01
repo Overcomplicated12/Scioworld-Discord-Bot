@@ -1,3 +1,4 @@
+import { notifySubmissionStaff } from './staff-notifications.js';
 import { ensureDiscussionThread } from './discussion-links.js';
 import { createHash } from 'node:crypto';
 import { store } from './store.js';
@@ -13,7 +14,13 @@ export async function checkPilotSchedules(client, now = Date.now(), persistence 
       catch (e) { console.error('Pilot schedule read failed:', guild.id, e.message); continue; }
       for (const job of jobs) {
         try {
-          if (persistence.pilotQuiet(guild.id)) break;
+          if (job.kind === 'staff-submission') {
+            const delivered = await notifySubmissionStaff(guild, job);
+            persistence.ackPilotJob(guild.id, job, { delivered, now });
+            if (!delivered) console.warn('No staff DM delivered; retrying in 15 minutes:', guild.id, job.id);
+            continue;
+          }
+          if (persistence.pilotQuiet(guild.id)) continue;
           if (job.kind === 'qualified') {
             try {
               await (await client.users.fetch(job.userId)).send({ content: `${job.simulation ? '**Simulation only:** ' : ''}You qualified for the ScioCulture seasonal sticker milestone! Use /passport in ${guild.name} to see eligibility and claim status. Organizers handle approval and mailing separately.`, allowedMentions: { parse: [] } });

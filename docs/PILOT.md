@@ -129,3 +129,9 @@ After deployment authorization, back up the existing data, register commands, an
 Each open daily question gets one public thread. The bot reuses that thread after restarts and does not post or copy student text into it. Public links must reference the submitting student's own non-bot message in that exact question's thread and within the season. Cross-server links, other students' messages, and unavailable messages are rejected. A private submission and public submission share one review/reward slot per student and question.
 
 No Message Content privileged intent or passive conversation monitoring is needed. The bot fetches author/timestamp metadata only for explicitly submitted links; moderators read the linked content in Discord. Public thread participation is optional and does not automatically generate a reward. Existing private modal buttons continue to work privately, but new posts show the public discussion workflow.
+
+### Staff submission alerts
+
+Each accepted discussion submission (including a requested revision) queues a staff DM. New lore submissions also queue an alert. The scheduler delivers within about one minute, preferring the server owner, then a cached administrator or moderator with Manage Messages or Moderate Members. It stops after one successful delivery. Alerts identify the student, season/question, submission ID, public message link when applicable, and review command; they never copy private explanation text. Review permissions remain owner/admin only.
+
+Notification state survives restarts. If no staff member accepts DMs, delivery retries after 15 minutes and logs the failure. Quiet mode does not suppress these operational notices. Pending discussions present when this feature is deployed also receive an alert. Old lore backlog is left unchanged. A crash between Discord accepting a DM and the local delivery acknowledgment can cause a retry, but never a duplicate reward.

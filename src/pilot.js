@@ -222,7 +222,7 @@ export function runPilot(state, guildId, userId, action, args = {}, now = Date.n
     if (!d) { d = { id: `D${s.discussions.length + 1}`, userId, activityId: a.id, at: now }; s.discussions.push(d); }
     if (args.sourceMessage) { d.sourceMessage = args.sourceMessage; d.at = args.sourceMessage.createdAt; }
     else delete d.sourceMessage;
-    d.text = args.text.trim(); d.status = 'pending'; d.updatedAt = now; delete d.reason;
+    d.text = args.text.trim(); d.status = 'pending'; d.updatedAt = now; delete d.staffNotifiedAt; delete d.staffNoticeNextAt; delete d.reason;
     return { saved: true, id: d.id };
   }
   throw new PilotError('Unknown pilot action.');
@@ -231,9 +231,14 @@ export function runPilot(state, guildId, userId, action, args = {}, now = Date.n
 // Durable work list: replies never expose correct answers until their deadline.
 export function pilotJobs(state, guildId, now) {
   const jobs = [];
+  for (const l of state.loreSubmissions || []) {
+    if (l.guildId === guildId && l.status === 'pending' && l.staffNoticePending && (!l.staffNoticeNextAt || now >= l.staffNoticeNextAt)) jobs.push({ kind: 'staff-submission', type: 'lore', id: l.id, userId: l.authorId });
+  }
   for (const s of state.pilot?.seasons || []) {
     if (s.guildId !== guildId || s.status === 'draft') continue;
     advance(state, s, now);
+    // Review alerts are operational messages, so quiet mode does not suppress them.
+    for (const d of s.discussions) if (d.status === 'pending' && d.staffNotifiedAt !== d.updatedAt && (!d.staffNoticeNextAt || now >= d.staffNoticeNextAt)) jobs.push({ kind: 'staff-submission', type: 'discussion', season: s.id, id: d.id, userId: d.userId, activityId: d.activityId, version: d.updatedAt, url: d.sourceMessage?.url });
     if (state.pilot.quietGuilds.includes(guildId)) continue;
     for (const a of s.activities) {
       if (now < a.opensAt) continue;
@@ -246,6 +251,15 @@ export function pilotJobs(state, guildId, now) {
   return jobs;
 }
 export function acknowledgePilotJob(state, guildId, job, messageId) {
+  if (job.kind === 'staff-submission') {
+    const item = job.type === 'lore'
+      ? state.loreSubmissions.find(l => l.guildId === guildId && l.id === job.id)
+      : state.pilot?.seasons.find(s => s.guildId === guildId && s.id === job.season)?.discussions.find(d => d.id === job.id && d.updatedAt === job.version);
+    if (!item) return;
+    if (messageId.delivered) { item.staffNoticePending = false; item.staffNotifiedAt = job.version; }
+    else item.staffNoticeNextAt = messageId.now + 15 * 60_000;
+    return;
+  }
   const s = state.pilot?.seasons.find(s => s.guildId === guildId && s.id === job.season);
   if (!s) return;
   if (job.kind === 'qualified') { if (!s.notifications.includes(job.userId)) s.notifications.push(job.userId); return; }

@@ -449,7 +449,7 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
   function createLoreSubmission(guildId, authorId, title, text, tags = []) {
     load();
     const cleanTags = tags.filter(Boolean).map(tag => tag.trim().toLowerCase()).filter(Boolean).slice(0, 6);
-    const submission = { id: `LS${String(state.nextLoreSubmissionId++).padStart(4, '0')}`, guildId, authorId, title: title.trim(), text: text.trim(), tags: cleanTags, status: 'pending', createdAt: new Date().toISOString() };
+    const submission = { id: `LS${String(state.nextLoreSubmissionId++).padStart(4, '0')}`, guildId, authorId, title: title.trim(), text: text.trim(), tags: cleanTags, status: 'pending', staffNoticePending: true, createdAt: new Date().toISOString() };
     state.loreSubmissions.push(submission); save(); return submission;
   }
   function listLoreSubmissions(guildId, status = null) {
