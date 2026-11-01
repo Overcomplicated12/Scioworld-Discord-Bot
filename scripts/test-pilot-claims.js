@@ -5,6 +5,9 @@ import path from 'node:path';
 import { createStore } from '../src/store.js';
 import { DAY } from '../src/pilot.js';
 const config=JSON.parse(fs.readFileSync(new URL('../content/pilot/season.json',import.meta.url)));
+config.activities = config.activities.slice(0, 2);
+config.activities[0].openDay = 0; config.activities[0].closeDay = 5;
+config.activities[1].openDay = 7; config.activities[1].closeDay = 12;
 const dir=fs.mkdtempSync(path.join(os.tmpdir(),'scio-claims-'));
 try {
  const file=path.join(dir,'state.json');const s=createStore(file);const now=Date.now();

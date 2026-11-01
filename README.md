@@ -37,7 +37,7 @@ For a persistent server deployment, see [docs/HOSTING.md](docs/HOSTING.md). The 
 
 ## Two-week science pilot
 
-The bot now includes `/weekly`, `/passport`, and an administrator-only `/pilot` command group. One shared activity engine supports predictions, Two Truths and a Lie, and opinions. Three seasonal Contribution Stamps qualify for an organizer-reviewed sticker claim; stamps cannot be bought or traded. Existing data and commands are retained.
+The bot now includes `/question`, `/passport`, and an administrator-only `/pilot` command group. One shared activity engine supports predictions, Two Truths and a Lie, and opinions. Three seasonal Contribution Stamps qualify for an organizer-reviewed sticker claim; stamps cannot be bought or traded. Existing data and commands are retained.
 
 Start with a **draft simulation** using the configuration in `content/pilot/season.json`. Nothing activates or issues merchandise at startup. Read [the pilot operator guide](docs/PILOT.md) for setup, privacy, claims, simulation, and reporting. Run `npm test` to check all workflows; `npm run test:pilot` runs isolated pilot tests without production writes.
 
@@ -52,7 +52,7 @@ Start with a **draft simulation** using the configuration in `content/pilot/seas
 - `/leaderboard` — rank by knowledge points, Sciocoins, or streak.
 - `/privacy` — control leaderboard visibility, public recognition, or camp features.
 
-Knowledge points track levels (100 KP per level). Ordinary trivia pays 2 coins/3 KP for up to five different correct answers per UTC day. Optional daily rewards are flat at 2 coins/1 KP; there is no streak bonus or penalty. Weekly activity and contribution rewards are listed in the pilot guide.
+Knowledge points track levels (100 KP per level). Ordinary trivia pays 2 coins/3 KP for up to five different correct answers per UTC day. Optional daily rewards are flat at 2 coins/1 KP; there is no streak bonus or penalty. Daily activity and contribution rewards are listed in the pilot guide.
 
 ### Games and community
 

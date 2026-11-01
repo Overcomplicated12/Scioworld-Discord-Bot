@@ -65,7 +65,7 @@ export async function execute(i) {
     }else content=`**${action}**\n\`\`\`json\n${JSON.stringify(result,null,2).slice(0,1750)}\n\`\`\``;
     await i.editReply({content,files,allowedMentions:{parse:[]}});
     if(['review','claim-review','reward-lore'].includes(action) && result.userId) {
-      try{await (await i.client.users.fetch(result.userId)).send({content:`ScioCulture ${action}: ${result.status || (result.awarded?'lore reward approved':'lore reward already issued')}. ${args.reason}\nCheck /weekly or /passport in the server for details.`,allowedMentions:{parse:[]}});}catch{ /* Feedback stays in the private command view. */ }
+      try{await (await i.client.users.fetch(result.userId)).send({content:`ScioCulture ${action}: ${result.status || (result.awarded?'lore reward approved':'lore reward already issued')}. ${args.reason}\nCheck /question or /passport in the server for details.`,allowedMentions:{parse:[]}});}catch{ /* Feedback stays in the private command view. */ }
     }
     if(['activate','publish','close','quiet'].includes(action))await checkPilotSchedules(i.client);
   }catch(e){console.error('Pilot command:',e.message);await i.editReply({content:e instanceof PilotError?e.message:'Could not complete this operation. Check the configuration or bot logs.',allowedMentions:{parse:[]}});}

@@ -2,7 +2,7 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBu
 import { store } from '../store.js';
 import { PilotError } from '../pilot.js';
 import { requireGuild } from './utils.js';
-export const data = new SlashCommandBuilder().setName('weekly').setDescription('Join the science activity or check your private answer and feedback.')
+export const data = new SlashCommandBuilder().setName('question').setDescription('Answer today’s science question or check your private feedback.')
   .addStringOption(o => o.setName('activity').setDescription('Optional activity ID to revisit'))
   .addStringOption(o => o.setName('season').setDescription('Optional previous season ID'));
 export const privateReply = (content) => ({ content, flags: MessageFlags.Ephemeral, allowedMentions: { parse: [] } });
@@ -13,7 +13,7 @@ export function activityMessage(result, now = Date.now()) {
   let content = `${header}\n${a.prompt}\n\n${a.choices.map((c,i)=>`**${i+1}.** ${c}`).join('\n')}\n\n${closed ? 'Answers closed' : 'Answers close'} <t:${Math.floor(a.closesAt/1000)}:F>.`;
   if (closed) content += `\n\n${a.explanations.map((e,i)=>`**${i+1}:** ${e} (${result.distribution?.[i] || 0} votes)`).join('\n')}\n${a.source ? `Source: ${a.source}` : 'This question has no single correct answer.'}`;
   else content += '\nChoose below. You can revise until the deadline; each person earns one answer stamp.';
-  content += '\nUse `/weekly` for your private answer and review feedback. A short explanation is optional.';
+  content += '\nUse `/question` for your private answer and review feedback. A short explanation is optional.';
   const rows = [];
   if (!closed && now >= a.opensAt) rows.push(new ActionRowBuilder().addComponents(a.choices.map((_,i)=>new ButtonBuilder().setCustomId(`weekly:answer:${season}:${a.id}:${i}`).setLabel(`Choice ${i+1}`).setStyle(ButtonStyle.Primary))));
   rows.push(new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`weekly:explain:${season}:${a.id}`).setLabel('Explain your answer').setStyle(ButtonStyle.Secondary)));
@@ -29,7 +29,7 @@ export async function execute(interaction) {
     await interaction.reply({ ...payload, flags: MessageFlags.Ephemeral });
   } catch (e) { if (!(e instanceof PilotError)) throw e; await interaction.reply(privateReply(e.message)); }
 }
-export async function handleInteraction(interaction) {
+export async function handleInteraction(interaction, persistence = store) {
   if (!requireGuild(interaction)) return;
   const [, action, season, activity, choice] = interaction.customId.split(':');
   try {
@@ -39,11 +39,11 @@ export async function handleInteraction(interaction) {
       return;
     }
     if (action === 'answer') {
-      const result = store.pilot(interaction.guildId, interaction.user.id, 'answer', { season, activity, choice: Number(choice) });
+      const result = persistence.pilot(interaction.guildId, interaction.user.id, 'answer', { season, activity, choice: Number(choice) });
       await interaction.reply(privateReply(`${result.simulation ? 'Simulation: ' : ''}Saved: **${result.choice}**. You can revise before the deadline. Your answer stamp is awarded only once. Check /passport for progress.`));
     } else if (action === 'submit' && interaction.isModalSubmit()) {
-      store.pilot(interaction.guildId, interaction.user.id, 'discuss', { season, activity, text: interaction.fields.getTextInputValue('reasoning') });
-      await interaction.reply(privateReply('Your explanation is in the private review queue. Check /weekly for feedback. It will not be published automatically.'));
+      persistence.pilot(interaction.guildId, interaction.user.id, 'discuss', { season, activity, text: interaction.fields.getTextInputValue('reasoning') });
+      await interaction.reply(privateReply('Your explanation is in the private review queue. Check /question for feedback. It will not be published automatically.'));
     }
   } catch (e) { if (!(e instanceof PilotError)) throw e; await interaction.reply(privateReply(e.message)); }
 }

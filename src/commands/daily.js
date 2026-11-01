@@ -9,6 +9,6 @@ export const data = new SlashCommandBuilder().setName('daily').setDescription('C
 export async function execute(interaction) {
   if (!requireGuild(interaction)) return;
   const result = store.claimDaily(interaction.guildId, interaction.user.id, utcDate(), utcDate(-1));
-  if (!result.claimed) { await interaction.reply({ content: 'You already claimed this optional reward today. Try /weekly whenever you have time.', flags: MessageFlags.Ephemeral }); return; }
+  if (!result.claimed) { await interaction.reply({ content: 'You already claimed this optional reward today. Try /question whenever you have time.', flags: MessageFlags.Ephemeral }); return; }
   await interaction.reply({ content: `Daily reward claimed: **+${result.reward} Sciocoins** and **+${result.knowledgePoints} knowledge points**. No streak required.\n\n📚 **Today’s science fact:** ${dailyFact(utcDate())}`, flags: MessageFlags.Ephemeral });
 }

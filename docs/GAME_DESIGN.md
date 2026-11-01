@@ -14,7 +14,7 @@ The engagement loop is **notice → participate → understand → contribute �
 
 ## Current pilot loop
 
-1. `/start`, then `/weekly`: answer one science activity each week.
+1. `/start`, then `/question`: answer one optional science activity each day.
 2. Optionally explain a prediction or contribute original lore for human review.
 3. `/passport view`: see Contribution Stamps and eligibility for one seasonal sticker claim.
 4. Organizers review claims and handle mailing externally. Simulation issues no real merchandise.

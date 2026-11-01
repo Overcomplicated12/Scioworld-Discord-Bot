@@ -11,7 +11,7 @@ export const data = new SlashCommandBuilder()
 
 function pagesFor(canManage) {
   const pages = [
-    ['**ScioVirtual help · 1/4**', '', '**Start here**', '`/menu` — choose Learn, Connect, Create, or Collect', '`/start` — create your profile', '`/weekly` — join the weekly science activity', '`/passport view` — stamps, sticker claims, and season history', '`/profile` — view level, points, title, and featured collectible', '`/inventory` — view currencies, resources, and collectibles', '`/daily` — claim your daily reward'],
+    ['**ScioVirtual help · 1/4**', '', '**Start here**', '`/menu` — choose Learn, Connect, Create, or Collect', '`/start` — create your profile', '`/question` — join the daily science activity', '`/passport view` — stamps, sticker claims, and season history', '`/profile` — view level, points, title, and featured collectible', '`/inventory` — view currencies, resources, and collectibles', '`/daily` — claim your daily reward'],
     ['**ScioVirtual help · 2/4**', '', '**Learn and connect**', '`/trivia` — answer a science question', '`/camp-trivia ask` — answer a course-specific question', '`/race` — compete in a friendly science race', '`/poll status` — see the next weekly community poll', '`/lore action:solve` — solve a key clue to unlock the next chapter', '`/lore action:progress` — see story progress', '`/torture-om opt-in|opt-out` — manage the fictional Om challenge', '`/frog` — get a funny philosophical quote (30-minute cooldown)', '`/lore` — read shared stories'],
     ['**ScioVirtual help · 3/4**', '', '**Create and collect**', '`/lore action:submit` — students submit a story for review', '`/camp-trivia add` — instructors create course questions', '`/shop` — view or buy collectibles', '`/craft` — craft a collectible', '`/equip` — feature an owned collectible', '`/sets` — track collectible set progress', '`/trade` — exchange items with friends', '`/privacy` — control leaderboard, recognition, and camp visibility'],
     ['**ScioVirtual help · 4/4**', '', '`/ping` — check that the bot is online', '`/help topic:<start|economy|friendly>` — get a focused explanation'],
@@ -31,7 +31,7 @@ export async function execute(interaction) {
   const topic = interaction.options.getString('topic');
   const canManage = Boolean(interaction.guild && (interaction.guild.ownerId === interaction.user.id || interaction.memberPermissions?.has('Administrator')));
   const messages = {
-    start: '**Getting started**\nUse `/start`, then `/weekly` for a science question and `/passport view` for seasonal progress. Three stamps qualify for a sticker claim when organizers open claims. Simulation seasons do not issue real prizes. Use `/help` any time you need this menu again.',
+    start: '**Getting started**\nUse `/start`, then `/question` for a science question and `/passport view` for seasonal progress. Three stamps qualify for a sticker claim when organizers open claims. Simulation seasons do not issue real prizes. Use `/help` any time you need this menu again.',
     economy: '**Economy**\nSciocoins are fictional server currency with no cash value. Earn them from trivia and daily rewards, then spend them on collectibles, crafting, and trades. Knowledge points track your learning progress and levels. Contribution Stamps are separate: they cannot be bought or traded. Physical stickers require organizer approval.',
     friendly: '**Friendly play**\nGames are opt-in. Keep competition welcoming, avoid spam, and celebrate good answers. Use `/report` if a player is behaving inappropriately.',
   };

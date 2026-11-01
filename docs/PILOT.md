@@ -1,11 +1,11 @@
 # Running the ScioCulture pilot
 
-Build scope: one week. Initial evaluation: two weeks. Students answer one science activity per week, optionally explain their reasoning or contribute original lore, and see their progress in a private passport. No daily attendance or external camp scores are required.
+Build scope: one week. Initial evaluation: two weeks. Students answer one optional science activity per day, optionally explain their reasoning or contribute original lore, and see their progress in a private passport. No daily attendance or external camp scores are required.
 
 ## Student flow
 
 1. `/start` creates the existing profile. Balances and inventories are preserved.
-2. `/weekly` shows the current question privately. Public scheduled posts have the same buttons. Choose an answer; revise it until the displayed deadline. Only the final answer determines the correctness bonus, paid at reveal.
+2. `/question` shows the current question privately. Public scheduled posts have the same buttons. Choose an answer; revise it until the displayed deadline. Only the final answer determines the correctness bonus, paid at reveal.
 3. **Explain your answer** opens a short modal. Explain a prediction, suggest an experiment, ask a relevant scientific question, or constructively respond to someone’s reasoning. Moderators approve, request revision, or reject with feedback. No word-count minimum or AI judge is used. Text remains private.
 4. `/passport view` shows stamps, dates, opportunities, eligibility, and claim status. `/passport history` lists past seasons; `/passport view season:<id>` opens one.
 5. Once qualified and claims are open, `/passport claim` submits one claim for organizer review. No mailing address belongs in Discord or this bot.
@@ -16,12 +16,12 @@ Build scope: one week. Initial evaluation: two weeks. Students answer one scienc
 
 | Contribution | Stamps | Sciocoins | KP |
 | --- | ---: | ---: | ---: |
-| Weekly answer (once per activity) | 1 | 2 | 2 |
+| Daily answer (once per activity) | 1 | 2 | 2 |
 | Correct final answer at reveal | 0 | 3 | 4 |
 | Approved explanation (once per activity) | 1 | 3 | 2 |
 | Original lore approved for rewards (once per season) | 2 | 15 | 0 |
 
-Three stamps qualify for a sticker claim. Answering both weekly activities and having one explanation approved is enough; original lore plus one weekly answer is another path. Opinion activities never award correctness bonuses. Ordinary games, reactions, daily claims, and message counts never grant stamps. Stamps cannot be traded or purchased.
+Three stamps qualify for a sticker claim. Answering any three daily activities, or two plus one approved explanation, is enough; original lore plus one daily answer is another path. Opinion activities never award correctness bonuses. Ordinary games, reactions, daily claims, and message counts never grant stamps. Stamps cannot be traded or purchased.
 
 Lore publication and rewards are independent. `/lore-review approve` publishes; `/pilot reward-lore` explicitly approves originality, substance, and relevance and grants the season reward. A second submission cannot bypass the one-lore-reward limit. Lore must have been submitted during the season. Reviews may finish after the season closes; rewards and claims remain available afterward.
 
@@ -34,7 +34,7 @@ Edit `content/pilot/season.json`; this is content/configuration, not application
 - A unique season ID/name, timezone, duration in days, stamp threshold, sticker name, stock, and eligibility rules.
 - Reward amounts for answers, correctness, explanations, and lore.
 - The existing economy's reward amounts and caps in `economy` (loaded at process startup).
-- Ordered, nonoverlapping activities with opening/closing day offsets. The defaults are prediction on days 0–5 and Two Truths on days 7–12.
+- Ordered, nonoverlapping activities with opening/closing day offsets. The default is 14 different prompts, one every 24 hours, mixing predictions, Two Truths and a Lie, and open-ended science discussions. Each closes when the next opens.
 - A `discussionExample` you can copy into `activities` for an opinion activity. Remove `correct` for opinions. Each factual choice requires an explanation and factual activities require an HTTPS source. Check the sources yourself before publishing new content.
 
 Run `npm test` after editing. A season takes a frozen copy of its configuration at creation; later edits do not change saved seasons. To correct a draft configuration, use a new ID and create a new draft. Unused drafts remain inactive. Longer seasons use a larger `durationDays` and more activities; no new engine is needed.
@@ -81,7 +81,7 @@ All season-specific operations accept an optional `season` ID (except creation).
 
 Quiet mode suppresses automatic messages, not deadlines or private commands. Opening early is refused if another activity is active. Closing early is explicit. If moderation requests revision, the student can use the explanation button again before the season ends. Pending reviews can be processed after closing, but new submissions/revisions cannot.
 
-Students receive private review feedback when DMs work; `/weekly` and `/passport` retain their status if DMs fail. Automatic qualification DMs fall back to the passport when a student blocks DMs. Contributions are never automatically highlighted publicly.
+Students receive private review feedback when DMs work; `/question` and `/passport` retain their status if DMs fail. Automatic qualification DMs fall back to the passport when a student blocks DMs. Contributions are never automatically highlighted publicly.
 
 ## Real sticker claims
 
@@ -95,14 +95,14 @@ Mailing happens through the organizers' approved process outside this bot. Do no
 
 `/pilot engagement` reports real counts even if they fall below the targets:
 
-- New profiles created during the season, unique weekly participants and per-activity counts.
+- New profiles created during the season, unique daily-activity participants and per-activity counts.
 - Meaningful participation in Weeks 1 and 2 and their intersection.
 - **Retention = Week 1 participants who also participate in Week 2 / Week 1 participants.** Zero Week 1 participants yields `null`/N/A, not 0% or 100%.
 - Explanations submitted/approved, approval percentage, participating students who submitted an explanation, and pending review counts.
 - Lore submitted, published, and rewarded; students earning stamps/qualifying; claims/fulfillment.
 - Review actions, opt-outs, reports, and private feedback count. Organizers read the feedback to identify complaints; there is no automatic sentiment classifier.
 
-Meaningful participation means a weekly answer, approved explanation, or approved rewarded lore contribution. Participation is attributed to its original submission timestamp, so delayed approval does not move a Week 1 contribution into Week 2. Answer revisions do not add participants. The report shows no student names or public participation rankings. Private organizer queues contain the identities necessary for moderation/fulfillment.
+Meaningful participation means a daily answer, approved explanation, or approved rewarded lore contribution. Participation is attributed to its original submission timestamp, so delayed approval does not move a Week 1 contribution into Week 2. Answer revisions do not add participants. The report shows no student names or public participation rankings. Private organizer queues contain the identities necessary for moderation/fulfillment.
 
 The proposed 40% retention and 25% discussion participation targets are pilot hypotheses, not research benchmarks. Reporting is descriptive: it cannot prove that the bot caused a change. For longer seasons, the report still includes Week 1 → Week 2 retention and every activity's counts.
 

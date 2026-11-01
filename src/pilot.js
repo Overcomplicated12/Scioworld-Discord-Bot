@@ -77,7 +77,7 @@ export function pilotReport(state, s) {
   return {
     season: s.id, simulation: s.simulation,
     newProfiles: Object.values(state.profiles).filter(p => p.guildId === s.guildId && inSeason(s, Date.parse(p.createdAt))).length,
-    weeklyParticipants: unique(s.answers.map(x => x.userId)), participantsByActivity: Object.fromEntries(s.activities.map(a => [a.id, unique(s.answers.filter(x => x.activityId === a.id).map(x => x.userId))])),
+    activityParticipants: unique(s.answers.map(x => x.userId)), participantsByActivity: Object.fromEntries(s.activities.map(a => [a.id, unique(s.answers.filter(x => x.activityId === a.id).map(x => x.userId))])),
     week1: w1.size, week2: w2.size, returning: returned, retentionPercent: w1.size ? Math.round(returned / w1.size * 1000) / 10 : null,
     activeParticipants: active, discussions: s.discussions.length, approvedDiscussions: s.discussions.filter(x => x.status === 'approved').length,
     discussionApprovalPercent: s.discussions.length ? Math.round(s.discussions.filter(x => x.status === 'approved').length / s.discussions.length * 1000) / 10 : null,
@@ -184,7 +184,7 @@ export function runPilot(state, guildId, userId, action, args = {}, now = Date.n
     return d;
   }
   const a = args.activity ? s.activities.find(a => a.id === args.activity) : s.activities.find(a => now >= a.opensAt && now < a.closesAt) || [...s.activities].reverse().find(a => now >= a.closesAt);
-  requireThat(a, 'No weekly activity is available yet.');
+  requireThat(a, 'No daily activity is available yet.');
   if (action === 'weekly') {
     requireThat(s.status !== 'draft', 'The season is still a draft.');
     return { season: s.id, simulation: s.simulation, activity: publicActivity(a, now), answer: s.answers.find(x => x.activityId === a.id && x.userId === userId), discussion: s.discussions.find(x => x.activityId === a.id && x.userId === userId), distribution: now >= a.closesAt ? a.choices.map((_, i) => s.answers.filter(x => x.activityId === a.id && x.choice === i).length) : undefined };
@@ -214,7 +214,7 @@ export function runPilot(state, guildId, userId, action, args = {}, now = Date.n
     requireThat(now >= a.opensAt, 'This activity has not opened.');
     requireThat(typeof args.text === 'string' && args.text.trim().length > 0 && args.text.length <= 1000, 'Explain your reasoning in 1–1000 characters.');
     let d = s.discussions.find(x => x.userId === userId && x.activityId === a.id);
-    requireThat(!d || d.status === 'revision', 'You already submitted for this activity. Check /weekly for feedback.');
+    requireThat(!d || d.status === 'revision', 'You already submitted for this activity. Check /question for feedback.');
     if (!d) { d = { id: `D${s.discussions.length + 1}`, userId, activityId: a.id, at: now }; s.discussions.push(d); }
     d.text = args.text.trim(); d.status = 'pending'; d.updatedAt = now; delete d.reason;
     return { saved: true, id: d.id };

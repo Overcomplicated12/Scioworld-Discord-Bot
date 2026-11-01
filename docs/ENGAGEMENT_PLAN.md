@@ -2,9 +2,9 @@
 
 The pilot asks whether students voluntarily return to science and community activities across two weeks. It is independent of Camp Challenges, Revenge, course participation, and private email. There are no attendance streak requirements, paid draws, wagers, or activity-volume leaderboards.
 
-Week 1 offers a science prediction. Week 2 offers Two Truths and a Lie. Students can answer quickly, optionally explain their reasoning, or contribute original community lore. Factual questions reveal an explanation after voting closes. An opinion format is also available in the same activity engine.
+A different optional science question appears each day for 14 days, mixing predictions, Two Truths and a Lie, and open-ended discussions. Students can answer quickly, optionally explain their reasoning, or contribute original community lore. Factual questions reveal an explanation after voting closes. An opinion format is also available in the same activity engine.
 
-Three Contribution Stamps qualify a student for organizer review of one seasonal sticker claim. Two answers plus an approved explanation, or one answer plus an approved original lore contribution, reach the milestone. These stamps are separate from fictional Sciocoins and Knowledge Points. Simulation mode makes no real merchandise promise.
+Three Contribution Stamps qualify a student for organizer review of one seasonal sticker claim. Three daily answers, two answers plus an approved explanation, or one answer plus an approved original lore contribution reach the milestone. There is no requirement to participate on consecutive days. These stamps are separate from fictional Sciocoins and Knowledge Points. Simulation mode makes no real merchandise promise.
 
 The primary metric is the percentage of meaningful Week 1 participants who participate meaningfully in Week 2. Meaningful participation includes answers and approved explanations/lore, attributed to the submission week. Command volume, views, reactions, and bot messages do not count. Organizers also inspect approval workload, feedback, opt-outs, and reports.
 

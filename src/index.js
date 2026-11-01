@@ -35,7 +35,7 @@ client.on(Events.InteractionCreate, async interaction => {
     try { await weekly.handleInteraction(interaction); }
     catch (error) {
       console.error('Weekly interaction failed:', error);
-      if (!interaction.replied && !interaction.deferred) await interaction.reply({ content: 'Could not process that response. Try /weekly again.', flags: MessageFlags.Ephemeral });
+      if (!interaction.replied && !interaction.deferred) await interaction.reply({ content: 'Could not process that response. Try /question again.', flags: MessageFlags.Ephemeral });
     }
     return;
   }

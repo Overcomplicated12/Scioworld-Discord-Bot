@@ -35,7 +35,7 @@
       "id": "floating-frog",
       "format": "prediction",
       "openDay": 0,
-      "closeDay": 5,
+      "closeDay": 1,
       "prompt": "The Frog drops an ordinary freshwater ice cube into liquid freshwater. Before it melts, what happens?",
       "choices": [
         "It floats with most of it underwater",
@@ -53,8 +53,8 @@
     {
       "id": "moon-lies",
       "format": "truths",
-      "openDay": 7,
-      "closeDay": 12,
+      "openDay": 1,
+      "closeDay": 2,
       "prompt": "The Frog is selling Moon facts. Which ONE is false?",
       "choices": [
         "The Moon has a very thin atmosphere",
@@ -68,6 +68,225 @@
         "True: the Moon has no natural moons of its own."
       ],
       "source": "https://science.nasa.gov/moon/facts/"
+    },
+    {
+      "id": "frog-lab-budget",
+      "format": "discussion",
+      "prompt": "The Frog has funding for one science exhibit. Which would you choose, and what could visitors learn?",
+      "choices": [
+        "Tiny ecosystem",
+        "Telescope",
+        "Chemistry demonstration"
+      ],
+      "explanations": [
+        "An ecosystem can invite questions about interdependence.",
+        "A telescope can invite questions about our place in space.",
+        "A demonstration can invite predictions and experiments."
+      ],
+      "source": "",
+      "openDay": 2,
+      "closeDay": 3
+    },
+    {
+      "id": "warm-water",
+      "format": "prediction",
+      "prompt": "The Frog warms a fixed mass of freshwater from 10\u00b0C to 30\u00b0C without losing any. What happens to its density?",
+      "choices": [
+        "It decreases",
+        "It increases",
+        "It stays exactly the same"
+      ],
+      "correct": 0,
+      "explanations": [
+        "For this temperature range, warmer freshwater is less dense.",
+        "The density trend goes the other way over this range.",
+        "Density depends on temperature even when mass stays fixed."
+      ],
+      "source": "https://www.usgs.gov/water-science-school/science/water-density",
+      "openDay": 3,
+      "closeDay": 4
+    },
+    {
+      "id": "alien-evidence",
+      "format": "discussion",
+      "prompt": "A blurry photo shows what might be an alien frog. What would you ask for first?",
+      "choices": [
+        "An independent observation",
+        "The original image and method",
+        "A testable prediction"
+      ],
+      "explanations": [
+        "Independent observations can help check whether an effect is reproducible.",
+        "Understanding how evidence was collected helps assess possible errors.",
+        "A testable prediction helps distinguish explanations."
+      ],
+      "source": "",
+      "openDay": 4,
+      "closeDay": 5
+    },
+    {
+      "id": "science-superpower",
+      "format": "discussion",
+      "prompt": "The Frog can give your lab one superpower. Which would help you learn most?",
+      "choices": [
+        "Repeat any experiment cheaply",
+        "Measure anything precisely",
+        "Ask any expert one question"
+      ],
+      "explanations": [
+        "Repeats can help explore variability and reproducibility.",
+        "Precision helps measurement, but a precise instrument can still be biased.",
+        "Expert guidance can help frame better questions; it is not a substitute for evidence."
+      ],
+      "source": "",
+      "openDay": 5,
+      "closeDay": 6
+    },
+    {
+      "id": "ice-structure",
+      "format": "prediction",
+      "prompt": "The Frog freezes some freshwater at ordinary pressure. Why can the resulting ice float?",
+      "choices": [
+        "Its molecules form a more open structure",
+        "Its mass disappears",
+        "It must contain a large air pocket"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Ordinary ice has an open molecular arrangement, making it less dense than liquid water.",
+        "Freezing does not make the water\u2019s mass disappear.",
+        "Ice can float because of its structure, without needing a large air pocket."
+      ],
+      "source": "https://www.usgs.gov/water-science-school/science/water-density",
+      "openDay": 6,
+      "closeDay": 7
+    },
+    {
+      "id": "frog-fair-test",
+      "format": "discussion",
+      "prompt": "The Frog claims music helps seedlings grow. Which improvement would you prioritize in the experiment?",
+      "choices": [
+        "Keep light and water comparable",
+        "Use more than one seedling",
+        "Assign seedlings to groups randomly"
+      ],
+      "explanations": [
+        "Comparable conditions help isolate the factor being tested.",
+        "Multiple seedlings help reveal natural variation.",
+        "Random assignment helps reduce systematic differences between groups."
+      ],
+      "source": "",
+      "openDay": 7,
+      "closeDay": 8
+    },
+    {
+      "id": "surprising-result",
+      "format": "discussion",
+      "prompt": "The Frog gets a result that contradicts the textbook. What would you do next?",
+      "choices": [
+        "Check the measurements",
+        "Repeat the experiment",
+        "Ask someone to inspect the method"
+      ],
+      "explanations": [
+        "Checking measurements can reveal mistakes or instrument problems.",
+        "Repeating can test whether a result is consistent.",
+        "Another perspective may reveal assumptions you missed."
+      ],
+      "source": "",
+      "openDay": 8,
+      "closeDay": 9
+    },
+    {
+      "id": "salty-water",
+      "format": "prediction",
+      "prompt": "At the same temperature, the Frog dissolves salt in freshwater. What generally happens to the water\u2019s density?",
+      "choices": [
+        "It increases",
+        "It decreases",
+        "It becomes zero"
+      ],
+      "correct": 0,
+      "explanations": [
+        "Dissolved salt increases the density of water.",
+        "Saltwater is generally denser than freshwater at the same temperature.",
+        "Adding salt does not eliminate density."
+      ],
+      "source": "https://www.usgs.gov/water-science-school/science/water-density",
+      "openDay": 9,
+      "closeDay": 10
+    },
+    {
+      "id": "frog-science-museum",
+      "format": "discussion",
+      "prompt": "Which question would you put on the wall of the Frog\u2019s science museum?",
+      "choices": [
+        "How do we know?",
+        "What would change our minds?",
+        "What could we test next?"
+      ],
+      "explanations": [
+        "This invites visitors to examine evidence and methods.",
+        "This invites visitors to identify evidence against their explanation.",
+        "This invites visitors to turn curiosity into an investigation."
+      ],
+      "source": "",
+      "openDay": 10,
+      "closeDay": 11
+    },
+    {
+      "id": "unexpected-tradeoff",
+      "format": "discussion",
+      "prompt": "The Frog can build only one sensor for a school garden. Which would you choose and what would you investigate?",
+      "choices": [
+        "Soil moisture",
+        "Air temperature",
+        "Light level"
+      ],
+      "explanations": [
+        "Moisture data could help explore watering patterns.",
+        "Temperature data could help explore daily and seasonal changes.",
+        "Light data could help explore differences between locations."
+      ],
+      "source": "",
+      "openDay": 11,
+      "closeDay": 12
+    },
+    {
+      "id": "teach-the-frog",
+      "format": "discussion",
+      "prompt": "The Frog keeps confusing a hypothesis with a guess. How would you teach the difference?",
+      "choices": [
+        "Give a testable example",
+        "Design a small experiment",
+        "Compare competing explanations"
+      ],
+      "explanations": [
+        "A specific prediction can show how an explanation can be checked.",
+        "An experiment can make the connection between explanation and evidence concrete.",
+        "Comparisons can show why some explanations fit evidence better than others."
+      ],
+      "source": "",
+      "openDay": 12,
+      "closeDay": 13
+    },
+    {
+      "id": "next-frog-question",
+      "format": "discussion",
+      "prompt": "What should the Frog investigate next? Suggest one specific question in your explanation.",
+      "choices": [
+        "Space",
+        "Living things",
+        "Everyday physics"
+      ],
+      "explanations": [
+        "Space invites questions about worlds and observations.",
+        "Living things invite questions about interactions and adaptation.",
+        "Everyday physics invites questions you can explore around you."
+      ],
+      "source": "",
+      "openDay": 13,
+      "closeDay": 14
     }
   ],
   "discussionExample": {
