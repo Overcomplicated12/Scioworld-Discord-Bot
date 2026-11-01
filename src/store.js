@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { runPilot, pilotJobs, acknowledgePilotJob } from './pilot.js';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -51,6 +52,24 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     fs.writeFileSync(temporaryPath, `${JSON.stringify(state, null, 2)}\n`, { mode: 0o600 });
     fs.renameSync(temporaryPath, filePath);
   }
+  // All pilot operations run synchronously without awaits, in this one PM2 process.
+  // Save the complete ledger and balances together, so retries cannot double-pay.
+  function pilotTransaction(operation) {
+    load();
+    if (!state.pilot && fs.existsSync(filePath)) {
+      const backup = `${filePath}.pre-pilot.bak`;
+      if (!fs.existsSync(backup)) fs.copyFileSync(filePath, backup, fs.constants.COPYFILE_EXCL);
+    }
+    const before = structuredClone(state);
+    try { const result = operation(state); save(); return structuredClone(result); }
+    catch (error) { state = before; throw error; }
+  }
+  function pilot(guildId, userId, action, args = {}, now = Date.now(), canManage = false) {
+    return pilotTransaction(state => runPilot(state, guildId, userId, action, args, now, canManage));
+  }
+  function getPilotJobs(guildId, now = Date.now()) { return pilotTransaction(state => pilotJobs(state, guildId, now)); }
+  function ackPilotJob(guildId, job, messageId) { return pilotTransaction(state => acknowledgePilotJob(state, guildId, job, messageId)); }
+  function pilotQuiet(guildId) { load(); return state.pilot?.quietGuilds.includes(guildId) || false; }
   function getOrCreate(guildId, userId) {
     load();
     const key = keyFor(guildId, userId);
@@ -549,7 +568,7 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
   function beginOmModePoll(guildId, activationKey, nowMs, channelId) { const schedule = getOmSchedule(guildId); schedule.modePoll = { activationKey, channelId, endsAt: nowMs + 60 * 60 * 1000, votes: {}, voters: [] }; save(); return schedule.modePoll; }
   function recordOmModeVote(guildId, userId, mode) { const schedule = getOmSchedule(guildId); if (!schedule.modePoll) return { recorded: false, reason: 'not-active' }; if (schedule.modePoll.voters.includes(userId)) return { recorded: false, reason: 'already-voted' }; schedule.modePoll.voters.push(userId); schedule.modePoll.votes[mode] = (schedule.modePoll.votes[mode] || 0) + 1; save(); return { recorded: true }; }
   function finishOmModePoll(guildId, nowMs) { const schedule = getOmSchedule(guildId); if (!schedule.modePoll || nowMs < schedule.modePoll.endsAt) return { finished: false }; const entries = Object.entries(schedule.modePoll.votes); schedule.mode = entries.length ? entries.sort((a, b) => b[1] - a[1])[0][0] : 'water-drop'; schedule.modePoll = null; save(); return { finished: true, mode: schedule.mode }; }
-  return { getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, createTradeOffer, settleTrade, pendingTrades, listProfiles, setLeaderboardPrivacy, setPrivacy, equipCollectible, craftCollectible, createRace, joinRace, startRace, answerRace, cancelRace, getRace, expireRaces, getOperationalStatus, createReport, listReports, updateReport, getCampResources, addCampCourse, removeCampCourse, addCampInstructor, removeCampInstructor, exportCampResources, importCampResources, isCampInstructor, addCampTriviaQuestion, listCampTriviaQuestions, removeCampTriviaQuestion, answerCampTrivia, createLoreSubmission, listLoreSubmissions, updateLoreSubmission, getLoreProgress, startLoreDiscussion, joinLoreDiscussion, startLoreChallenge, answerLoreChallenge, getPollSchedule, markPollReminderSent, markPollExhaustedReminderSent, markPollSent, pollOverrideAvailable, pollUsedWithinYear, getOmSchedule, setOmOptIn, setOmTarget, clearOmTarget, activateOm, recordOmMessage, beginOmModePoll, recordOmModeVote, finishOmModePoll };
+  return { pilot, getPilotJobs, ackPilotJob, pilotQuiet, getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, createTradeOffer, settleTrade, pendingTrades, listProfiles, setLeaderboardPrivacy, setPrivacy, equipCollectible, craftCollectible, createRace, joinRace, startRace, answerRace, cancelRace, getRace, expireRaces, getOperationalStatus, createReport, listReports, updateReport, getCampResources, addCampCourse, removeCampCourse, addCampInstructor, removeCampInstructor, exportCampResources, importCampResources, isCampInstructor, addCampTriviaQuestion, listCampTriviaQuestions, removeCampTriviaQuestion, answerCampTrivia, createLoreSubmission, listLoreSubmissions, updateLoreSubmission, getLoreProgress, startLoreDiscussion, joinLoreDiscussion, startLoreChallenge, answerLoreChallenge, getPollSchedule, markPollReminderSent, markPollExhaustedReminderSent, markPollSent, pollOverrideAvailable, pollUsedWithinYear, getOmSchedule, setOmOptIn, setOmTarget, clearOmTarget, activateOm, recordOmMessage, beginOmModePoll, recordOmModeVote, finishOmModePoll };
 }
 
 export const store = createStore();
