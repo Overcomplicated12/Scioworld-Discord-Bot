@@ -58,6 +58,8 @@ Knowledge points are progression points: correct trivia answers give more, parti
 - `/poll override` — admin-only custom poll for the week.
 - `/frog` — receive a Frog of Wisdom quote when you own the collectible.
 - `/lore` — read, list, or search community stories.
+- `/lore action:submit title:<title> query:<story text>` — submit a student-created story for review.
+- `/lore-review list|approve|reject` — moderator review of student submissions.
 - `/report` — privately report a player to moderators.
 
 Weekly polls are selected from a question bank, protected from reuse for one year, and announced to the server owner 24 hours before the scheduled post. If the bank is exhausted, the owner is asked to add more prompts. The day after a weekly poll, an opt-in Om challenge style poll may run before its capped fictional DMs begin.

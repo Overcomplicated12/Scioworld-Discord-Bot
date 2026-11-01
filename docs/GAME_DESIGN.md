@@ -68,6 +68,7 @@ Suggested starting balance: 100 Sciocoins, one starter collectible, and a small 
 - `/daily` — once per day, award a small bonus and a rotating Sciovirtual fact.
 - `/frog` — if the player owns the Frog of Wisdom, reveal a philosopher quote; use a per-player cooldown to prevent spam.
 - `/lore [action] [query]` — reveal a random community story, list stories, or search contributed entries.
+- `/lore action:submit title:<title> query:<story text>` — submit a student-created story for review.
 - `/trivia [category]` — start a short question for the channel or an ephemeral solo question.
 - `/race create [category]` — open a friendly time-limited race.
 - `/race join` — join an open race.
@@ -91,6 +92,7 @@ Suggested starting balance: 100 Sciocoins, one starter collectible, and a small 
 - `/poll status` — view the next weekly poll and its reminder schedule.
 - `/poll early|override` — owner/admin controls for the weekly poll, limited to one override per week.
 - `/report` — submit a private report; moderators and the server owner receive a DM, with anti-spam limits.
+- `/lore-review list|approve|reject` — moderators review student lore before it enters the public archive.
 - `/om opt-in|opt-out|status` — manage consent for the harmless fictional Om challenge.
 - `/om target|stop` — owner/admin controls for an opted-in target.
 - `/om-test` — temporary owner/admin test for the one-minute consent flow.
