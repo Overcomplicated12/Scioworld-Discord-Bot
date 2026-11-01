@@ -47,6 +47,7 @@ async function sendScheduledPoll(guild, nowMs) {
 export async function checkPollSchedules(client, nowMs = Date.now()) {
   for (const guild of client.guilds.cache.values()) {
     try {
+      if (store.pilotQuiet(guild.id)) continue;
       const schedule = store.getPollSchedule(guild.id, nowMs);
       if (nowMs >= schedule.nextDueAt - DAY && nowMs < schedule.nextDueAt && !schedule.reminderSent) {
         await dmOwner(guild, 'Your weekly ScioVirtual poll is scheduled for about 24 hours from now. Use `/poll override` if you want to choose this week’s question.');
@@ -62,6 +63,7 @@ export async function checkPollSchedules(client, nowMs = Date.now()) {
 export async function checkOmSchedules(client, nowMs = Date.now()) {
   for (const guild of client.guilds.cache.values()) {
     try {
+      if (store.pilotQuiet(guild.id)) continue;
       const pollSchedule = store.getPollSchedule(guild.id, nowMs);
       const activationAt = pollSchedule.nextDueAt + DAY;
       const activationKey = String(pollSchedule.nextDueAt);

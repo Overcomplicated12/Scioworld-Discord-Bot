@@ -1,6 +1,7 @@
-﻿import 'dotenv/config';
+import { checkPilotSchedules } from './pilot-scheduler.js';
+import 'dotenv/config';
 import { Client, Events, GatewayIntentBits, MessageFlags } from 'discord.js';
-import { commands, campTrivia, help, lore, menu, omTest, trivia } from './commands/index.js';
+import { commands, campTrivia, help, menu, omTest, trivia, weekly } from './commands/index.js';
 import { checkOmSchedules, checkPollSchedules } from './poll-scheduler.js';
 import { backupProfileData } from './backups.js';
 import { store } from './store.js';
@@ -16,6 +17,8 @@ const commandsByName = new Map(commands.map(command => [command.data.name, comma
 client.once(Events.ClientReady, readyClient => {
   console.log(`Logged in as ${readyClient.user.tag}.`);
   try { backupProfileData(); } catch (error) { console.error('Initial profile backup failed:', error); }
+  checkPilotSchedules(readyClient).catch(error => console.error('Pilot schedule failed:', error));
+  setInterval(() => checkPilotSchedules(readyClient).catch(error => console.error('Pilot schedule failed:', error)), 60_000);
   checkPollSchedules(readyClient).catch(error => console.error('Initial poll schedule check failed:', error));
   checkOmSchedules(readyClient).catch(error => console.error('Initial Om schedule check failed:', error));
   setInterval(() => {
@@ -28,6 +31,14 @@ client.once(Events.ClientReady, readyClient => {
 });
 
 client.on(Events.InteractionCreate, async interaction => {
+  if ((interaction.isButton() || interaction.isModalSubmit()) && interaction.customId.startsWith('weekly:')) {
+    try { await weekly.handleInteraction(interaction); }
+    catch (error) {
+      console.error('Weekly interaction failed:', error);
+      if (!interaction.replied && !interaction.deferred) await interaction.reply({ content: 'Could not process that response. Try /weekly again.', flags: MessageFlags.Ephemeral });
+    }
+    return;
+  }
   if (interaction.isButton() && interaction.customId.startsWith('trivia:')) {
     try {
       await trivia.handleButton(interaction);

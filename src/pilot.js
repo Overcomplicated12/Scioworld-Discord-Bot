@@ -29,7 +29,7 @@ export function validatePilot(config) {
     requireThat(Array.isArray(a.choices) && a.choices.length >= 2 && a.choices.length <= 4 && a.choices.every(x => typeof x === 'string' && x.length > 0 && x.length <= 80), 'Provide 2–4 short choices.');
     requireThat(a.format !== 'truths' || a.choices.length === 3, 'Two Truths needs exactly three statements.');
     requireThat(Array.isArray(a.explanations) && a.explanations.length === a.choices.length && a.explanations.every(x => typeof x === 'string' && x.length > 0 && x.length <= 250), 'Explain every choice in 1–250 characters.');
-    if (a.format !== 'discussion') requireThat(Number.isInteger(a.correct) && a.correct >= 0 && a.correct < a.choices.length && /^https:\/\//.test(a.source), 'Factual questions need a correct answer and an HTTPS source.');
+    if (a.format !== 'discussion') requireThat(Number.isInteger(a.correct) && a.correct >= 0 && a.correct < a.choices.length && typeof a.source === 'string' && a.source.length <= 300 && /^https:\/\//.test(a.source), 'Factual questions need a correct answer and an HTTPS source.');
     else requireThat(a.correct === undefined, 'Opinion questions cannot have a correct answer.');
   }
   return config;
