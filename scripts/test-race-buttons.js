@@ -19,8 +19,9 @@ try {
   assert.equal(reply.flags, 64, 'A partial race answer should only acknowledge the answering player.');
   assert.match(reply.content, /waiting for the other racers/i);
 
-  await handleButton({ guildId: 'g', user: { id: 'kedar' }, customId: `race:${race.id}:0:0`, reply: async value => { reply = value; } }, persistence);
+  await handleButton({ guildId: 'g', user: { id: 'kedar' }, customId: `race:${race.id}:0:0`, update: async value => { reply = value; } }, persistence);
   assert.match(reply.content, /round 2\/3/i, 'The final answer for a round should post the next question with buttons.');
+  assert.match(reply.content, /all \*\*2\*\* racers answered/i, 'The next round should explain why it advanced.');
   assert.equal(reply.components[0].components.length, 4);
 
   await handleButton({ guildId: 'g', user: { id: 'kedar' }, customId: `race:${race.id}:0:0`, reply: async value => { reply = value; } }, persistence);

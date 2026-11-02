@@ -21,7 +21,7 @@ function resultMessage(result, raceId, questionForNext) {
     return { content: `Race **${raceId}** finished! Winners: ${result.winners.map(id => `<@${id}>`).join(', ')}.\n\n**Race rewards**\n${rewardText}`, allowedMentions: { users: result.winners } };
   }
   const payload = showQuestion(result.race, questionForNext);
-  payload.content = `${result.correct ? 'Correct!' : 'Answer recorded.'}\n${payload.content}`;
+  payload.content = `Round complete — all **${result.race.players.length}** racers answered. ${result.correct ? 'Your answer was correct.' : 'Your answer was recorded.'}\n\n${payload.content}`;
   return payload;
 }
 
@@ -68,7 +68,9 @@ export async function handleButton(interaction, persistence = store) {
   const question = questions.find(item => item.id === race.questionIds[race.round]);
   const result = persistence.answerRace(interaction.guildId, interaction.user.id, raceId, choice, question, Date.now());
   const next = result.nextQuestionId ? questions.find(item => item.id === result.nextQuestionId) : null;
-  await interaction.reply(resultMessage(result, raceId, next));
+  const payload = resultMessage(result, raceId, next);
+  if (result.complete) await interaction.update(payload);
+  else await interaction.reply(payload);
 }
 
 export async function handleNumericMessage(message, persistence = store) {
