@@ -473,7 +473,9 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     }
     submission.status = status; submission.reviewedAt = new Date().toISOString(); save(); return { updated: true, submission };
   }
-  function loreKey(storyId, entryId) { return `${storyId}:${entryId}`; }
+  // Lore discussions and challenges are server-scoped, just like progress.
+  // Including the guild prevents one server's active clue from blocking another.
+  function loreKey(guildId, storyId, entryId) { return `${guildId}:${storyId}:${entryId}`; }
   function getLoreProgress(guildId, stories) {
     load();
     if (!state.loreProgress[guildId]) state.loreProgress[guildId] = {};
@@ -481,13 +483,13 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     save(); return state.loreProgress[guildId];
   }
   function startLoreDiscussion(guildId, storyId, entryId, prompt, nowMs = Date.now()) {
-    load(); const key = loreKey(storyId, entryId); const existing = state.loreDiscussions[key];
+    load(); const key = loreKey(guildId, storyId, entryId); const existing = state.loreDiscussions[key];
     if (existing && !existing.unlocked) return { started: false, reason: 'active', discussion: existing };
     const discussion = { guildId, storyId, entryId, prompt, participants: [], startedAt: nowMs, unlocked: false };
     state.loreDiscussions[key] = discussion; save(); return { started: true, discussion };
   }
   function joinLoreDiscussion(guildId, userId, storyId, entryId) {
-    load(); const key = loreKey(storyId, entryId); const discussion = state.loreDiscussions[key];
+    load(); const key = loreKey(guildId, storyId, entryId); const discussion = state.loreDiscussions[key];
     if (!discussion || discussion.guildId !== guildId || discussion.unlocked) return { joined: false, reason: 'inactive' };
     if (discussion.participants.includes(userId)) return { joined: false, reason: 'already-joined', discussion };
     discussion.participants.push(userId);
@@ -500,14 +502,14 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
   }
   function normalizeAnswer(value) { return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
   function startLoreChallenge(guildId, storyId, entryId, clue, answer, aliases = [], nowMs = Date.now()) {
-    load(); const key = loreKey(storyId, entryId); const existing = state.loreChallenges?.[key];
+    load(); const key = loreKey(guildId, storyId, entryId); const existing = state.loreChallenges?.[key];
     if (existing && !existing.solved) return { started: false, reason: 'active', challenge: existing };
     if (!state.loreChallenges) state.loreChallenges = {};
     const challenge = { guildId, storyId, entryId, clue, answer: normalizeAnswer(answer), aliases: [answer, ...aliases].map(normalizeAnswer), attempts: {}, startedAt: nowMs, solved: false };
     state.loreChallenges[key] = challenge; save(); return { started: true, challenge };
   }
   function answerLoreChallenge(guildId, userId, storyId, entryId, submittedAnswer, nowMs = Date.now()) {
-    load(); const key = loreKey(storyId, entryId); const challenge = state.loreChallenges?.[key];
+    load(); const key = loreKey(guildId, storyId, entryId); const challenge = state.loreChallenges?.[key];
     if (!challenge || challenge.guildId !== guildId || challenge.solved) return { solved: false, reason: 'inactive' };
     const lastAttempt = challenge.attempts[userId] || 0;
     if (nowMs - lastAttempt < 30 * 60 * 1000) return { solved: false, reason: 'cooldown', remainingMs: 30 * 60 * 1000 - (nowMs - lastAttempt) };
