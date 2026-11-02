@@ -36,17 +36,17 @@
       "format": "prediction",
       "openDay": 0,
       "closeDay": 1,
-      "prompt": "The Frog drops an ordinary freshwater ice cube into liquid freshwater. Before it melts, what happens?",
+      "prompt": "A sealed freshwater ice cube is placed in liquid freshwater at 4°C. Which explanation best predicts what happens before it melts?",
       "choices": [
-        "It floats with most of it underwater",
-        "It sinks to the bottom",
-        "Exactly half stays above water"
+        "It floats because ice's crystal lattice is less dense",
+        "It sinks because colder water is always denser",
+        "It stays suspended because both substances are H₂O"
       ],
       "correct": 0,
       "explanations": [
-        "Ice is less dense than liquid water, so it floats, mostly submerged.",
-        "Sinking would require the ice to be denser than the water.",
-        "The submerged fraction depends on relative densities; it is much more than half."
+        "Hydrogen bonding spaces molecules farther apart in ordinary ice.",
+        "Temperature alone does not make ice denser than liquid water here.",
+        "The same chemical formula does not guarantee the same density."
       ],
       "source": "https://www.usgs.gov/water-science-school/science/water-density"
     },
@@ -57,33 +57,34 @@
       "closeDay": 2,
       "prompt": "The Frog is selling Moon facts. Which ONE is false?",
       "choices": [
-        "The Moon has a very thin atmosphere",
-        "The Moon never rotates",
-        "The Moon has no moons of its own"
+        "The Moon rotates once for each orbit around Earth",
+        "The Moon's near side is always sunlit",
+        "The Moon has no natural moon of its own"
       ],
       "correct": 1,
       "explanations": [
-        "True: the Moon has an extremely thin atmosphere called an exosphere.",
-        "False: the Moon rotates once per orbit, which keeps roughly the same face toward Earth.",
-        "True: the Moon has no natural moons of its own."
+        "True: synchronous rotation keeps nearly the same face toward Earth.",
+        "False: the near side has day and night as the Moon rotates.",
+        "True: the Moon has no natural satellite orbiting it."
       ],
       "source": "https://science.nasa.gov/moon/facts/"
     },
     {
       "id": "frog-lab-budget",
-      "format": "discussion",
-      "prompt": "The Frog has funding for one science exhibit. Which would you choose, and what could visitors learn?",
+      "format": "prediction",
+      "prompt": "A museum wants one exhibit that can distinguish correlation from causation. Which design gives the strongest evidence?",
       "choices": [
-        "Tiny ecosystem",
-        "Telescope",
-        "Chemistry demonstration"
+        "Randomly assign conditions and measure the same outcome",
+        "Show a dramatic before-and-after with no comparison",
+        "Ask visitors which explanation feels most convincing"
       ],
       "explanations": [
-        "An ecosystem can invite questions about interdependence.",
-        "A telescope can invite questions about our place in space.",
-        "A demonstration can invite predictions and experiments."
+        "Random assignment and a shared outcome help isolate the tested variable.",
+        "Without a comparison, other changes could explain the result.",
+        "Persuasion is not evidence that one variable caused another."
       ],
-      "source": "",
+      "correct": 0,
+      "source": "https://www.nationalacademies.org/read/21835/chapter/6",
       "openDay": 2,
       "closeDay": 3
     },
@@ -108,37 +109,39 @@
     },
     {
       "id": "alien-evidence",
-      "format": "discussion",
-      "prompt": "A blurry photo shows what might be an alien frog. What would you ask for first?",
+      "format": "prediction",
+      "prompt": "A blurry photo is offered as evidence of an alien frog. Which next step most directly tests whether the claim is reproducible?",
       "choices": [
-        "An independent observation",
-        "The original image and method",
-        "A testable prediction"
+        "Obtain the original data and seek an independent observation",
+        "Crop the image until the shape looks clearer",
+        "Ask supporters to vote on what they see"
       ],
       "explanations": [
-        "Independent observations can help check whether an effect is reproducible.",
-        "Understanding how evidence was collected helps assess possible errors.",
-        "A testable prediction helps distinguish explanations."
+        "Independent observations and original data make the claim checkable.",
+        "Cropping can change appearance without adding evidence.",
+        "A vote measures opinion, not reproducibility."
       ],
-      "source": "",
+      "correct": 0,
+      "source": "https://www.nationalacademies.org/read/21835/chapter/6",
       "openDay": 4,
       "closeDay": 5
     },
     {
       "id": "science-superpower",
-      "format": "discussion",
-      "prompt": "The Frog can give your lab one superpower. Which would help you learn most?",
+      "format": "prediction",
+      "prompt": "A lab can improve one capability before testing a surprising hypothesis. Which change most improves the quality of its inference?",
       "choices": [
-        "Repeat any experiment cheaply",
-        "Measure anything precisely",
-        "Ask any expert one question"
+        "Pre-register a measurable prediction and control conditions",
+        "Collect only the most dramatic trials",
+        "Ask an expert to choose the expected result"
       ],
       "explanations": [
-        "Repeats can help explore variability and reproducibility.",
-        "Precision helps measurement, but a precise instrument can still be biased.",
-        "Expert guidance can help frame better questions; it is not a substitute for evidence."
+        "A predefined prediction and controls reduce hindsight and confounding.",
+        "Selecting dramatic trials can bias the evidence toward a desired result.",
+        "Expert advice can help design a test but cannot replace the test."
       ],
-      "source": "",
+      "correct": 0,
+      "source": "https://www.nationalacademies.org/read/21835/chapter/6",
       "openDay": 5,
       "closeDay": 6
     },
@@ -163,37 +166,39 @@
     },
     {
       "id": "frog-fair-test",
-      "format": "discussion",
-      "prompt": "The Frog claims music helps seedlings grow. Which improvement would you prioritize in the experiment?",
+      "format": "prediction",
+      "prompt": "The Frog claims music helps seedlings grow. Which redesign most directly reduces confounding?",
       "choices": [
-        "Keep light and water comparable",
-        "Use more than one seedling",
-        "Assign seedlings to groups randomly"
+        "Randomly assign many seedlings while matching light, water, and soil",
+        "Play louder music for seedlings that already look healthiest",
+        "Measure only the tallest plant in each group"
       ],
       "explanations": [
-        "Comparable conditions help isolate the factor being tested.",
-        "Multiple seedlings help reveal natural variation.",
-        "Random assignment helps reduce systematic differences between groups."
+        "Random assignment plus matched conditions separates music from other causes.",
+        "Treating healthier seedlings differently creates a confound.",
+        "Selecting only extremes hides variation and can mislead the comparison."
       ],
-      "source": "",
+      "correct": 0,
+      "source": "https://www.nationalacademies.org/read/21835/chapter/6",
       "openDay": 7,
       "closeDay": 8
     },
     {
       "id": "surprising-result",
-      "format": "discussion",
-      "prompt": "The Frog gets a result that contradicts the textbook. What would you do next?",
+      "format": "prediction",
+      "prompt": "The Frog gets one result that contradicts a textbook. Which response is most scientifically defensible first?",
       "choices": [
-        "Check the measurements",
-        "Repeat the experiment",
-        "Ask someone to inspect the method"
+        "Check calibration and protocol, then repeat with controls",
+        "Delete outliers until the result agrees with the textbook",
+        "Declare the textbook disproven after one trial"
       ],
       "explanations": [
-        "Checking measurements can reveal mistakes or instrument problems.",
-        "Repeating can test whether a result is consistent.",
-        "Another perspective may reveal assumptions you missed."
+        "Verification and controlled repetition test error and reproducibility.",
+        "Removing inconvenient data without a rule can manufacture agreement.",
+        "One surprising trial is a prompt for checking, not a final verdict."
       ],
-      "source": "",
+      "correct": 0,
+      "source": "https://www.nationalacademies.org/read/21835/chapter/6",
       "openDay": 8,
       "closeDay": 9
     },
@@ -218,73 +223,77 @@
     },
     {
       "id": "frog-science-museum",
-      "format": "discussion",
-      "prompt": "Which question would you put on the wall of the Frog\u2019s science museum?",
+      "format": "prediction",
+      "prompt": "A visitor says one result proves a theory. Which question best tests the strength of that claim?",
       "choices": [
-        "How do we know?",
-        "What would change our minds?",
-        "What could we test next?"
+        "What observation would distinguish this explanation from alternatives?",
+        "How many people like the explanation?",
+        "Can we phrase the explanation more confidently?"
       ],
       "explanations": [
-        "This invites visitors to examine evidence and methods.",
-        "This invites visitors to identify evidence against their explanation.",
-        "This invites visitors to turn curiosity into an investigation."
+        "A distinguishing prediction makes competing explanations testable.",
+        "Popularity does not determine whether a claim is true.",
+        "Confidence in wording does not add supporting evidence."
       ],
-      "source": "",
+      "correct": 0,
+      "source": "https://www.nationalacademies.org/read/21835/chapter/6",
       "openDay": 10,
       "closeDay": 11
     },
     {
       "id": "unexpected-tradeoff",
-      "format": "discussion",
-      "prompt": "The Frog can build only one sensor for a school garden. Which would you choose and what would you investigate?",
+      "format": "prediction",
+      "prompt": "The Frog can build one sensor to investigate why plants wilt in a school garden. Which measurement is most directly useful?",
       "choices": [
-        "Soil moisture",
-        "Air temperature",
-        "Light level"
+        "Soil moisture at root depth measured over time",
+        "Air temperature once at noon",
+        "A daily count of flower colors"
       ],
       "explanations": [
-        "Moisture data could help explore watering patterns.",
-        "Temperature data could help explore daily and seasonal changes.",
-        "Light data could help explore differences between locations."
+        "Root-zone moisture directly tests whether water availability tracks wilting.",
+        "A single temperature snapshot misses variation and the proposed mechanism.",
+        "Flower color is not a direct measure of water stress."
       ],
-      "source": "",
+      "correct": 0,
+      "source": "https://www.usgs.gov/special-topics/water-science-school/science/soil-moisture",
       "openDay": 11,
       "closeDay": 12
     },
     {
       "id": "teach-the-frog",
-      "format": "discussion",
-      "prompt": "The Frog keeps confusing a hypothesis with a guess. How would you teach the difference?",
+      "format": "prediction",
+      "prompt": "Which statement is a testable hypothesis rather than a vague guess?",
       "choices": [
-        "Give a testable example",
-        "Design a small experiment",
-        "Compare competing explanations"
+        "More light makes seedlings taller after 14 days, with other conditions fixed",
+        "Plants grow better in good environments",
+        "Nature wants seedlings to thrive"
       ],
       "explanations": [
-        "A specific prediction can show how an explanation can be checked.",
-        "An experiment can make the connection between explanation and evidence concrete.",
-        "Comparisons can show why some explanations fit evidence better than others."
+        "It identifies a measurable change, timeframe, and controlled conditions.",
+        "The terms are too broad to specify what observation would count as a test.",
+        "This assigns intention rather than making a measurable prediction."
       ],
-      "source": "",
+      "correct": 0,
+      "source": "https://www.nationalacademies.org/read/21835/chapter/6",
       "openDay": 12,
       "closeDay": 13
     },
     {
       "id": "next-frog-question",
-      "format": "discussion",
-      "prompt": "What should the Frog investigate next? Suggest one specific question in your explanation.",
+      "format": "prediction",
+      "prompt": "After observing frogs near a pond, which follow-up question is most testable?",
       "choices": [
-        "Space",
-        "Living things",
-        "Everyday physics"
+        "Does water temperature predict frog activity after controlling for time of day?",
+        "Why are frogs interesting?",
+        "Are frogs happiest in spring?"
       ],
       "explanations": [
-        "Space invites questions about worlds and observations.",
-        "Living things invite questions about interactions and adaptation.",
-        "Everyday physics invites questions you can explore around you."
+        "It names measurable variables and a confound to control.",
+        "Interest is subjective and does not define an observable test.",
+        "Happiness is undefined unless it is operationalized and measured."
       ],
-      "source": "",
+      "correct": 0,
+      "source": "https://www.usgs.gov/centers/nwhc/science/amphibian-research",
       "openDay": 13,
       "closeDay": 14
     }
