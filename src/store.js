@@ -588,7 +588,7 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
   function activateOm(guildId, activationKey, nowMs) {
     const schedule = getOmSchedule(guildId);
     if (!schedule.targetId || !schedule.optedIn.includes(schedule.targetId) || schedule.activatedFor === activationKey) return { active: false, schedule };
-    schedule.activatedFor = activationKey; schedule.activeUntil = nowMs + 60 * 60 * 1000; schedule.nextSendAt = nowMs + Math.floor(Math.random() * 5 * 60 * 1000); schedule.lastSentAt = 0; schedule.sentDate = null; schedule.sentToday = 0; schedule.sentThisActivation = 0; save(); return { active: true, schedule };
+    schedule.activatedFor = activationKey; schedule.activeUntil = nowMs + 60 * 60 * 1000; schedule.nextSendAt = nowMs + Math.floor(Math.random() * 5 * 60 * 1000); schedule.lastSentAt = 0; schedule.sentDate = null; schedule.sentToday = 0; schedule.sentThisActivation = 0; schedule.pendingMessage = null; save(); return { active: true, schedule };
   }
   function recordOmMessage(guildId, nowMs) {
     const schedule = getOmSchedule(guildId);
