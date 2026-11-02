@@ -11,7 +11,7 @@ if (!process.env.DISCORD_TOKEN) {
   process.exit(1);
 }
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
 const commandsByName = new Map(commands.map(command => [command.data.name, command]));
 
 client.once(Events.ClientReady, readyClient => {
@@ -119,7 +119,7 @@ client.on(Events.MessageCreate, async message => {
 });
 
 client.on(Events.Error, error => console.error('Discord client error:', error));
-client.login(process.env.DISCORD_TOKEN).catch(() => {
-  console.error('Could not log in to Discord. Check the bot token and network connection.');
+client.login(process.env.DISCORD_TOKEN).catch(error => {
+  console.error('Could not log in to Discord. Check the bot token, enabled gateway intents, and network connection.', error);
   process.exitCode = 1;
 });
