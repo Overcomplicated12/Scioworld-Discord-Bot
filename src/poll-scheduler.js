@@ -126,7 +126,7 @@ export async function checkBotherOmSchedules(client, nowMs = Date.now()) {
         }
         if (claimed.complete) {
           const channel = guild.channels.cache.get(claimed.action.channelId);
-          await channel?.send({ content: '✅ The Om challenge is complete. Thanks for voting!', allowedMentions: { parse: [] } }).catch(() => {});
+          await channel?.send({ content: '✅ Om has been tortured. Thanks for voting!', allowedMentions: { parse: [] } }).catch(() => {});
         }
       } catch (error) {
         store.closeBotherPoll(guild.id);
