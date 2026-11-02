@@ -37,6 +37,8 @@ Use a normal, non-root account with sudo access. The bot connects outbound to th
 
    Set `DISCORD_TOKEN` to your bot token and `DISCORD_APPLICATION_ID` to the application ID. Set `DISCORD_GUILD_ID` to the testing server ID for immediate guild updates; deployment clears global copies so commands do not appear twice. Keep the token private.
 
+   If you want the optional numeric race-answer fallback, enable **Message Content Intent** under the bot's Privileged Gateway Intents in the Discord Developer Portal.
+
 5. Install dependencies, register commands, and start the bot:
 
    ```bash

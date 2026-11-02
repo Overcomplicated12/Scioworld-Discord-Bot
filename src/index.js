@@ -12,7 +12,9 @@ if (!process.env.DISCORD_TOKEN) {
   process.exit(1);
 }
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
+// Message Content is required for the optional numeric race-answer fallback.
+// It must also be enabled as a privileged intent in the Discord Developer Portal.
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 const commandsByName = new Map(commands.map(command => [command.data.name, command]));
 
 client.once(Events.ClientReady, readyClient => {

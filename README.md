@@ -15,6 +15,7 @@ A Discord bot for ScioVirtual culture, science trivia, community lore, collectib
    - `DISCORD_TOKEN` — bot token from the Discord Developer Portal.
    - `DISCORD_APPLICATION_ID` — application ID.
    - `DISCORD_GUILD_ID` — optional testing server ID.
+   - Enable the **Message Content Intent** in the Discord Developer Portal if you want players to answer races with normal `1`, `2`, `3`, or `4` messages. The bot requests this privileged intent at startup.
 4. Invite the bot with the `bot` and `applications.commands` scopes. It needs permission to view channels, send messages, and create polls.
 5. Validate and register commands:
 
