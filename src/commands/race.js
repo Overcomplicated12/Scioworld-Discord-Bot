@@ -19,7 +19,7 @@ function resultMessage(result, raceId, questionForNext) {
   if (result.finished) {
     const rewardText = Object.entries(result.rewards).map(([id, reward]) => `<@${id}> +${reward.coins} coins, +${reward.knowledgePoints} knowledge`).join('\n');
     const finalPoint = result.roundWinnerId ? `Final point: <@${result.roundWinnerId}> answered first.\n\n` : 'No one found the final answer.\n\n';
-    return { content: `${finalPoint}Race **${raceId}** finished! Winners: ${result.winners.map(id => `<@${id}>`).join(', ')}.\n\n**Race rewards**\n${rewardText}`, allowedMentions: { users: [...result.winners, result.roundWinnerId].filter(Boolean) } };
+    return { content: `${finalPoint}Race **${raceId}** finished! Winners: ${result.winners.map(id => `<@${id}>`).join(', ')}.\n\n**Race rewards**\n${rewardText}`, allowedMentions: { users: [...new Set([...result.winners, result.roundWinnerId].filter(Boolean))] } };
   }
   const payload = showQuestion(result.race, questionForNext);
   payload.content = result.roundWinnerId
@@ -68,7 +68,7 @@ export async function handleButton(interaction, persistence = store) {
   const [, raceId, roundText, choiceText] = interaction.customId.split(':');
   const race = persistence.getRace?.(interaction.guildId, raceId);
   const round = Number(roundText); const choice = Number(choiceText);
-  if (!race || race.status !== 'active' || race.round !== round) { await interaction.reply({ content: 'That race question has already moved on or ended.', flags: MessageFlags.Ephemeral }); return; }
+  if (!race || race.status !== 'active' || race.round !== round) { await interaction.deferUpdate().catch(() => {}); return; }
   const question = questions.find(item => item.id === race.questionIds[race.round]);
   const result = persistence.answerRace(interaction.guildId, interaction.user.id, raceId, choice, question, Date.now());
   const next = result.nextQuestionId ? questions.find(item => item.id === result.nextQuestionId) : null;

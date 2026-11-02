@@ -25,8 +25,9 @@ try {
   assert.match(reply.content, /kedar> answered first/i, 'The next round should identify the first correct racer.');
   assert.equal(reply.components[0].components.length, 4);
 
-  await handleButton({ guildId: 'g', user: { id: 'kedar' }, customId: `race:${race.id}:0:0`, reply: async value => { reply = value; } }, persistence);
-  assert.match(reply.content, /already moved on/i, 'Old buttons cannot submit an answer to a later round.');
+  let staleAcknowledged = false;
+  await handleButton({ guildId: 'g', user: { id: 'kedar' }, customId: `race:${race.id}:0:0`, deferUpdate: async () => { staleAcknowledged = true; } }, persistence);
+  assert.equal(staleAcknowledged, true, 'Old buttons should be acknowledged without posting extra messages.');
 
   let reaction;
   const numericReply = { guildId: 'g', author: { id: 'toby', bot: false }, content: String(((questions[1].answer + 1) % questions[1].choices.length) + 1), react: async value => { reaction = value; } };
