@@ -13,14 +13,14 @@ try {
  now+=86400000;assert.equal(answer('q1').coins,2);
  const before=s.getOrCreate('g','a').coins;
  const q={id:'q',choices:['a','b'],answer:0};
- for(let n=0;n<3;n++){
+ for(let n=0;n<7;n++){
   const r=s.createRace('g','a','science',['q'],now).race;s.joinRace('g','b',r.id);s.startRace('g','a',r.id,now);
   assert.equal(s.startRace('g','a',r.id,now).started,false);
   const result=s.answerRace('g','a',r.id,0,q,now);
-  assert.equal(result.rewards.a.coins,n<2?5:0);
+  assert.equal(result.rewards.a.coins,n<6?5:0);
   assert.equal(s.startRace('g','a',r.id,now).started,false);
  }
- assert.equal(s.getOrCreate('g','a').coins,before+10);
+ assert.equal(s.getOrCreate('g','a').coins,before+30);
  assert.equal(s.claimDaily('g','a','2030-01-03','2030-01-02').reward,2);
  assert.equal(s.claimDaily('g','a','2030-01-10','2030-01-09').reward,2);
  assert.equal(s.claimDaily('g','a','2030-01-10','2030-01-09').claimed,false);
