@@ -1,4 +1,5 @@
 import { MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
+import { loadRepositoryInstructorCsv } from '../camp-csv.js';
 import { store } from '../store.js';
 import { requireGuild } from './utils.js';
 
@@ -8,12 +9,26 @@ export const data = new SlashCommandBuilder().setName('camp-course').setDescript
   .addSubcommand(command => command.setName('add').setDescription('Add a course tied to a Discord role.').addStringOption(option => option.setName('name').setDescription('Course name').setMaxLength(80).setRequired(true)).addRoleOption(option => option.setName('role').setDescription('Role students use for this course').setRequired(true)))
   .addSubcommand(command => command.setName('remove').setDescription('Remove a course category.').addStringOption(option => option.setName('name').setDescription('Course name').setMaxLength(80).setRequired(true)))
   .addSubcommand(command => command.setName('export').setDescription('Export camp courses and instructors as JSON.'))
+  .addSubcommand(command => command.setName('import-csv').setDescription('Sync courses and instructors from the repository CSV.'))
   .addSubcommand(command => command.setName('import').setDescription('Replace camp courses and instructors from JSON.').addStringOption(option => option.setName('data').setDescription('JSON copied from camp-course export').setMaxLength(5900).setRequired(true)));
 
 export async function execute(interaction) {
   if (!requireGuild(interaction)) return;
   if (!adminOnly(interaction)) { await interaction.reply({ content: 'Only the server owner or an administrator can manage camp courses.', flags: MessageFlags.Ephemeral }); return; }
   const action = interaction.options.getSubcommand();
+  if (action === 'import-csv') {
+    try {
+      const imported = loadRepositoryInstructorCsv();
+      const existing = store.getCampResources(interaction.guildId);
+      const retained = existing.filter(course => !imported.some(source => source.roleId === course.roleId || source.name.toLowerCase() === course.name.toLowerCase()));
+      const result = store.importCampResources(interaction.guildId, JSON.stringify([...retained, ...imported]));
+      await interaction.reply({ content: result.imported ? `Synced **${imported.length}** course${imported.length === 1 ? '' : 's'} from the repository CSV. Unrelated course records were kept.` : 'The CSV could not be imported.', flags: MessageFlags.Ephemeral });
+    } catch (error) {
+      console.error('Camp CSV import failed:', error);
+      await interaction.reply({ content: 'The repository instructor CSV is missing or malformed. Check the server logs for details.', flags: MessageFlags.Ephemeral });
+    }
+    return;
+  }
   if (action === 'export') {
     const data = store.exportCampResources(interaction.guildId);
     if (data.length < 1800) await interaction.reply({ content: `\`\`\`json\n${data}\n\`\`\``, flags: MessageFlags.Ephemeral });

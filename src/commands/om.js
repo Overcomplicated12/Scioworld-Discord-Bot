@@ -3,7 +3,7 @@ import { store } from '../store.js';
 import { requireGuild } from './utils.js';
 
 const adminOnly = interaction => interaction.guild?.ownerId === interaction.user.id || interaction.memberPermissions?.has(PermissionFlagsBits.Administrator);
-export const data = new SlashCommandBuilder().setName('torture-om').setDescription('Manage the opt-in fictional Om challenge.')
+export const data = new SlashCommandBuilder().setName('torture-om').setDescription('Manage consent and targeting for the friendly Om challenge.')
   .addSubcommand(command => command.setName('opt-in').setDescription('Consent to receive harmless Om challenge messages.'))
   .addSubcommand(command => command.setName('opt-out').setDescription('Stop receiving Om challenge messages.'))
   .addSubcommand(command => command.setName('status').setDescription('View the Om challenge status.'))

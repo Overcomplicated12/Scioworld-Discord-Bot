@@ -558,15 +558,16 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
   }
   function getOmSchedule(guildId) {
     load();
-    if (!state.omSchedules[guildId]) { state.omSchedules[guildId] = { optedIn: [], targetId: null, activatedFor: null, activeUntil: 0, lastSentAt: 0, sentDate: null, sentToday: 0, sentThisActivation: 0, nextSendAt: 0, mode: null, modePoll: null }; save(); }
+    if (!state.omSchedules[guildId]) { state.omSchedules[guildId] = { optedIn: [], targetId: null, activatedFor: null, activeUntil: 0, lastSentAt: 0, sentDate: null, sentToday: 0, sentThisActivation: 0, nextSendAt: 0, mode: null, modePoll: null, botherPoll: null, botherAction: null, botherStartedAt: {} }; save(); }
     const schedule = state.omSchedules[guildId];
     if (!Array.isArray(schedule.optedIn)) schedule.optedIn = [];
+    if (!schedule.botherStartedAt || typeof schedule.botherStartedAt !== 'object') schedule.botherStartedAt = {};
     return schedule;
   }
   function setOmOptIn(guildId, userId, optedIn) {
     const schedule = getOmSchedule(guildId);
     if (optedIn && !schedule.optedIn.includes(userId)) schedule.optedIn.push(userId);
-    if (!optedIn) { schedule.optedIn = schedule.optedIn.filter(id => id !== userId); if (schedule.targetId === userId) schedule.targetId = null; }
+    if (!optedIn) { schedule.optedIn = schedule.optedIn.filter(id => id !== userId); if (schedule.targetId === userId) { schedule.targetId = null; schedule.botherPoll = null; schedule.botherAction = null; schedule.activeUntil = 0; } }
     save(); return schedule;
   }
   function setOmTarget(guildId, userId) {
@@ -574,7 +575,7 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     if (!schedule.optedIn.includes(userId)) return { set: false, reason: 'not-opted-in' };
     schedule.targetId = userId; save(); return { set: true, schedule };
   }
-  function clearOmTarget(guildId) { const schedule = getOmSchedule(guildId); schedule.targetId = null; schedule.activeUntil = 0; save(); return schedule; }
+  function clearOmTarget(guildId) { const schedule = getOmSchedule(guildId); schedule.targetId = null; schedule.activeUntil = 0; schedule.botherPoll = null; schedule.botherAction = null; save(); return schedule; }
   function activateOm(guildId, activationKey, nowMs) {
     const schedule = getOmSchedule(guildId);
     if (!schedule.targetId || !schedule.optedIn.includes(schedule.targetId) || schedule.activatedFor === activationKey) return { active: false, schedule };
@@ -597,7 +598,50 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
   function beginOmModePoll(guildId, activationKey, nowMs, channelId) { const schedule = getOmSchedule(guildId); schedule.modePoll = { activationKey, channelId, endsAt: nowMs + 60 * 60 * 1000, votes: {}, voters: [] }; save(); return schedule.modePoll; }
   function recordOmModeVote(guildId, userId, mode) { const schedule = getOmSchedule(guildId); if (!schedule.modePoll) return { recorded: false, reason: 'not-active' }; if (schedule.modePoll.voters.includes(userId)) return { recorded: false, reason: 'already-voted' }; schedule.modePoll.voters.push(userId); schedule.modePoll.votes[mode] = (schedule.modePoll.votes[mode] || 0) + 1; save(); return { recorded: true }; }
   function finishOmModePoll(guildId, nowMs) { const schedule = getOmSchedule(guildId); if (!schedule.modePoll || nowMs < schedule.modePoll.endsAt) return { finished: false }; const entries = Object.entries(schedule.modePoll.votes); schedule.mode = entries.length ? entries.sort((a, b) => b[1] - a[1])[0][0] : 'water-drop'; schedule.modePoll = null; save(); return { finished: true, mode: schedule.mode }; }
-  return { pilot, getPilotJobs, ackPilotJob, pilotQuiet, getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, createTradeOffer, settleTrade, pendingTrades, listProfiles, setLeaderboardPrivacy, setPrivacy, equipCollectible, craftCollectible, createRace, joinRace, startRace, answerRace, cancelRace, getRace, expireRaces, getOperationalStatus, createReport, listReports, updateReport, getCampResources, addCampCourse, removeCampCourse, addCampInstructor, removeCampInstructor, exportCampResources, importCampResources, isCampInstructor, addCampTriviaQuestion, listCampTriviaQuestions, removeCampTriviaQuestion, answerCampTrivia, createLoreSubmission, listLoreSubmissions, updateLoreSubmission, getLoreProgress, startLoreDiscussion, joinLoreDiscussion, startLoreChallenge, answerLoreChallenge, getPollSchedule, markPollReminderSent, markPollExhaustedReminderSent, markPollSent, pollOverrideAvailable, pollUsedWithinYear, getOmSchedule, setOmOptIn, setOmTarget, clearOmTarget, activateOm, recordOmMessage, beginOmModePoll, recordOmModeVote, finishOmModePoll };
+  function beginBotherPoll(guildId, userId, channelId, options, nowMs) {
+    const schedule = getOmSchedule(guildId);
+    const today = new Date(nowMs).toISOString().slice(0, 10);
+    if (!schedule.targetId || !schedule.optedIn.includes(schedule.targetId)) return { started: false, reason: 'target-not-opted-in' };
+    if (schedule.botherPoll && schedule.botherPoll.endsAt > nowMs) return { started: false, reason: 'poll-active' };
+    if (schedule.botherAction) return { started: false, reason: 'action-active' };
+    if (schedule.botherStartedAt[userId] === today) return { started: false, reason: 'daily-limit' };
+    schedule.botherStartedAt[userId] = today;
+    schedule.botherPoll = { startedBy: userId, channelId, targetId: schedule.targetId, options, startedAt: nowMs, endsAt: nowMs + 5 * 60_000, votes: {}, voters: [] };
+    save(); return { started: true, poll: schedule.botherPoll };
+  }
+  function setBotherPollMessage(guildId, messageId) { const poll = getOmSchedule(guildId).botherPoll; if (!poll) return false; poll.messageId = messageId; save(); return true; }
+  function recordBotherVote(guildId, userId, optionId, nowMs) {
+    const poll = getOmSchedule(guildId).botherPoll;
+    if (!poll || nowMs >= poll.endsAt) return { recorded: false, reason: 'not-active' };
+    if (!poll.options.some(option => option.id === optionId)) return { recorded: false, reason: 'invalid-option' };
+    if (poll.voters.includes(userId)) return { recorded: false, reason: 'already-voted' };
+    poll.voters.push(userId); poll.votes[optionId] = (poll.votes[optionId] || 0) + 1; save(); return { recorded: true };
+  }
+  function finishBotherPoll(guildId, nowMs) {
+    const schedule = getOmSchedule(guildId); const poll = schedule.botherPoll;
+    if (!poll || nowMs < poll.endsAt) return { finished: false };
+    schedule.botherPoll = null;
+    if (!schedule.optedIn.includes(poll.targetId) || schedule.targetId !== poll.targetId) { save(); return { finished: true, cancelled: true }; }
+    const highest = Math.max(0, ...poll.options.map(option => poll.votes[option.id] || 0));
+    if (!highest) { save(); return { finished: true, noVotes: true }; }
+    const winners = poll.options.filter(option => (poll.votes[option.id] || 0) === highest);
+    const option = winners[Math.floor(Math.random() * winners.length)];
+    schedule.botherAction = { ...option, targetId: poll.targetId, channelId: poll.channelId, sent: 0, nextAt: nowMs };
+    save(); return { finished: true, option, action: { ...schedule.botherAction } };
+  }
+  function recordBotherSend(guildId, nowMs) {
+    const schedule = getOmSchedule(guildId); const action = schedule.botherAction;
+    if (!action || nowMs < action.nextAt) return { sent: false };
+    if (!schedule.optedIn.includes(action.targetId) || schedule.targetId !== action.targetId) { schedule.botherAction = null; save(); return { sent: false, cancelled: true }; }
+    action.sent += 1;
+    const complete = action.sent >= action.count;
+    const sentAction = { ...action };
+    if (complete) schedule.botherAction = null;
+    else action.nextAt = nowMs + 60 * 60_000;
+    save(); return { sent: true, action: sentAction, complete };
+  }
+  function closeBotherPoll(guildId) { const schedule = getOmSchedule(guildId); schedule.botherPoll = null; schedule.botherAction = null; save(); return schedule; }
+  return { pilot, getPilotJobs, ackPilotJob, pilotQuiet, getOrCreate, hasProfile, claimDaily, claimFrogQuote, startTrivia, answerTrivia, buyCollectible, createTradeOffer, settleTrade, pendingTrades, listProfiles, setLeaderboardPrivacy, setPrivacy, equipCollectible, craftCollectible, createRace, joinRace, startRace, answerRace, cancelRace, getRace, expireRaces, getOperationalStatus, createReport, listReports, updateReport, getCampResources, addCampCourse, removeCampCourse, addCampInstructor, removeCampInstructor, exportCampResources, importCampResources, isCampInstructor, addCampTriviaQuestion, listCampTriviaQuestions, removeCampTriviaQuestion, answerCampTrivia, createLoreSubmission, listLoreSubmissions, updateLoreSubmission, getLoreProgress, startLoreDiscussion, joinLoreDiscussion, startLoreChallenge, answerLoreChallenge, getPollSchedule, markPollReminderSent, markPollExhaustedReminderSent, markPollSent, pollOverrideAvailable, pollUsedWithinYear, getOmSchedule, setOmOptIn, setOmTarget, clearOmTarget, activateOm, recordOmMessage, beginOmModePoll, recordOmModeVote, finishOmModePoll, beginBotherPoll, setBotherPollMessage, recordBotherVote, finishBotherPoll, recordBotherSend, closeBotherPoll };
 }
 
 export const store = createStore();

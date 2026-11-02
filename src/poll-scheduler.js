@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { pollBank } from './polls.js';
 import { store } from './store.js';
-import { omModes, randomOmMessageForMode } from './om.js';
+import { omModes, randomOmMessageForMode, randomSillyOmMessage } from './om.js';
 
 const DAY = 24 * 60 * 60 * 1000;
 const YEAR = 366 * DAY;
@@ -90,6 +90,50 @@ export async function checkOmSchedules(client, nowMs = Date.now()) {
       await target.send(`🧪 **Om challenge**\n${randomOmMessageForMode(result.mode)}\n\nYou are receiving this because you opted in. Use /torture-om opt-out at any time.`);
     } catch (error) {
       console.error(`Om challenge scheduler failed for guild ${guild.id}:`, error);
+    }
+  }
+}
+
+export async function checkBotherOmSchedules(client, nowMs = Date.now()) {
+  for (const guild of client.guilds.cache.values()) {
+    try {
+      const schedule = store.getOmSchedule(guild.id);
+      if (schedule.botherPoll && nowMs >= schedule.botherPoll.endsAt) {
+        const poll = { ...schedule.botherPoll };
+        const result = store.finishBotherPoll(guild.id, nowMs);
+        if (poll.messageId) {
+          const channel = guild.channels.cache.get(poll.channelId);
+          const message = await channel?.messages.fetch(poll.messageId).catch(() => null);
+          const summary = result.option
+            ? `The vote is closed. **${result.option.label}** won; messages are spaced one hour apart.`
+            : result.cancelled ? 'The vote closed because Om opted out. No action was sent.' : 'The vote closed with no votes, so no action was sent.';
+          await message?.edit({ content: `${message.content}\n\n${summary}`, components: [] }).catch(() => {});
+        }
+      }
+      const action = store.getOmSchedule(guild.id).botherAction;
+      if (!action || nowMs < action.nextAt) continue;
+      const claimed = store.recordBotherSend(guild.id, nowMs);
+      if (!claimed.sent) continue;
+      try {
+        if (claimed.action.kind === 'ping') {
+          const channel = await findChannel(guild, claimed.action.channelId);
+          if (!channel) throw new Error('No text channel is available for the opted-in ping.');
+          await channel.send({ content: `<@${claimed.action.targetId}>`, allowedMentions: { users: [claimed.action.targetId] } });
+        } else {
+          const target = await client.users.fetch(claimed.action.targetId);
+          const text = claimed.action.kind === 'silly-dm' ? randomSillyOmMessage() : 'Hi 👋';
+          await target.send(`📨 ${text}\n\nYou opted into the Om challenge. Use /torture-om opt-out to stop future messages.`);
+        }
+        if (claimed.complete) {
+          const channel = guild.channels.cache.get(claimed.action.channelId);
+          await channel?.send({ content: '✅ The Om challenge is complete. Thanks for voting!', allowedMentions: { parse: [] } }).catch(() => {});
+        }
+      } catch (error) {
+        store.closeBotherPoll(guild.id);
+        console.error(`Bother Om delivery failed for guild ${guild.id}:`, error);
+      }
+    } catch (error) {
+      console.error(`Bother Om scheduler failed for guild ${guild.id}:`, error);
     }
   }
 }

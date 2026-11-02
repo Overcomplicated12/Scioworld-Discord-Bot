@@ -25,6 +25,31 @@ export const omModes = [
   { id: 'philosophy', label: 'Philosophical nonsense' },
 ];
 
+const botherCounts = [1, 3, 5, 8, 11];
+export const botherOptions = [
+  ...botherCounts.map(count => ({ id: `ping-${count}`, kind: 'ping', count, label: `Ping Om ${count} time${count === 1 ? '' : 's'}` })),
+  ...botherCounts.map(count => ({ id: `dm-${count}`, kind: 'dm', count, label: `DM Om ${count} time${count === 1 ? '' : 's'}` })),
+  ...botherCounts.map(count => ({ id: `silly-dm-${count}`, kind: 'silly-dm', count, label: `Silly DM ${count} time${count === 1 ? '' : 's'}` })),
+];
+
+const sillyOmMessages = [
+  'Hi 👋',
+  'A frog says hello 🐸',
+  'Beep boop, mentor detected 🤖',
+  'The snack committee has been thinking of you 🍪',
+];
+
+export function chooseBotherOptions(random = Math.random) {
+  const options = [...botherOptions];
+  for (let index = options.length - 1; index > 0; index -= 1) {
+    const swap = Math.floor(random() * (index + 1));
+    [options[index], options[swap]] = [options[swap], options[index]];
+  }
+  return options.slice(0, 3);
+}
+
+export function randomSillyOmMessage(random = Math.random) { return sillyOmMessages[Math.floor(random() * sillyOmMessages.length)]; }
+
 export function randomOmMessage() { return omMessages[Math.floor(Math.random() * omMessages.length)]; }
 export function randomWaterDropMessage() { return waterDropMessages[Math.floor(Math.random() * waterDropMessages.length)]; }
 export function randomOmMessageForMode(mode) {

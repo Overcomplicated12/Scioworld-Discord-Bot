@@ -64,6 +64,7 @@ Knowledge points track levels (100 KP per level). Ordinary trivia pays 2 coins/3
 - `/poll override` — admin-only custom poll for the week.
 - `/frog` — receive a Frog of Wisdom quote when you own the collectible.
 - `/torture-om opt-in|opt-out|status` — manage the fictional, consent-based Om challenge.
+- `/bother-om start` — run a five-minute vote for an opted-in Om target. The winning harmless option sends at most 11 pings or DMs, one hour apart; `/torture-om opt-out` stops future sends immediately.
 - `/lore` — read, list, or search community stories.
 - `/lore action:submit title:<title> query:<story text>` — submit a student-created story for review.
 - `/lore action:solve story:<story id>` — get a key clue and solve it to unlock the next story chapter.
@@ -88,11 +89,14 @@ The shop sells digital cosmetics only. Physical sticker claims are separate, req
 ### Camp resources
 
 - `/camp-resources` — students see instructors for courses matching their Discord roles.
+- `/camp-course import-csv` — owner/admin sync of repository course and instructor rows into this server.
 - `/camp-course add|remove` — server owner/admin manages course categories and linked roles.
 - `/camp-instructor add|remove` — server owner/admin manages course instructors.
 - `/camp-trivia add|list|remove` — instructors create and manage questions for their course; admins can manage every course.
 
 Instructor mentions are clickable but notifications are suppressed so viewing resources does not repeatedly ping instructors.
+
+The CSV importer reads `role_id`, `role_name`, `instructor_user_id`, and `instructor_tag`. Rows sharing a role become one course with multiple instructors; unrelated server course records are retained.
 
 ## Lore contributions
 

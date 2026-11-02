@@ -1,8 +1,8 @@
 import { checkPilotSchedules } from './pilot-scheduler.js';
 import 'dotenv/config';
 import { Client, Events, GatewayIntentBits, MessageFlags } from 'discord.js';
-import { commands, campTrivia, help, menu, omTest, trivia, weekly } from './commands/index.js';
-import { checkOmSchedules, checkPollSchedules } from './poll-scheduler.js';
+import { commands, botherOm, campTrivia, help, menu, omTest, trivia, weekly } from './commands/index.js';
+import { checkBotherOmSchedules, checkOmSchedules, checkPollSchedules } from './poll-scheduler.js';
 import { backupProfileData } from './backups.js';
 import { store } from './store.js';
 
@@ -20,11 +20,13 @@ client.once(Events.ClientReady, readyClient => {
   checkPilotSchedules(readyClient).catch(error => console.error('Pilot schedule failed:', error));
   setInterval(() => checkPilotSchedules(readyClient).catch(error => console.error('Pilot schedule failed:', error)), 60_000);
   checkPollSchedules(readyClient).catch(error => console.error('Initial poll schedule check failed:', error));
+  checkBotherOmSchedules(readyClient).catch(error => console.error('Initial Bother Om check failed:', error));
   checkOmSchedules(readyClient).catch(error => console.error('Initial Om schedule check failed:', error));
   setInterval(() => {
     checkPollSchedules(readyClient).catch(error => console.error('Poll schedule check failed:', error));
+    checkBotherOmSchedules(readyClient).catch(error => console.error('Bother Om schedule check failed:', error));
     checkOmSchedules(readyClient).catch(error => console.error('Om schedule check failed:', error));
-  }, 15 * 60 * 1000);
+  }, 60_000);
   setInterval(() => {
     try { backupProfileData(); } catch (error) { console.error('Profile backup failed:', error); }
   }, 24 * 60 * 60 * 1000);
@@ -73,6 +75,11 @@ client.on(Events.InteractionCreate, async interaction => {
     if (interaction.guildId !== guildId) return;
     const result = store.recordOmModeVote(guildId, interaction.user.id, mode);
     await interaction.reply({ content: result.recorded ? 'Your Om challenge style vote was recorded.' : result.reason === 'already-voted' ? 'You already voted in this poll.' : 'That Om poll is not active.', flags: MessageFlags.Ephemeral });
+    return;
+  }
+  if (interaction.isButton() && interaction.customId.startsWith('bother:')) {
+    try { await botherOm.handleButton(interaction); }
+    catch (error) { console.error('Bother Om vote failed:', error); if (!interaction.replied && !interaction.deferred) await interaction.reply({ content: 'That vote could not be processed.', flags: MessageFlags.Ephemeral }); }
     return;
   }
   if (interaction.isButton() && interaction.customId.startsWith('camp-trivia:')) {

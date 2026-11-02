@@ -25,17 +25,19 @@ import * as campInstructor from './camp-instructor.js';
 import * as poll from './poll.js';
 import * as om from './om.js';
 import * as omTest from './om-test.js';
+import * as botherOm from './bother-om.js';
 import * as botStatus from './bot-status.js';
 import * as reports from './reports.js';
 import * as campTrivia from './camp-trivia.js';
 import * as menu from './menu.js';
 import * as loreReview from './lore-review.js';
 
-export const commands = [weekly, passport, pilot, ping, help, menu, start, profile, inventory, daily, frog, lore, loreReview, trivia, shop, trade, leaderboard, privacy, craft, equip, report, reports, race, sets, campResources, campCourse, campInstructor, campTrivia, poll, om, omTest, botStatus];
+export const commands = [weekly, passport, pilot, ping, help, menu, start, profile, inventory, daily, frog, lore, loreReview, trivia, shop, trade, leaderboard, privacy, craft, equip, report, reports, race, sets, campResources, campCourse, campInstructor, campTrivia, poll, om, omTest, botherOm, botStatus];
 export { trivia, help };
 export { omTest };
 export { campTrivia };
 export { menu };
 export { lore };
+export { botherOm };
 
 export { weekly };

@@ -156,6 +156,8 @@ Start with an adapter that can read the camp resource catalog and write only app
 
 Keep this fictional, harmless, and opt-in. The weekly poll chooses a message style, and a selected target receives at most three DMs spaced about 20 minutes apart. `/torture-om opt-out` and the admin stop command end participation immediately. No collectible or wager changes these limits.
 
+`/bother-om start` is a separate, consent-gated five-minute community vote. It only works after an administrator selects an opted-in target. The selected option sends no more than 11 harmless pings or DMs, spaced one hour apart. Opting out or an admin stop cancels pending sends immediately.
+
 ## Success criteria
 
 The first release is ready when:
