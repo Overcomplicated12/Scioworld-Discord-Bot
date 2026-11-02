@@ -25,7 +25,7 @@ A Discord bot for ScioVirtual culture, science trivia, community lore, collectib
    npm run deploy-commands
    ```
 
-   When `DISCORD_GUILD_ID` is set, commands are registered in that server and global commands are cleared to prevent duplicate slash commands. Without it, commands are registered globally.
+   When `DISCORD_GUILD_ID` is set, commands are registered in that server. Global commands are preserved by default; set `DISCORD_CLEAR_GLOBAL_COMMANDS=true` only when you intentionally want to remove them. Without `DISCORD_GUILD_ID`, commands are registered globally.
 6. Start the bot:
 
    ```bash

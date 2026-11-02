@@ -35,7 +35,7 @@ Use a normal, non-root account with sudo access. The bot connects outbound to th
    nano .env
    ```
 
-   Set `DISCORD_TOKEN` to your bot token and `DISCORD_APPLICATION_ID` to the application ID. Set `DISCORD_GUILD_ID` to the testing server ID for immediate guild updates; deployment clears global copies so commands do not appear twice. Keep the token private.
+   Set `DISCORD_TOKEN` to your bot token and `DISCORD_APPLICATION_ID` to the application ID. Set `DISCORD_GUILD_ID` to the testing server ID for immediate guild updates. Global commands are preserved unless you explicitly set `DISCORD_CLEAR_GLOBAL_COMMANDS=true`. Keep the token private.
 
    If you want the optional numeric race-answer fallback, enable **Message Content Intent** under the bot's Privileged Gateway Intents in the Discord Developer Portal.
 
@@ -48,7 +48,7 @@ Use a normal, non-root account with sudo access. The bot connects outbound to th
    pm2 save
    ```
 
-   Registration replaces this application's command set in the selected target. With `DISCORD_GUILD_ID`, the testing server receives the commands and global copies are cleared.
+   Registration replaces this application's command set in the selected target. With `DISCORD_GUILD_ID`, the testing server receives the commands; global copies remain unless explicitly cleared.
 
 6. Enable restart after reboot using your normal account:
 

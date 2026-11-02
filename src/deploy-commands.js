@@ -3,6 +3,7 @@ import { REST, Routes } from 'discord.js';
 import { commands } from './commands/index.js';
 
 const { DISCORD_TOKEN, DISCORD_APPLICATION_ID, DISCORD_GUILD_ID } = process.env;
+const clearGlobalCommands = process.env.DISCORD_CLEAR_GLOBAL_COMMANDS === 'true';
 if (!DISCORD_TOKEN || !DISCORD_APPLICATION_ID) {
   console.error('Set DISCORD_TOKEN and DISCORD_APPLICATION_ID in .env.');
   process.exit(1);
@@ -16,8 +17,12 @@ try {
       { body: commands.map(command => command.data.toJSON()) },
     );
     console.log(`Registered ${commands.length} commands in guild ${DISCORD_GUILD_ID}.`);
-    await rest.put(Routes.applicationCommands(DISCORD_APPLICATION_ID), { body: [] });
-    console.log('Cleared global commands to prevent duplicate entries in the testing server.');
+    if (clearGlobalCommands) {
+      await rest.put(Routes.applicationCommands(DISCORD_APPLICATION_ID), { body: [] });
+      console.log('Cleared global commands because DISCORD_CLEAR_GLOBAL_COMMANDS=true.');
+    } else {
+      console.log('Kept global commands. Set DISCORD_CLEAR_GLOBAL_COMMANDS=true only when intentionally removing them.');
+    }
   } else {
     await rest.put(
       Routes.applicationCommands(DISCORD_APPLICATION_ID),
