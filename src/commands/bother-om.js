@@ -27,6 +27,7 @@ export async function execute(interaction) {
     await interaction.reply({ content: 'The Om vote and any scheduled action have been stopped.', flags: MessageFlags.Ephemeral });
     return;
   }
+  if (!adminOnly(interaction)) { await interaction.reply({ content: 'Only the server owner or an administrator can start an Om method poll.', flags: MessageFlags.Ephemeral }); return; }
   const options = chooseBotherOptions();
   const result = store.beginBotherPoll(interaction.guildId, interaction.user.id, interaction.channelId, options, Date.now());
   if (!result.started) {

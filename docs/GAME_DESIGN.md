@@ -82,6 +82,7 @@ Suggested starting balance: 100 Sciocoins, one starter collectible, and a small 
 - `/report` — submit a private report; moderators and the server owner receive a DM, with anti-spam limits.
 - `/lore-review list|approve|reject` — moderators review student lore before it enters the public archive.
 - `/torture-om opt-in|opt-out|status` — manage consent for the harmless fictional Om challenge.
+- `/torture-om poll [duration]` — owner/admin-only vote for the next harmless Om method; the duration defaults to five minutes.
 - `/torture-om target|stop` — owner/admin controls for an opted-in target.
 - `/om-test` — temporary owner/admin test for the one-minute consent flow.
 

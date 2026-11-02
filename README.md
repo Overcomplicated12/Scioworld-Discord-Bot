@@ -64,7 +64,8 @@ Knowledge points track levels (100 KP per level). Ordinary trivia pays 2 coins/3
 - `/poll override` — admin-only custom poll for the week.
 - `/frog` — receive a Frog of Wisdom quote when you own the collectible.
 - `/torture-om opt-in|opt-out|status` — manage the fictional, consent-based Om challenge.
-- `/bother-om start` — run a five-minute vote for an opted-in Om target. The winning harmless option sends at most 11 pings or DMs, one hour apart; `/torture-om opt-out` stops future sends immediately.
+- `/torture-om poll duration:<minutes>` — owner/admin-only poll for the next harmless Om method; duration is optional and defaults to five minutes.
+- `/bother-om start` — admin/owner-only legacy alias for a five-minute vote for an opted-in Om target. The winning harmless option sends at most 11 pings or DMs, one hour apart; `/torture-om opt-out` stops future sends immediately.
 - `/lore` — read, list, or search community stories.
 - `/lore action:submit title:<title> query:<story text>` — submit a student-created story for review.
 - `/lore action:solve story:<story id>` — get a key clue and solve it to unlock the next story chapter.

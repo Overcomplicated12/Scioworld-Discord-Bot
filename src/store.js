@@ -601,15 +601,15 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
   function beginOmModePoll(guildId, activationKey, nowMs, channelId) { const schedule = getOmSchedule(guildId); schedule.modePoll = { activationKey, channelId, endsAt: nowMs + 60 * 60 * 1000, votes: {}, voters: [] }; save(); return schedule.modePoll; }
   function recordOmModeVote(guildId, userId, mode) { const schedule = getOmSchedule(guildId); if (!schedule.modePoll) return { recorded: false, reason: 'not-active' }; if (schedule.modePoll.voters.includes(userId)) return { recorded: false, reason: 'already-voted' }; schedule.modePoll.voters.push(userId); schedule.modePoll.votes[mode] = (schedule.modePoll.votes[mode] || 0) + 1; save(); return { recorded: true }; }
   function finishOmModePoll(guildId, nowMs) { const schedule = getOmSchedule(guildId); if (!schedule.modePoll || nowMs < schedule.modePoll.endsAt) return { finished: false }; const entries = Object.entries(schedule.modePoll.votes); schedule.mode = entries.length ? entries.sort((a, b) => b[1] - a[1])[0][0] : 'water-drop'; schedule.modePoll = null; save(); return { finished: true, mode: schedule.mode }; }
-  function beginBotherPoll(guildId, userId, channelId, options, nowMs) {
+  function beginBotherPoll(guildId, userId, channelId, options, nowMs, durationMs = 5 * 60_000, enforceDailyLimit = true) {
     const schedule = getOmSchedule(guildId);
     const today = new Date(nowMs).toISOString().slice(0, 10);
     if (!schedule.targetId || !schedule.optedIn.includes(schedule.targetId)) return { started: false, reason: 'target-not-opted-in' };
     if (schedule.botherPoll && schedule.botherPoll.endsAt > nowMs) return { started: false, reason: 'poll-active' };
     if (schedule.botherAction) return { started: false, reason: 'action-active' };
-    if (schedule.botherStartedAt[userId] === today) return { started: false, reason: 'daily-limit' };
+    if (enforceDailyLimit && schedule.botherStartedAt[userId] === today) return { started: false, reason: 'daily-limit' };
     schedule.botherStartedAt[userId] = today;
-    schedule.botherPoll = { startedBy: userId, channelId, targetId: schedule.targetId, options, startedAt: nowMs, endsAt: nowMs + 5 * 60_000, votes: {}, voters: [] };
+    schedule.botherPoll = { startedBy: userId, channelId, targetId: schedule.targetId, options, startedAt: nowMs, endsAt: nowMs + durationMs, votes: {}, voters: [] };
     save(); return { started: true, poll: schedule.botherPoll };
   }
   function setBotherPollMessage(guildId, messageId) { const poll = getOmSchedule(guildId).botherPoll; if (!poll) return false; poll.messageId = messageId; save(); return true; }

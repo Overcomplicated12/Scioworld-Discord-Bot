@@ -19,6 +19,7 @@ try {
   assert.equal(store.setOmTarget('guild', 'om').set, true);
   const started = store.beginBotherPoll('guild', 'alice', 'channel', options, now);
   assert.equal(started.started, true);
+  assert.equal(started.poll.endsAt, now + 5 * 60_000);
   assert.equal(store.beginBotherPoll('guild', 'bob', 'channel', options, now).reason, 'poll-active');
   assert.equal(store.recordBotherVote('guild', 'alice', options[0].id, now).recorded, true);
   assert.equal(store.recordBotherVote('guild', 'alice', options[1].id, now).reason, 'already-voted');
