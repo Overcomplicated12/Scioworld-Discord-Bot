@@ -27,12 +27,19 @@ try {
 
   const bobProfile = store.getOrCreate(guild, bob);
   assert.equal(bobProfile.collectibles.includes('frog-of-wisdom'), true);
+  const otherGuild = 'other-test-guild';
+  const aliceElsewhere = store.getOrCreate(otherGuild, alice);
+  assert.equal(aliceElsewhere.coins, 100);
+  assert.deepEqual(aliceElsewhere.collectibles, ['frog-of-wisdom']);
+  assert.notEqual(store.getOrCreate(guild, alice), aliceElsewhere);
   assert.equal(store.buyCollectible(guild, alice, 'camp-sticker', 40).purchased, true);
   assert.equal(store.buyCollectible(guild, bob, 'pocket-beaker', 50).purchased, true);
   const offer = store.createTradeOffer(guild, alice, bob, 'camp-sticker', 'pocket-beaker', 0, 0, now);
   assert.equal(offer.created, true);
   assert.equal(store.settleTrade(guild, bob, offer.offer.id, 'accept', now + 1000).settled, true);
   assert.equal(store.getOrCreate(guild, alice).collectibles.includes('pocket-beaker'), true);
+  assert.deepEqual(store.getOrCreate(otherGuild, alice).collectibles, ['frog-of-wisdom']);
+  assert.equal(store.getOrCreate(otherGuild, alice).coins, 100);
 
   const race = store.createRace(guild, alice, 'science', ['question-1', 'question-2', 'question-3'], now);
   assert.equal(race.created, true);

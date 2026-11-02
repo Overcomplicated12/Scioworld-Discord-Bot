@@ -10,6 +10,9 @@ for (const key of ['triviaDailyLimit','triviaCoins','triviaKP','raceWeeklyLimit'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
+// Every economy profile is namespaced by both server and user. A person's
+// Sciocoins, resources, collectibles, cooldowns, and progression never cross
+// a guild boundary, even when they use the same Discord account elsewhere.
 function keyFor(guildId, userId) { return `${guildId}:${userId}`; }
 
 function newProfile(guildId, userId) {
