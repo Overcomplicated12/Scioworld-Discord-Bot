@@ -1,4 +1,4 @@
-import { MessageFlags, SlashCommandBuilder } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags, SlashCommandBuilder } from 'discord.js';
 import { questions } from '../questions.js';
 import { store } from '../store.js';
 import { requireGuild } from './utils.js';
@@ -6,7 +6,24 @@ import { requireGuild } from './utils.js';
 const categories = [...new Set(questions.map(question => question.category))];
 const choices = categories.slice(0, 25).map(category => ({ name: category, value: category }));
 function pickQuestions(category) { const pool = questions.filter(question => !category || question.category === category); return [...pool].sort(() => Math.random() - 0.5).slice(0, 3).map(question => question.id); }
-function showQuestion(race, question) { return `🏁 **Race ${race.id} — round ${race.round + 1}/3**\n${question.prompt}\nChoices: ${question.choices.map((choice, index) => `**${index}** ${choice}`).join(' · ')}\nAnswer with /race answer race_id:${race.id} choice:0 (replace 0 with your choice).`; }
+function showQuestion(race, question) {
+  return {
+    content: `🏁 **Race ${race.id} — round ${race.round + 1}/3**\n${question.prompt}\n${question.choices.map((choice, index) => `**${index + 1}.** ${choice}`).join('\n')}\n\nChoose an answer below.`,
+    components: [new ActionRowBuilder().addComponents(question.choices.map((choice, index) => new ButtonBuilder().setCustomId(`race:${race.id}:${race.round}:${index}`).setLabel(`Choice ${index + 1}`).setStyle(ButtonStyle.Primary)))],
+  };
+}
+
+function resultMessage(result, raceId, questionForNext) {
+  if (!result.answered) return { content: result.reason === 'already-answered' ? 'You already answered this round.' : 'You cannot answer that race.', flags: MessageFlags.Ephemeral };
+  if (!result.complete) return { content: result.correct ? 'Correct — waiting for the other racers.' : 'Answer recorded — waiting for the other racers.', flags: MessageFlags.Ephemeral };
+  if (result.finished) {
+    const rewardText = Object.entries(result.rewards).map(([id, reward]) => `<@${id}> +${reward.coins} coins, +${reward.knowledgePoints} knowledge`).join('\n');
+    return { content: `Race **${raceId}** finished! Winners: ${result.winners.map(id => `<@${id}>`).join(', ')}.\n\n**Race rewards**\n${rewardText}`, allowedMentions: { users: result.winners } };
+  }
+  const payload = showQuestion(result.race, questionForNext);
+  payload.content = `${result.correct ? 'Correct!' : 'Answer recorded.'}\n${payload.content}`;
+  return payload;
+}
 
 export const data = new SlashCommandBuilder().setName('race').setDescription('Compete in a quick science race.')
   .addSubcommand(command => command.setName('create').setDescription('Create a race lobby.').addStringOption(option => option.setName('category').setDescription('Question category').setRequired(false).addChoices(...choices)))
@@ -28,8 +45,36 @@ export async function execute(interaction) {
   const raceState = store.answerRace; const race = store.getRace?.(interaction.guildId, raceId);
   if (!race) { await interaction.reply({ content: 'Race not found or no longer active.', flags: MessageFlags.Ephemeral }); return; }
   const question = questions.find(item => item.id === race.questionIds[race.round]); const result = raceState(interaction.guildId, interaction.user.id, raceId, interaction.options.getInteger('choice'), question, now);
-  if (!result.answered) { await interaction.reply({ content: result.reason === 'already-answered' ? 'You already answered this round.' : 'You cannot answer that race.', flags: MessageFlags.Ephemeral }); return; }
-  if (!result.complete) { await interaction.reply({ content: result.correct ? 'Your answer is correct. Waiting for the other racers.' : 'Answer recorded. Waiting for the other racers.' }); return; }
-  if (result.finished) { const rewardText = Object.entries(result.rewards).map(([id, reward]) => `<@${id}> +${reward.coins} coins, +${reward.knowledgePoints} knowledge`).join('\n'); await interaction.reply(`Race **${raceId}** finished! Winners: ${result.winners.map(id => `<@${id}>`).join(', ')}.\n\n**Race rewards**\n${rewardText}`, { allowedMentions: { users: result.winners } }); return; }
-  const next = questions.find(item => item.id === result.nextQuestionId); await interaction.reply(`${result.correct ? 'Correct!' : 'Answer recorded.'}\n${showQuestion(result.race, next)}`);
+  const next = result.nextQuestionId ? questions.find(item => item.id === result.nextQuestionId) : null;
+  await interaction.reply(resultMessage(result, raceId, next));
+}
+
+export async function handleButton(interaction, persistence = store) {
+  if (!requireGuild(interaction)) return;
+  const [, raceId, roundText, choiceText] = interaction.customId.split(':');
+  const race = persistence.getRace?.(interaction.guildId, raceId);
+  const round = Number(roundText); const choice = Number(choiceText);
+  if (!race || race.status !== 'active' || race.round !== round) { await interaction.reply({ content: 'That race question has already moved on or ended.', flags: MessageFlags.Ephemeral }); return; }
+  const question = questions.find(item => item.id === race.questionIds[race.round]);
+  const result = persistence.answerRace(interaction.guildId, interaction.user.id, raceId, choice, question, Date.now());
+  const next = result.nextQuestionId ? questions.find(item => item.id === result.nextQuestionId) : null;
+  await interaction.reply(resultMessage(result, raceId, next));
+}
+
+export async function handleNumericMessage(message, persistence = store) {
+  if (!message.guildId || message.author?.bot) return false;
+  const matched = message.content.trim().match(/^([1-4])$/);
+  if (!matched) return false;
+  const race = persistence.getActiveRace?.(message.guildId);
+  if (!race || !race.players.includes(message.author.id)) return false;
+  const question = questions.find(item => item.id === race.questionIds[race.round]);
+  const result = persistence.answerRace(message.guildId, message.author.id, race.id, Number(matched[1]) - 1, question, Date.now());
+  if (!result.answered) return false;
+  if (!result.complete) {
+    await message.react?.('✅').catch(() => {});
+    return true;
+  }
+  const next = result.nextQuestionId ? questions.find(item => item.id === result.nextQuestionId) : null;
+  await message.channel.send(resultMessage(result, race.id, next));
+  return true;
 }

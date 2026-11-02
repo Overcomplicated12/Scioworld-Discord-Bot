@@ -58,7 +58,7 @@ Knowledge points track levels (100 KP per level). Ordinary trivia pays 2 coins/3
 
 - `/trivia` — answer science questions.
 - `/camp-trivia ask` — answer a course-specific trivia question.
-- `/race create|join|start|answer|cancel` — run a friendly, non-wager science race.
+- `/race create|join|start|answer|cancel` — run a friendly, non-wager science race. During a race, players can click a choice button or send `1`, `2`, `3`, or `4` as a normal channel message. Enable Discord's **Message Content Intent** for numeric replies.
 - `/poll status` — see the next weekly poll.
 - `/poll early` — admin-only early random poll.
 - `/poll override` — admin-only custom poll for the week.

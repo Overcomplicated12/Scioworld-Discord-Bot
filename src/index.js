@@ -1,7 +1,7 @@
 import { checkPilotSchedules } from './pilot-scheduler.js';
 import 'dotenv/config';
 import { Client, Events, GatewayIntentBits, MessageFlags } from 'discord.js';
-import { commands, botherOm, campTrivia, help, menu, omTest, trivia, weekly } from './commands/index.js';
+import { commands, botherOm, campTrivia, help, menu, omTest, race, trivia, weekly } from './commands/index.js';
 import { checkBotherOmSchedules, checkOmSchedules, checkPollSchedules } from './poll-scheduler.js';
 import { backupProfileData } from './backups.js';
 import { store } from './store.js';
@@ -11,7 +11,7 @@ if (!process.env.DISCORD_TOKEN) {
   process.exit(1);
 }
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 const commandsByName = new Map(commands.map(command => [command.data.name, command]));
 
 client.once(Events.ClientReady, readyClient => {
@@ -50,6 +50,11 @@ client.on(Events.InteractionCreate, async interaction => {
       console.error('Trivia button failed:', error);
       if (!interaction.replied && !interaction.deferred) await interaction.reply({ content: 'That trivia answer could not be processed.', flags: MessageFlags.Ephemeral });
     }
+    return;
+  }
+  if (interaction.isButton() && interaction.customId.startsWith('race:')) {
+    try { await race.handleButton(interaction); }
+    catch (error) { console.error('Race button failed:', error); if (!interaction.replied && !interaction.deferred) await interaction.reply({ content: 'That race answer could not be processed.', flags: MessageFlags.Ephemeral }); }
     return;
   }
   if (interaction.isButton() && interaction.customId.startsWith('help:')) {
@@ -106,6 +111,11 @@ client.on(Events.InteractionCreate, async interaction => {
       console.error('Could not send the error response:', replyError);
     }
   }
+});
+
+client.on(Events.MessageCreate, async message => {
+  try { await race.handleNumericMessage(message); }
+  catch (error) { console.error('Race numeric answer failed:', error); }
 });
 
 client.on(Events.Error, error => console.error('Discord client error:', error));

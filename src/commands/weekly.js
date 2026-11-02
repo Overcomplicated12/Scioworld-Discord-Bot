@@ -37,6 +37,8 @@ export async function handleInteraction(interaction, persistence = store) {
   if (!requireGuild(interaction)) return;
   const [, action, season, activity, choice] = interaction.customId.split(':');
   try {
+    // A public question should be joinable from its buttons; `/start` is no longer a prerequisite.
+    if (['answer', 'link-submit', 'submit'].includes(action)) persistence.getOrCreate?.(interaction.guildId, interaction.user.id);
     if (action === 'link') {
       const text = new TextInputBuilder().setCustomId('message-link').setLabel('Link to your public discussion message').setStyle(TextInputStyle.Short).setMaxLength(200).setRequired(true);
       await interaction.showModal(new ModalBuilder().setCustomId(`weekly:link-submit:${season}:${activity}`).setTitle('Submit your discussion').addComponents(new ActionRowBuilder().addComponents(text)));

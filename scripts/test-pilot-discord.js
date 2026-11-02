@@ -14,6 +14,14 @@ await handleInteraction({guildId:'g',user:{id:'student'},customId:modal.custom_i
 assert.equal(submitted[2],'discuss');
 assert.equal(submitted[3].text,'I would test the prediction twice.');
 assert.match(confirmation.content,/private review queue/);
+let createdProfile = 0;
+let answerReply;
+await handleInteraction({guildId:'g',user:{id:'new-student'},customId:'weekly:answer:test:activity:0',reply:async value=>{answerReply=value;}},{
+  getOrCreate:()=>{createdProfile++;},
+  pilot:()=>({simulation:true,choice:'a'}),
+});
+assert.equal(createdProfile,1,'Answer buttons should work before a student runs /start.');
+assert.match(answerReply.content,/Saved/);
 let denied;
 await pilotCommand({guildId:'g',guild:{ownerId:'owner'},user:{id:'student'},memberPermissions:{has:()=>false},reply:async value=>{denied=value;}});
 assert.match(denied.content,/Only/);

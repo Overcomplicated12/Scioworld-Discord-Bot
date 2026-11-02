@@ -34,6 +34,7 @@ import * as loreReview from './lore-review.js';
 
 export const commands = [weekly, passport, pilot, ping, help, menu, start, profile, inventory, daily, frog, lore, loreReview, trivia, shop, trade, leaderboard, privacy, craft, equip, report, reports, race, sets, campResources, campCourse, campInstructor, campTrivia, poll, om, omTest, botherOm, botStatus];
 export { trivia, help };
+export { race };
 export { omTest };
 export { campTrivia };
 export { menu };
