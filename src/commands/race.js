@@ -19,7 +19,9 @@ function resultMessage(result, raceId, questionForNext) {
   if (result.finished) {
     const rewardText = Object.entries(result.rewards).map(([id, reward]) => `<@${id}> +${reward.coins} coins, +${reward.knowledgePoints} knowledge`).join('\n');
     const finalPoint = result.roundWinnerId ? `Final point: <@${result.roundWinnerId}> answered first.\n\n` : 'No one found the final answer.\n\n';
-    return { content: `${finalPoint}Race **${raceId}** finished! Winners: ${result.winners.map(id => `<@${id}>`).join(', ')}.\n\n**Race rewards**\n${rewardText}`, allowedMentions: { users: [...new Set([...result.winners, result.roundWinnerId].filter(Boolean))] } };
+    const cappedWinners = result.winners.filter(id => result.rewards[id]?.coins === 0 && result.rewards[id]?.knowledgePoints === 0);
+    const capNote = cappedWinners.length ? '\n\nℹ️ The weekly race reward limit was reached, so this win received recognition but no additional coins or knowledge.' : '';
+    return { content: `${finalPoint}Race **${raceId}** finished! Winners: ${result.winners.map(id => `<@${id}>`).join(', ')}.\n\n**Race rewards**\n${rewardText}${capNote}`, allowedMentions: { users: [...new Set([...result.winners, result.roundWinnerId].filter(Boolean))] } };
   }
   const payload = showQuestion(result.race, questionForNext);
   payload.content = result.roundWinnerId
