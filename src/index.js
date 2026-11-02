@@ -1,4 +1,5 @@
 import { checkPilotSchedules } from './pilot-scheduler.js';
+import { checkRaceSchedules } from '../race-scheduler.js';
 import 'dotenv/config';
 import { Client, Events, GatewayIntentBits, MessageFlags } from 'discord.js';
 import { commands, botherOm, campTrivia, help, menu, omTest, race, trivia, weekly } from './commands/index.js';
@@ -18,7 +19,9 @@ client.once(Events.ClientReady, readyClient => {
   console.log(`Logged in as ${readyClient.user.tag}.`);
   try { backupProfileData(); } catch (error) { console.error('Initial profile backup failed:', error); }
   checkPilotSchedules(readyClient).catch(error => console.error('Pilot schedule failed:', error));
+  checkRaceSchedules(readyClient).catch(error => console.error('Race timeout check failed:', error));
   setInterval(() => checkPilotSchedules(readyClient).catch(error => console.error('Pilot schedule failed:', error)), 60_000);
+  setInterval(() => checkRaceSchedules(readyClient).catch(error => console.error('Race timeout check failed:', error)), 60_000);
   checkPollSchedules(readyClient).catch(error => console.error('Initial poll schedule check failed:', error));
   checkBotherOmSchedules(readyClient).catch(error => console.error('Initial Bother Om check failed:', error));
   checkOmSchedules(readyClient).catch(error => console.error('Initial Om schedule check failed:', error));

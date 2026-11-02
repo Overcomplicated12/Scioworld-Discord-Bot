@@ -244,12 +244,12 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     if (profile.coins < coinCost) return { crafted: false, reason: 'insufficient-coins', profile, costNeeded: coinCost - profile.coins };
     profile.resources[inputResource] -= inputCount; profile.coins -= coinCost; profile.collectibles.push(outputId); save(); return { crafted: true, profile };
   }
-  function createRace(guildId, hostId, category, questionIds, nowMs) {
+  function createRace(guildId, hostId, category, questionIds, nowMs, channelId = null) {
     load();
     if (state.races.some(race => race.guildId === guildId && ['lobby', 'active'].includes(race.status))) return { created: false, reason: 'active-race' };
     const host = getOrCreate(guildId, hostId);
     const id = `R${String(state.nextRaceId++).padStart(4, '0')}`;
-    const race = { id, guildId, hostId, category, questionIds, players: [hostId], scores: { [hostId]: 0 }, answers: {}, round: -1, status: 'lobby', createdAt: new Date(nowMs).toISOString(), lastActivityAt: nowMs };
+    const race = { id, guildId, hostId, category, questionIds, channelId, players: [hostId], scores: { [hostId]: 0 }, answers: {}, round: -1, status: 'lobby', createdAt: new Date(nowMs).toISOString(), lastActivityAt: nowMs };
     state.races.push(race); save(); return { created: true, race };
   }
   function joinRace(guildId, userId, raceId) {
