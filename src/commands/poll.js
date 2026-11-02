@@ -6,7 +6,6 @@ import { requireGuild } from './utils.js';
 const isModerator = interaction => interaction.guild?.ownerId === interaction.user.id || interaction.memberPermissions?.has(PermissionFlagsBits.Administrator);
 
 export const data = new SlashCommandBuilder().setName('poll').setDescription('Create the weekly community poll.')
-  .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
   .addSubcommand(command => command.setName('early').setDescription('Post this week’s randomly selected poll now.'))
   .addSubcommand(command => command.setName('override').setDescription('Use your weekly admin override for a custom poll.').addStringOption(option => option.setName('question').setDescription('Poll question').setMaxLength(300).setRequired(true)).addStringOption(option => option.setName('option1').setDescription('First answer').setMaxLength(100).setRequired(true)).addStringOption(option => option.setName('option2').setDescription('Second answer').setMaxLength(100).setRequired(true)).addStringOption(option => option.setName('option3').setDescription('Third answer').setMaxLength(100).setRequired(false)).addStringOption(option => option.setName('option4').setDescription('Fourth answer').setMaxLength(100).setRequired(false)))
   .addSubcommand(command => command.setName('status').setDescription('View the weekly poll schedule.'));
