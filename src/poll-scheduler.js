@@ -5,6 +5,7 @@ import { omModes, randomOmMessageForMode, randomSillyOmMessage } from './om.js';
 
 const DAY = 24 * 60 * 60 * 1000;
 const YEAR = 366 * DAY;
+let pollSchedulerRunning = false;
 
 async function dmOwner(guild, content) {
   try {
@@ -45,18 +46,24 @@ async function sendScheduledPoll(guild, nowMs) {
 }
 
 export async function checkPollSchedules(client, nowMs = Date.now()) {
-  for (const guild of client.guilds.cache.values()) {
-    try {
-      if (store.pilotQuiet(guild.id)) continue;
-      const schedule = store.getPollSchedule(guild.id, nowMs);
-      if (nowMs >= schedule.nextDueAt - DAY && nowMs < schedule.nextDueAt && !schedule.reminderSent) {
-        await dmOwner(guild, 'Your weekly ScioVirtual poll is scheduled for about 24 hours from now. Use `/poll override` if you want to choose this week’s question.');
-        store.markPollReminderSent(guild.id);
+  if (pollSchedulerRunning) return;
+  pollSchedulerRunning = true;
+  try {
+    for (const guild of client.guilds.cache.values()) {
+      try {
+        if (store.pilotQuiet(guild.id)) continue;
+        const schedule = store.getPollSchedule(guild.id, nowMs);
+        if (nowMs >= schedule.nextDueAt - DAY && nowMs < schedule.nextDueAt && !schedule.reminderSent) {
+          await dmOwner(guild, 'Your weekly ScioVirtual poll is scheduled for about 24 hours from now. Use `/poll override` if you want to choose this week’s question.');
+          store.markPollReminderSent(guild.id);
+        }
+        if (nowMs >= schedule.nextDueAt) await sendScheduledPoll(guild, nowMs);
+      } catch (error) {
+        console.error(`Weekly poll scheduler failed for guild ${guild.id}:`, error);
       }
-      if (nowMs >= schedule.nextDueAt) await sendScheduledPoll(guild, nowMs);
-    } catch (error) {
-      console.error(`Weekly poll scheduler failed for guild ${guild.id}:`, error);
     }
+  } finally {
+    pollSchedulerRunning = false;
   }
 }
 
