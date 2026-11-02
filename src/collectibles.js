@@ -1,6 +1,9 @@
 export const collectibles = [
   { id: 'frog-of-wisdom', name: 'Frog of Wisdom', rarity: 'special', set: 'Frog Lore', description: 'A thoughtful frog with excellent timing.', cost: 0 },
-  { id: 'camp-sticker', name: 'Camp Sticker', rarity: 'common', set: 'Camp Kit', description: 'A little piece of camp spirit.', cost: 40 },
+  // Kept in the catalog so existing inventories still render correctly, but it
+  // is not a coin-purchasable shop item. Seasonal sticker eligibility is handled
+  // through the passport flow and organizer review.
+  { id: 'camp-sticker', name: 'Camp Sticker', rarity: 'common', set: 'Camp Kit', description: 'A little piece of camp spirit.', cost: 40, shop: false },
   { id: 'pocket-beaker', name: 'Pocket Beaker', rarity: 'common', set: 'Camp Kit', description: 'Small glassware for large hypotheses.', cost: 50 },
   { id: 'star-map', name: 'Star Map', rarity: 'uncommon', set: 'Camp Kit', description: 'A map for getting lost in more interesting places.', cost: 90 },
   { id: 'mystery-badge', name: 'Mystery Badge', rarity: 'uncommon', set: 'Sciovirtual Lore', description: 'Nobody knows what it means, including the badge.', cost: 100 },
