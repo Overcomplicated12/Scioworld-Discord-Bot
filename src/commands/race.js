@@ -15,13 +15,17 @@ function showQuestion(race, question) {
 
 function resultMessage(result, raceId, questionForNext) {
   if (!result.answered) return { content: result.reason === 'already-answered' ? 'You already answered this round.' : 'You cannot answer that race.', flags: MessageFlags.Ephemeral };
-  if (!result.complete) return { content: result.correct ? 'Correct — waiting for the other racers.' : 'Answer recorded — waiting for the other racers.', flags: MessageFlags.Ephemeral };
+  if (!result.complete) return { content: 'Not correct — waiting for another racer to find the answer.', flags: MessageFlags.Ephemeral };
   if (result.finished) {
     const rewardText = Object.entries(result.rewards).map(([id, reward]) => `<@${id}> +${reward.coins} coins, +${reward.knowledgePoints} knowledge`).join('\n');
-    return { content: `Race **${raceId}** finished! Winners: ${result.winners.map(id => `<@${id}>`).join(', ')}.\n\n**Race rewards**\n${rewardText}`, allowedMentions: { users: result.winners } };
+    const finalPoint = result.roundWinnerId ? `Final point: <@${result.roundWinnerId}> answered first.\n\n` : 'No one found the final answer.\n\n';
+    return { content: `${finalPoint}Race **${raceId}** finished! Winners: ${result.winners.map(id => `<@${id}>`).join(', ')}.\n\n**Race rewards**\n${rewardText}`, allowedMentions: { users: [...result.winners, result.roundWinnerId].filter(Boolean) } };
   }
   const payload = showQuestion(result.race, questionForNext);
-  payload.content = `Round complete — all **${result.race.players.length}** racers answered. ${result.correct ? 'Your answer was correct.' : 'Your answer was recorded.'}\n\n${payload.content}`;
+  payload.content = result.roundWinnerId
+    ? `⚡ <@${result.roundWinnerId}> answered first and gets the point.\n\n${payload.content}`
+    : `No one found the answer that round, so no point was awarded.\n\n${payload.content}`;
+  payload.allowedMentions = { users: result.roundWinnerId ? [result.roundWinnerId] : [] };
   return payload;
 }
 

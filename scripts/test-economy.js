@@ -16,7 +16,7 @@ try {
  for(let n=0;n<3;n++){
   const r=s.createRace('g','a','science',['q'],now).race;s.joinRace('g','b',r.id);s.startRace('g','a',r.id,now);
   assert.equal(s.startRace('g','a',r.id,now).started,false);
-  s.answerRace('g','a',r.id,0,q,now);const result=s.answerRace('g','b',r.id,1,q,now);
+  const result=s.answerRace('g','a',r.id,0,q,now);
   assert.equal(result.rewards.a.coins,n<2?5:0);
   assert.equal(s.startRace('g','a',r.id,now).started,false);
  }

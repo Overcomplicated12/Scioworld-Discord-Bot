@@ -272,9 +272,11 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     if (!race.answers[race.round]) race.answers[race.round] = {};
     if (race.answers[race.round][userId] !== undefined) return { answered: false, reason: 'already-answered' };
     race.answers[race.round][userId] = answerIndex; race.lastActivityAt = nowMs;
-    const complete = race.players.every(player => race.answers[race.round][player] !== undefined);
-    if (!complete) { save(); return { answered: true, complete: false, correct: answerIndex === question.answer, race }; }
-    for (const player of race.players) if (race.answers[race.round][player] === question.answer) race.scores[player] += 1;
+    const correct = answerIndex === question.answer;
+    const allAnswered = race.players.every(player => race.answers[race.round][player] !== undefined);
+    if (!correct && !allAnswered) { save(); return { answered: true, complete: false, correct: false, race }; }
+    const roundWinnerId = correct ? userId : null;
+    if (roundWinnerId) race.scores[roundWinnerId] += 1;
     race.round += 1;
     if (race.round >= race.questionIds.length) {
       race.status = 'finished'; race.finishedAt = new Date(nowMs).toISOString(); const max = Math.max(...Object.values(race.scores)); const winners = race.players.filter(player => race.scores[player] === max);
@@ -294,9 +296,9 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
         state.profiles[profileKey].knowledgePoints += reward.knowledgePoints;
         rewards[playerId] = reward;
       }
-      race.rewardsAwarded = true; save(); return { answered: true, complete: true, finished: true, winners, rewards, race };
+      race.rewardsAwarded = true; save(); return { answered: true, complete: true, finished: true, winners, rewards, race, roundWinnerId };
     }
-    save(); return { answered: true, complete: true, finished: false, nextQuestionId: race.questionIds[race.round], race };
+    save(); return { answered: true, complete: true, finished: false, nextQuestionId: race.questionIds[race.round], race, roundWinnerId };
   }
   function cancelRace(guildId, userId, raceId, isModerator = false) {
     load(); const race = state.races.find(item => item.guildId === guildId && item.id.toLowerCase() === raceId.toLowerCase()); if (!race) return { cancelled: false, reason: 'not-found' }; if (!isModerator && race.hostId !== userId) return { cancelled: false, reason: 'not-host' }; if (!['lobby', 'active'].includes(race.status)) return { cancelled: false, reason: 'not-active' }; race.status = 'cancelled'; race.cancelledAt = new Date().toISOString(); save(); return { cancelled: true, race };
