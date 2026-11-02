@@ -37,9 +37,19 @@ export async function execute(interaction) {
   const action = interaction.options.getSubcommand(); const now = Date.now();
   const expired = store.expireRaces(interaction.guildId, now);
   if (expired.length && action === 'create') await interaction.channel.send(`⏱️ ${expired.map(race => `Race **${race.id}**`).join(' and ')} expired after inactivity. Start a new lobby whenever you are ready.`);
-  if (action === 'create') { const race = store.createRace(interaction.guildId, interaction.user.id, interaction.options.getString('category'), pickQuestions(interaction.options.getString('category')), now); if (!race.created) { await interaction.reply({ content: 'There is already an active race in this server.', flags: MessageFlags.Ephemeral }); return; } await interaction.reply(`🏁 Race **${race.race.id}** created by <@${interaction.user.id}>. Join with **/race join race_id:${race.race.id}**, then the host starts it.`, { allowedMentions: { users: [interaction.user.id] } }); return; }
+  if (action === 'create') { const race = store.createRace(interaction.guildId, interaction.user.id, interaction.options.getString('category'), pickQuestions(interaction.options.getString('category')), now); if (!race.created) { await interaction.reply({ content: 'There is already an active race in this server.', flags: MessageFlags.Ephemeral }); return; } await interaction.reply(`🏁 Race **${race.race.id}** created by <@${interaction.user.id}>. Join with **/race join race_id:${race.race.id}** within 15 minutes, then the host starts it. Once started, the race has 10 minutes of inactivity before it closes.`, { allowedMentions: { users: [interaction.user.id] } }); return; }
   const raceId = interaction.options.getString('race_id');
-  if (action === 'join') { const result = store.joinRace(interaction.guildId, interaction.user.id, raceId); const messages = { 'not-found': 'Race not found.', 'not-lobby': 'That race already started or ended.', 'already-joined': 'You already joined that race.' }; await interaction.reply({ content: result.joined ? `<@${interaction.user.id}> joined **${raceId}**. Players: ${result.race.players.length}` : messages[result.reason], allowedMentions: { users: [interaction.user.id] } }); return; }
+  if (action === 'join') {
+    const result = store.joinRace(interaction.guildId, interaction.user.id, raceId);
+    const closedMessage = result.race?.status === 'active'
+      ? `Race **${raceId}** already started, so new players cannot join this round.`
+      : result.race?.status === 'expired'
+        ? `Race **${raceId}** timed out from inactivity. Create a new race whenever you are ready.`
+        : `Race **${raceId}** already ended.`;
+    const messages = { 'not-found': 'Race not found.', 'not-lobby': closedMessage, 'already-joined': 'You already joined that race.' };
+    await interaction.reply({ content: result.joined ? `<@${interaction.user.id}> joined **${raceId}**. Players: ${result.race.players.length}` : messages[result.reason], allowedMentions: { users: [interaction.user.id] } });
+    return;
+  }
   if (action === 'start') { const result = store.startRace(interaction.guildId, interaction.user.id, raceId, now); if (!result.started) { const messages = { 'not-found': 'Race not found.', 'not-host': 'Only the host can start the race.', 'not-lobby': 'That race has already started or finished.', 'not-enough-players': 'At least two players must join first.' }; await interaction.reply({ content: messages[result.reason], flags: MessageFlags.Ephemeral }); return; } const question = questions.find(item => item.id === result.questionId); await interaction.reply(showQuestion(result.race, question)); return; }
   if (action === 'cancel') { const isModerator = interaction.memberPermissions?.has('ManageGuild') === true; const result = store.cancelRace(interaction.guildId, interaction.user.id, raceId, isModerator); const messages = { 'not-found': 'Race not found.', 'not-host': 'Only the host or a server moderator can cancel the race.', 'not-active': 'That race is no longer active.' }; await interaction.reply({ content: result.cancelled ? `Race **${raceId}** cancelled.` : messages[result.reason], flags: result.cancelled ? undefined : MessageFlags.Ephemeral }); return; }
   const raceState = store.answerRace; const race = store.getRace?.(interaction.guildId, raceId);

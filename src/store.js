@@ -254,7 +254,7 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
   }
   function joinRace(guildId, userId, raceId) {
     load(); const race = state.races.find(item => item.guildId === guildId && item.id.toLowerCase() === raceId.toLowerCase());
-    if (!race) return { joined: false, reason: 'not-found' }; if (race.status !== 'lobby') return { joined: false, reason: 'not-lobby' }; if (race.players.includes(userId)) return { joined: false, reason: 'already-joined' };
+    if (!race) return { joined: false, reason: 'not-found' }; if (race.status !== 'lobby') return { joined: false, reason: 'not-lobby', race }; if (race.players.includes(userId)) return { joined: false, reason: 'already-joined', race };
     const profileKey = keyFor(guildId, userId);
     if (!state.profiles[profileKey]) state.profiles[profileKey] = newProfile(guildId, userId);
     const profile = state.profiles[profileKey];
@@ -315,7 +315,7 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
       omActive: om.activeUntil > nowMs,
     };
   }
-  function expireRaces(guildId, nowMs, lobbyMs = 15 * 60 * 1000, activeMs = 3 * 60 * 1000) {
+  function expireRaces(guildId, nowMs, lobbyMs = 15 * 60 * 1000, activeMs = 10 * 60 * 1000) {
     load();
     const expired = [];
     for (const race of state.races.filter(item => item.guildId === guildId && ['lobby', 'active'].includes(item.status))) {

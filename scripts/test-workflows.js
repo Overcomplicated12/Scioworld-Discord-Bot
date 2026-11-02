@@ -38,6 +38,9 @@ try {
   assert.equal(race.created, true);
   assert.equal(store.joinRace(guild, bob, race.race.id).joined, true);
   assert.equal(store.startRace(guild, alice, race.race.id, now + 1000).started, true);
+  const lateJoin = store.joinRace(guild, 'late-player', race.race.id);
+  assert.equal(lateJoin.reason, 'not-lobby');
+  assert.equal(lateJoin.race.status, 'active');
 
   store.setOmOptIn(guild, bob, true);
   assert.equal(store.setOmTarget(guild, bob).set, true);
