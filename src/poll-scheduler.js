@@ -65,10 +65,13 @@ export async function checkOmSchedules(client, nowMs = Date.now()) {
     try {
       if (store.pilotQuiet(guild.id)) continue;
       const pollSchedule = store.getPollSchedule(guild.id, nowMs);
-      const activationAt = pollSchedule.nextDueAt + DAY;
-      const activationKey = String(pollSchedule.nextDueAt);
+      // nextDueAt points to the *next* weekly poll after markPollSent(). The
+      // Om activity belongs to the poll that was just posted, so anchor it to
+      // that poll's persisted send time instead of the next due date.
+      const activationAt = Number.isFinite(pollSchedule.lastSentAt) ? pollSchedule.lastSentAt + DAY : Infinity;
+      const activationKey = Number.isFinite(pollSchedule.lastSentAt) ? String(pollSchedule.lastSentAt) : null;
       const omSchedule = store.getOmSchedule(guild.id);
-      if (nowMs >= activationAt && omSchedule.targetId && omSchedule.optedIn.includes(omSchedule.targetId) && omSchedule.activatedFor !== activationKey) {
+      if (activationKey && nowMs >= activationAt && omSchedule.targetId && omSchedule.optedIn.includes(omSchedule.targetId) && omSchedule.activatedFor !== activationKey) {
         if (!omSchedule.modePoll) {
           const channel = await findChannel(guild, pollSchedule.channelId);
           if (channel) {
