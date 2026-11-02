@@ -6,6 +6,7 @@ import { omModes, randomOmMessageForMode, randomSillyOmMessage } from './om.js';
 const DAY = 24 * 60 * 60 * 1000;
 const YEAR = 366 * DAY;
 let pollSchedulerRunning = false;
+let omSchedulerRunning = false;
 
 async function dmOwner(guild, content) {
   try {
@@ -68,8 +69,11 @@ export async function checkPollSchedules(client, nowMs = Date.now()) {
 }
 
 export async function checkOmSchedules(client, nowMs = Date.now()) {
-  for (const guild of client.guilds.cache.values()) {
-    try {
+  if (omSchedulerRunning) return;
+  omSchedulerRunning = true;
+  try {
+    for (const guild of client.guilds.cache.values()) {
+      try {
       if (store.pilotQuiet(guild.id)) continue;
       const pollSchedule = store.getPollSchedule(guild.id, nowMs);
       // nextDueAt points to the *next* weekly poll after markPollSent(). The
@@ -98,9 +102,14 @@ export async function checkOmSchedules(client, nowMs = Date.now()) {
       if (!result.sent) continue;
       const target = await client.users.fetch(result.targetId);
       await target.send(`🧪 **Om challenge**\n${randomOmMessageForMode(result.mode)}\n\nYou are receiving this because you opted in. Use /torture-om opt-out at any time.`);
+      store.acknowledgeOmMessage(guild.id, nowMs);
     } catch (error) {
       console.error(`Om challenge scheduler failed for guild ${guild.id}:`, error);
+      store.releaseOmMessage(guild.id);
+      }
     }
+  } finally {
+    omSchedulerRunning = false;
   }
 }
 
@@ -134,12 +143,13 @@ export async function checkBotherOmSchedules(client, nowMs = Date.now()) {
           const text = claimed.action.kind === 'silly-dm' ? randomSillyOmMessage() : 'Hi 👋';
           await target.send(`📨 ${text}\n\nYou opted into the Om challenge. Use /torture-om opt-out to stop future messages.`);
         }
+        store.acknowledgeBotherSend(guild.id, nowMs);
         if (claimed.complete) {
           const channel = guild.channels.cache.get(claimed.action.channelId);
           await channel?.send({ content: '✅ Om has been tortured. Thanks for voting!', allowedMentions: { parse: [] } }).catch(() => {});
         }
       } catch (error) {
-        store.closeBotherPoll(guild.id);
+        store.releaseBotherSend(guild.id);
         console.error(`Bother Om delivery failed for guild ${guild.id}:`, error);
       }
     } catch (error) {

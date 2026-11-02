@@ -57,8 +57,11 @@ try {
   assert.equal(store.activateOm(guild, 'activation', now + 60 * 60 * 1000 + 1).active, true);
   const firstOm = now + 60 * 60 * 1000 + 5 * 60 * 1000;
   assert.equal(store.recordOmMessage(guild, firstOm).sent, true);
+  assert.equal(store.acknowledgeOmMessage(guild, firstOm).acknowledged, true);
   assert.equal(store.recordOmMessage(guild, firstOm + 20 * 60 * 1000).sent, true);
+  assert.equal(store.acknowledgeOmMessage(guild, firstOm + 20 * 60 * 1000).acknowledged, true);
   assert.equal(store.recordOmMessage(guild, firstOm + 40 * 60 * 1000).sent, true);
+  assert.equal(store.acknowledgeOmMessage(guild, firstOm + 40 * 60 * 1000).acknowledged, true);
   assert.equal(store.recordOmMessage(guild, firstOm + 60 * 60 * 1000).sent, false);
 
   const reloaded = createStore(filePath);

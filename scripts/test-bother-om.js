@@ -32,8 +32,9 @@ try {
   for (let index = 0; index < finished.action.count; index += 1) {
     const result = store.recordBotherSend('guild', now + 5 * 60_000 + index * 60 * 60_000);
     assert.equal(result.sent, true);
-    assert.equal(result.action.sent, index + 1);
+    assert.equal(result.action.sent, index);
     assert.equal(result.complete, index === finished.action.count - 1);
+    assert.equal(store.acknowledgeBotherSend('guild', now + 5 * 60_000 + index * 60 * 60_000).acknowledged, true);
   }
   assert.equal(store.recordBotherSend('guild', now + 99 * 60 * 60_000).sent, false);
   assert.equal(store.beginBotherPoll('guild', 'alice', 'channel', options, now + 6 * 60 * 60_000).reason, 'daily-limit');
