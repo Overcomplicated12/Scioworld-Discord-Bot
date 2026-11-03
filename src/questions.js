@@ -1,4 +1,6 @@
-export const questions = [
+import { loadImportedQuestions } from './trivia-bank.js';
+
+const baseQuestions = [
   { id: 'bio-01', category: 'biology', prompt: 'What organelle is often called the powerhouse of the cell?', choices: ['Nucleus', 'Mitochondrion', 'Ribosome', 'Cell wall'], answer: 1, explanation: 'Mitochondria produce much of a cell’s usable energy.', difficulty: 'easy' },
   { id: 'bio-02', category: 'biology', prompt: 'Which molecule carries genetic instructions in most living things?', choices: ['DNA', 'ATP', 'Cellulose', 'Chlorophyll'], answer: 0, explanation: 'DNA stores hereditary information.', difficulty: 'easy' },
   { id: 'chem-01', category: 'chemistry', prompt: 'What is the chemical symbol for sodium?', choices: ['So', 'S', 'Na', 'Sd'], answer: 2, explanation: 'Na comes from the Latin name natrium.', difficulty: 'easy' },
@@ -22,5 +24,7 @@ export const questions = [
   { id: 'mixed-03', category: 'general-science', prompt: 'What tool is used to measure temperature?', choices: ['Thermometer', 'Compass', 'Hygrometer', 'Ruler'], answer: 0, explanation: 'A thermometer measures how hot or cold something is.', difficulty: 'easy' },
   { id: 'mixed-04', category: 'general-science', prompt: 'Which part of a plant usually absorbs water from soil?', choices: ['Roots', 'Flowers', 'Fruit', 'Petals'], answer: 0, explanation: 'Roots anchor plants and absorb water and minerals from the soil.', difficulty: 'easy' },
 ];
+
+export const questions = [...baseQuestions, ...loadImportedQuestions()];
 
 export const questionById = new Map(questions.map(question => [question.id, question]));

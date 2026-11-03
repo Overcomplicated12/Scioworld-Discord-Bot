@@ -100,6 +100,8 @@ Instructor mentions are clickable but notifications are suppressed so viewing re
 
 The CSV importer reads `role_id`, `role_name`, `instructor_user_id`, and `instructor_tag`. Rows sharing a role become one course with multiple instructors; unrelated server course records are retained.
 
+The trivia bank also includes the multiple-choice entries in `content/trivia/questions.csv`. Short-answer science-bowl entries are skipped because `/trivia` uses four answer buttons; entries with missing answers or button labels over Discord's limit are skipped during loading.
+
 ## Lore contributions
 
 Add a validated `.json` story under `content/lore`. Follow [content/lore/README.md](content/lore/README.md), then run:
