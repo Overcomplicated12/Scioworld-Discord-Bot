@@ -12,9 +12,11 @@ if (!process.env.DISCORD_TOKEN) {
   process.exit(1);
 }
 
-// Message Content is required for the optional numeric race-answer fallback.
-// It must also be enabled as a privileged intent in the Discord Developer Portal.
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
+// Numeric race answers use the optional Message Content privileged intent.
+// Keep it disabled by default so the bot can connect without that portal setting.
+const intents = [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages];
+if (process.env.DISCORD_MESSAGE_CONTENT === 'true') intents.push(GatewayIntentBits.MessageContent);
+const client = new Client({ intents });
 const commandsByName = new Map(commands.map(command => [command.data.name, command]));
 
 client.once(Events.ClientReady, readyClient => {
