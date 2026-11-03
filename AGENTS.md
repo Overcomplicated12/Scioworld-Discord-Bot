@@ -33,6 +33,8 @@ npm run test:pilot
 npm run check-python-content
 ```
 
+For an offline performance check, use `npm run stress-test`. It writes only to a temporary directory. Adjust `STRESS_GUILDS`, `STRESS_USERS`, `STRESS_TRIVIA_ROUNDS`, and `STRESS_RACE_ROUNDS` to scale the run; it never connects to Discord or touches production data.
+
 The dependency-free Python helper at `scripts/python/content_tools.py` validates
 the course CSV and lore structure and prints question-bank statistics. It is a
 contributor tool; the JavaScript checks remain the runtime validation path.

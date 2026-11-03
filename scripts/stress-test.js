@@ -49,7 +49,13 @@ try {
       assert.equal(store.startRace(guildId, host, created.race.id, now + 1_000).started, true);
       for (let round = 0; round < raceQuestions.length; round += 1) {
         const question = raceQuestions[round];
-        const result = store.answerRace(guildId, host, created.race.id, question.answer, question, now + 2_000 + round);
+        // The challenger submits an incorrect answer first; the host then
+        // submits the correct answer and advances the round.
+        const miss = (question.answer + 1) % question.choices.length;
+        const waiting = store.answerRace(guildId, challenger, created.race.id, miss, question, now + 2_000 + round * 2);
+        assert.equal(waiting.answered, true);
+        assert.equal(waiting.complete, false);
+        const result = store.answerRace(guildId, host, created.race.id, question.answer, question, now + 3_000 + round * 2);
         assert.equal(result.answered, true);
         if (result.finished) break;
       }
