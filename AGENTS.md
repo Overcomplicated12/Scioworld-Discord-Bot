@@ -30,7 +30,12 @@ For lore or pilot content, also run the focused check while iterating:
 ```bash
 npm run check-content
 npm run test:pilot
+npm run check-python-content
 ```
+
+The dependency-free Python helper at `scripts/python/content_tools.py` validates
+the course CSV and lore structure and prints question-bank statistics. It is a
+contributor tool; the JavaScript checks remain the runtime validation path.
 
 Content must remain valid JSON. Lore files must follow `content/lore/README.md`. Pilot factual activities need a correct choice, an explanation for every choice, and an HTTPS source.
 
