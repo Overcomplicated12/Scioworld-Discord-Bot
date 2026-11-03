@@ -8,15 +8,20 @@ const categoryNames = { biology: 'Biology', chemistry: 'Chemistry', physics: 'Ph
 const categoryChoices = [{ name: 'Mixed science', value: 'mixed' }, ...categories.slice(0, 24).map(category => ({ name: categoryNames[category] || category, value: category }))];
 
 export const data = new SlashCommandBuilder().setName('trivia').setDescription('Answer a science question for Sciocoins and knowledge points.')
-  .addStringOption(option => option.setName('category').setDescription('Choose a question category').setRequired(false).addChoices(...categoryChoices));
+  .addStringOption(option => option.setName('category').setDescription('Choose a question category').setRequired(false).addChoices(...categoryChoices))
+  .addStringOption(option => option.setName('difficulty').setDescription('Choose a difficulty').setRequired(false).addChoices(
+    { name: 'Easy', value: 'easy' }, { name: 'Medium', value: 'medium' }, { name: 'Hard', value: 'hard' },
+  ));
 
 export async function execute(interaction) {
   if (!requireGuild(interaction)) return;
   const category = interaction.options.getString('category');
+  const difficulty = interaction.options.getString('difficulty');
   const profile = store.getOrCreate(interaction.guildId, interaction.user.id);
   const categoryPool = !category || category === 'mixed' ? questions : questions.filter(question => question.category === category);
-  const fresh = categoryPool.filter(question => !profile.triviaRecentQuestions.includes(question.id));
-  const available = fresh.length ? fresh : categoryPool;
+  const difficultyPool = difficulty ? categoryPool.filter(question => question.difficulty === difficulty) : categoryPool;
+  const fresh = difficultyPool.filter(question => !profile.triviaRecentQuestions.includes(question.id));
+  const available = fresh.length ? fresh : difficultyPool;
   if (!available.length) { await interaction.reply({ content: 'No questions are available in that category yet.', flags: MessageFlags.Ephemeral }); return; }
   const question = available[Math.floor(Math.random() * available.length)];
   const result = store.startTrivia(interaction.guildId, interaction.user.id, question.id, Date.now());
@@ -31,7 +36,7 @@ export async function execute(interaction) {
     .setCustomId(`trivia:${question.id}:${index}:${interaction.user.id}`)
     .setLabel(choice)
     .setStyle(ButtonStyle.Primary)));
-  await interaction.reply({ content: `🧠 **${question.category} trivia**\n${question.prompt}\n\nYou have two minutes to answer.`, components: [buttons] });
+  await interaction.reply({ content: `🧠 **${question.category} trivia · ${question.difficulty}**\n${question.prompt}\n\nYou have two minutes to answer.`, components: [buttons] });
 }
 
 export async function handleButton(interaction) {
