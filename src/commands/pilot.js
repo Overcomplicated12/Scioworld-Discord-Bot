@@ -17,7 +17,7 @@ export const data = new SlashCommandBuilder().setName('pilot').setDescription('O
   .addSubcommand(c=>seasonOption(c.setName('publish').setDescription('Open a scheduled activity now.').addStringOption(o=>o.setName('activity').setDescription('Activity ID').setRequired(true))))
   .addSubcommand(c=>seasonOption(c.setName('close').setDescription('Close answers and reveal the current activity.').addStringOption(o=>o.setName('activity').setDescription('Activity ID').setRequired(true))))
   .addSubcommand(c=>seasonOption(c.setName('queue').setDescription('Read private submissions, claims, and feedback.').addIntegerOption(o=>o.setName('page').setDescription('Discussion page, starting at 1').setMinValue(1))))
-  .addSubcommand(c=>seasonOption(c.setName('qualified').setDescription('List students who reached the seasonal sticker threshold.')))
+  .addSubcommand(c=>seasonOption(c.setName('qualified').setDescription('List students who reached the seasonal sticker threshold.').addStringOption(o=>o.setName('filter').setDescription('Filter by claim state').addChoices({name:'All qualified',value:'all'},{name:'Not claimed',value:'not-requested'},{name:'Pending claim',value:'pending'},{name:'Approved claim',value:'approved'},{name:'Fulfilled claim',value:'fulfilled'})).addStringOption(o=>o.setName('format').setDescription('Display format').addChoices({name:'Message',value:'message'},{name:'JSON file',value:'json'},{name:'CSV file',value:'csv'}))))
   .addSubcommand(c=>seasonOption(decisionOption(c.setName('review').setDescription('Approve, request revision, or reject an explanation.').addStringOption(o=>o.setName('id').setDescription('Discussion ID, such as D1').setRequired(true)),['approved','revision','rejected']).addStringOption(o=>o.setName('reason').setDescription('Private feedback').setMaxLength(500).setRequired(true))))
   .addSubcommand(c=>seasonOption(c.setName('reward-lore').setDescription('Award seasonal lore stamps separately from publication approval.').addStringOption(o=>o.setName('submission').setDescription('Lore submission ID').setRequired(true)).addStringOption(o=>o.setName('reason').setDescription('Confirm originality, substance, and community relevance').setMaxLength(500).setRequired(true))))
   .addSubcommand(c=>seasonOption(c.setName('claims-open').setDescription('Open claims after publishing a fair eligibility and capacity policy.').addStringOption(o=>o.setName('policy').setDescription('Discord message link to your published policy; required for real claims'))))
@@ -45,6 +45,7 @@ export async function execute(i) {
     if(action==='review'){args.id=i.options.getString('id');args.decision=i.options.getString('decision');}
     if(action==='claim-review'){args.userId=i.options.getUser('student').id;args.decision=i.options.getString('decision');}
     if(action==='reward-lore')args.submissionId=i.options.getString('submission');
+    if(action==='qualified'){args.filter=i.options.getString('filter')||'all';args.format=i.options.getString('format')||'message';}
     if(action==='claims-open'){
       args.policyMessageUrl=i.options.getString('policy');
       if(args.policyMessageUrl){
@@ -70,8 +71,11 @@ export async function execute(i) {
       content=`**Private review queue** · ${result.discussions.length} explanations, ${result.claims.length} claims\n${d?`**${d.id}** · ${d.activityId} · <@${d.userId}>\n${d.text}\nUse /pilot review with this ID.`:'No pending explanation on this page.'}\n\nClaims: ${result.claims.slice(0,5).map(c=>`<@${c.userId}>`).join(', ')||'none'}\nAll pending claims and recent private feedback are in the attached file.`;
       files=[new AttachmentBuilder(Buffer.from(JSON.stringify(result,null,2)),{name:'private-pilot-queue.json'})];
     }else if(action==='qualified') {
-      const rows=result.qualified.map(person=>`<@${person.userId}> — **${person.stamps}** stamps · claim: **${person.claim}**`);
-      content=`**Seasonal sticker qualifiers** · ${result.season}\nThreshold: **${result.threshold}** stamps${result.simulation?' · simulation':''}\n\n${rows.join('\n')||'No students have qualified yet.'}`;
+      const people=result.qualified.filter(person=>args.filter==='all'||person.claim===args.filter);
+      const rows=people.map(person=>`<@${person.userId}> — **${person.stamps}** stamps · claim: **${person.claim}**`);
+      content=`**Seasonal sticker qualifiers** · ${result.season}\nFilter: **${args.filter}** · threshold: **${result.threshold}** stamps${result.simulation?' · simulation':''}\n\n${rows.join('\n')||'No students match this filter.'}`;
+      if(args.format==='json') files=[new AttachmentBuilder(Buffer.from(JSON.stringify({season:result.season,threshold:result.threshold,filter:args.filter,qualified:people},null,2)),{name:'qualified-students.json'})];
+      if(args.format==='csv') files=[new AttachmentBuilder(Buffer.from(`user_id,stamps,claim\n${people.map(person=>`${person.userId},${person.stamps},${person.claim}`).join('\n')}\n`),{name:'qualified-students.csv'})];
     }else if(action==='engagement') {
       content=`**${result.season} engagement${result.simulation?' (simulation)':''}**\nWeek 1: ${result.week1} · Week 2: ${result.week2} · Returning: ${result.returning}\nRetention: ${result.retentionPercent===null?'N/A — no Week 1 participants':`${result.retentionPercent}%`}\nExplanations: ${result.discussions} (${result.approvedDiscussions} approved)\nQualified: ${result.qualified} · Claims: ${result.claims}\nPending reviews: ${result.pendingReviews}\nFull aggregate report attached. Retention counts answers and approved explanations/lore by their original submission week.`;
       files=[new AttachmentBuilder(Buffer.from(JSON.stringify(result,null,2)),{name:'engagement.json'})];
