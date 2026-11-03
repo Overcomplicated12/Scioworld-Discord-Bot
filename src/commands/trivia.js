@@ -4,7 +4,8 @@ import { store } from '../store.js';
 import { requireGuild } from './utils.js';
 
 const categories = [...new Set(questions.map(question => question.category))];
-const categoryChoices = categories.slice(0, 25).map(category => ({ name: category, value: category }));
+const categoryNames = { biology: 'Biology', chemistry: 'Chemistry', physics: 'Physics', mathematics: 'Mathematics', 'earth-and-space': 'Earth & space', energy: 'Energy', 'general-science': 'General science', 'computer-science': 'Computer science', 'earth-science': 'Earth science', sciovirtual: 'Sciovirtual', space: 'Space' };
+const categoryChoices = [{ name: 'Mixed science', value: 'mixed' }, ...categories.slice(0, 24).map(category => ({ name: categoryNames[category] || category, value: category }))];
 
 export const data = new SlashCommandBuilder().setName('trivia').setDescription('Answer a science question for Sciocoins and knowledge points.')
   .addStringOption(option => option.setName('category').setDescription('Choose a question category').setRequired(false).addChoices(...categoryChoices));
@@ -12,7 +13,11 @@ export const data = new SlashCommandBuilder().setName('trivia').setDescription('
 export async function execute(interaction) {
   if (!requireGuild(interaction)) return;
   const category = interaction.options.getString('category');
-  const available = questions.filter(question => !category || question.category === category);
+  const profile = store.getOrCreate(interaction.guildId, interaction.user.id);
+  const categoryPool = !category || category === 'mixed' ? questions : questions.filter(question => question.category === category);
+  const fresh = categoryPool.filter(question => !profile.triviaRecentQuestions.includes(question.id));
+  const available = fresh.length ? fresh : categoryPool;
+  if (!available.length) { await interaction.reply({ content: 'No questions are available in that category yet.', flags: MessageFlags.Ephemeral }); return; }
   const question = available[Math.floor(Math.random() * available.length)];
   const result = store.startTrivia(interaction.guildId, interaction.user.id, question.id, Date.now());
   if (!result.started) {

@@ -20,7 +20,7 @@ function newProfile(guildId, userId) {
     guildId, userId, coins: 100, knowledgePoints: 0, streak: 0, lastDailyAt: null,
     resources: { 'starter-kit': 1 }, collectibles: ['frog-of-wisdom'],
     frogLastUsedAt: null, frogQuoteHistory: [],
-    triviaCooldownUntil: 0, pendingTrivia: null, triviaStreak: 0, bestTriviaStreak: 0,
+    triviaCooldownUntil: 0, pendingTrivia: null, triviaRecentQuestions: [], triviaStreak: 0, bestTriviaStreak: 0,
     reportCooldownUntil: 0,
     equippedCollectible: 'frog-of-wisdom', createdAt: new Date().toISOString(),
   };
@@ -93,6 +93,7 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     if (!Array.isArray(profile.frogQuoteHistory)) profile.frogQuoteHistory = [];
     if (profile.triviaCooldownUntil === undefined) profile.triviaCooldownUntil = 0;
     if (profile.pendingTrivia === undefined) profile.pendingTrivia = null;
+    if (!Array.isArray(profile.triviaRecentQuestions)) profile.triviaRecentQuestions = [];
     if (profile.triviaStreak === undefined) profile.triviaStreak = 0;
     if (profile.bestTriviaStreak === undefined) profile.bestTriviaStreak = profile.triviaStreak;
     if (profile.reportCooldownUntil === undefined) profile.reportCooldownUntil = 0;
@@ -147,6 +148,7 @@ export function createStore(filePath = path.join(projectRoot, 'data', 'profiles.
     if (pending.questionId !== questionId) return { accepted: false, reason: 'different-question', profile };
     const correct = answerIndex === correctAnswer;
     profile.pendingTrivia = null;
+    profile.triviaRecentQuestions = [...profile.triviaRecentQuestions.filter(id => id !== questionId), questionId].slice(-10);
     const day = new Date(nowMs).toISOString().slice(0, 10);
     if (profile.triviaRewardDay !== day) { profile.triviaRewardDay = day; profile.triviaRewardQuestions = []; }
     const eligible = correct && !profile.triviaRewardQuestions.includes(questionId) && profile.triviaRewardQuestions.length < economy.triviaDailyLimit;
