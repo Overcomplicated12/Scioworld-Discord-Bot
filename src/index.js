@@ -6,6 +6,7 @@ import { commands, botherOm, campTrivia, help, menu, omTest, race, trivia, weekl
 import { checkBotherOmSchedules, checkOmSchedules, checkPollSchedules } from './poll-scheduler.js';
 import { backupProfileData } from './backups.js';
 import { store } from './store.js';
+import { markSchedulerRun } from './health.js';
 
 if (!process.env.DISCORD_TOKEN) {
   console.error('Missing DISCORD_TOKEN in .env.');
@@ -22,17 +23,18 @@ const commandsByName = new Map(commands.map(command => [command.data.name, comma
 client.once(Events.ClientReady, readyClient => {
   console.log(`Logged in as ${readyClient.user.tag}.`);
   try { backupProfileData(); } catch (error) { console.error('Initial profile backup failed:', error); }
-  checkPilotSchedules(readyClient).catch(error => console.error('Pilot schedule failed:', error));
-  checkRaceSchedules(readyClient).catch(error => console.error('Race timeout check failed:', error));
-  setInterval(() => checkPilotSchedules(readyClient).catch(error => console.error('Pilot schedule failed:', error)), 60_000);
-  setInterval(() => checkRaceSchedules(readyClient).catch(error => console.error('Race timeout check failed:', error)), 60_000);
-  checkPollSchedules(readyClient).catch(error => console.error('Initial poll schedule check failed:', error));
-  checkBotherOmSchedules(readyClient).catch(error => console.error('Initial Bother Om check failed:', error));
-  checkOmSchedules(readyClient).catch(error => console.error('Initial Om schedule check failed:', error));
+  const run = (name, task, message) => task.then(() => markSchedulerRun(name)).catch(error => console.error(message, error));
+  run('pilot', checkPilotSchedules(readyClient), 'Pilot schedule failed:');
+  run('races', checkRaceSchedules(readyClient), 'Race timeout check failed:');
+  setInterval(() => run('pilot', checkPilotSchedules(readyClient), 'Pilot schedule failed:'), 60_000);
+  setInterval(() => run('races', checkRaceSchedules(readyClient), 'Race timeout check failed:'), 60_000);
+  run('polls', checkPollSchedules(readyClient), 'Initial poll schedule check failed:');
+  run('bother-om', checkBotherOmSchedules(readyClient), 'Initial Bother Om check failed:');
+  run('om', checkOmSchedules(readyClient), 'Initial Om schedule check failed:');
   setInterval(() => {
-    checkPollSchedules(readyClient).catch(error => console.error('Poll schedule check failed:', error));
-    checkBotherOmSchedules(readyClient).catch(error => console.error('Bother Om schedule check failed:', error));
-    checkOmSchedules(readyClient).catch(error => console.error('Om schedule check failed:', error));
+    run('polls', checkPollSchedules(readyClient), 'Poll schedule check failed:');
+    run('bother-om', checkBotherOmSchedules(readyClient), 'Bother Om schedule check failed:');
+    run('om', checkOmSchedules(readyClient), 'Om schedule check failed:');
   }, 60_000);
   setInterval(() => {
     try { backupProfileData(); } catch (error) { console.error('Profile backup failed:', error); }
