@@ -46,6 +46,7 @@ Content must remain valid JSON. Lore files must follow `content/lore/README.md`.
 - Slash-command schema changes require `npm run deploy-commands`.
 - Restart the running PM2 process with `pm2 restart scioworld` after deploying code.
 - Inspect health with `pm2 status` and live output with `pm2 logs scioworld`.
+- Run `npm run verify-deployment` on the deployment host after restarting; it checks PM2, recent login output, environment variables, and registered command names without printing secrets.
 - Keep `.env` configured with `DISCORD_TOKEN`, `DISCORD_APPLICATION_ID`, and an optional `DISCORD_GUILD_ID` for testing.
 - Do not expose tokens, profile data, private reports, or private submissions in public Discord messages or logs.
 

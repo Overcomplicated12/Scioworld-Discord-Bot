@@ -72,6 +72,8 @@ pm2 save
 
 `pm2 save` records the current process list for reboot. Logs are normally under `~/.pm2/logs`.
 
+After a restart, run `npm run verify-deployment` on the server. It verifies the required environment variables, that PM2 reports `scioworld` online, that the recent PM2 output contains a Discord login, and that the configured guild or global command set contains every command in the repository. It does not print the token.
+
 Player profiles are stored in `data/profiles.json` with owner-only permissions. Back up that file with the bot stopped or before upgrades; it is intentionally ignored by Git.
 
 From the repository directory, update manually with:
