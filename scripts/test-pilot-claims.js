@@ -25,6 +25,9 @@ try {
   assert.equal(run('reward-lore',{submissionId:second.id,reason:'Second story'}).awarded,false);
   assert.equal(run('passport',{},user).stamps,3);
  }
+ const qualified = run('qualified');
+ assert.deepEqual(qualified.qualified.map(person => person.userId), ['a', 'b']);
+ assert.equal(qualified.qualified[0].stamps, 3);
  run('claims-open',{policyMessageUrl:'https://discord.com/channels/g/c/message'});
  for(const user of ['a','b']){run('claim',{},user);run('claim',{},user);}
  assert.equal(run('report').claims,2);

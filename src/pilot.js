@@ -90,7 +90,7 @@ export function pilotReport(state, s) {
     reports: (state.reports || []).filter(x => x.guildId === s.guildId && inSeason(s, Date.parse(x.createdAt))).length,
   };
 }
-const ADMIN = new Set(['create', 'activate', 'quiet', 'publish', 'close', 'review', 'queue', 'reward-lore', 'claims-open', 'claim-review', 'report', 'status', 'stock']);
+const ADMIN = new Set(['create', 'activate', 'quiet', 'publish', 'close', 'review', 'queue', 'reward-lore', 'qualified', 'claims-open', 'claim-review', 'report', 'status', 'stock']);
 export function runPilot(state, guildId, userId, action, args = {}, now = Date.now(), canManage = false) {
   requireThat(guildId && Number.isFinite(now), 'Run this inside a server.');
   if (ADMIN.has(action)) requireThat(canManage, 'Only the server owner or administrators can manage the pilot.');
@@ -120,6 +120,10 @@ export function runPilot(state, guildId, userId, action, args = {}, now = Date.n
     s.status = 'active'; return { status: s.status, simulation: s.simulation };
   }
   if (action === 'status') return { id: s.id, status: s.status, simulation: s.simulation, start: s.start, end: s.end, quiet: db.quietGuilds.includes(guildId), claimsOpen: s.claimsOpen, inventory: s.inventory, eligibility: s.eligibility, activities: s.activities.map(a => ({ id: a.id, opensAt: a.opensAt, closesAt: a.closesAt, posted: Boolean(a.messageId), closed: Boolean(a.closed) })) };
+  if (action === 'qualified') {
+    const ids = [...new Set(s.ledger.map(entry => entry.userId))];
+    return { season: s.id, threshold: s.threshold, simulation: s.simulation, qualified: ids.filter(id => stamps(s, id) >= s.threshold).map(userId => ({ userId, stamps: stamps(s, userId), claim: s.claims.find(claim => claim.userId === userId)?.status || 'not requested' })) };
+  }
   if (action === 'passport') return passport(s, userId, now);
   if (action === 'report') return pilotReport(state, s);
   if (action === 'queue') return { discussions: s.discussions.filter(d => d.status === 'pending'), claims: s.claims.filter(c => c.status === 'pending'), feedback: s.feedback.slice(-10) };
