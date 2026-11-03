@@ -6,6 +6,7 @@ import { requireGuild } from './utils.js';
 const categories = [...new Set(questions.map(question => question.category))];
 const choices = categories.slice(0, 25).map(category => ({ name: category, value: category }));
 function pickQuestions(category) { const pool = questions.filter(question => !category || question.category === category); return [...pool].sort(() => Math.random() - 0.5).slice(0, 3).map(question => question.id); }
+const uniqueUsers = users => [...new Set(users.filter(Boolean))];
 function showQuestion(race, question) {
   return {
     content: `🏁 **Race ${race.id} — round ${race.round + 1}/3**\n${question.prompt}\n${question.choices.map((choice, index) => `**${index + 1}.** ${choice}`).join('\n')}\n\nChoose an answer below.`,
@@ -21,13 +22,13 @@ function resultMessage(result, raceId, questionForNext) {
     const finalPoint = result.roundWinnerId ? `Final point: <@${result.roundWinnerId}> answered first.\n\n` : 'No one found the final answer.\n\n';
     const cappedWinners = result.winners.filter(id => result.rewards[id]?.coins === 0 && result.rewards[id]?.knowledgePoints === 0);
     const capNote = cappedWinners.length ? '\n\nℹ️ The weekly race reward limit was reached, so this win received recognition but no additional coins or knowledge.' : '';
-    return { content: `${finalPoint}Race **${raceId}** finished! Winners: ${result.winners.map(id => `<@${id}>`).join(', ')}.\n\n**Race rewards**\n${rewardText}${capNote}`, allowedMentions: { users: [...new Set([...result.winners, result.roundWinnerId].filter(Boolean))] } };
+    return { content: `${finalPoint}Race **${raceId}** finished! Winners: ${result.winners.map(id => `<@${id}>`).join(', ')}.\n\n**Race rewards**\n${rewardText}${capNote}`, allowedMentions: { users: uniqueUsers([...result.winners, result.roundWinnerId]) } };
   }
   const payload = showQuestion(result.race, questionForNext);
   payload.content = result.roundWinnerId
     ? `⚡ <@${result.roundWinnerId}> answered first and gets the point.\n\n${payload.content}`
     : `No one found the answer that round, so no point was awarded.\n\n${payload.content}`;
-  payload.allowedMentions = { users: result.roundWinnerId ? [result.roundWinnerId] : [] };
+  payload.allowedMentions = { users: uniqueUsers([result.roundWinnerId]) };
   return payload;
 }
 
@@ -75,8 +76,13 @@ export async function handleButton(interaction, persistence = store) {
   const result = persistence.answerRace(interaction.guildId, interaction.user.id, raceId, choice, question, Date.now());
   const next = result.nextQuestionId ? questions.find(item => item.id === result.nextQuestionId) : null;
   const payload = resultMessage(result, raceId, next);
-  if (result.complete) await interaction.update(payload);
-  else await interaction.reply(payload);
+  if (result.complete) {
+    try { await interaction.update(payload); }
+    catch (error) {
+      console.error('Race interaction update failed:', error);
+      if (!interaction.replied && !interaction.deferred) await interaction.reply({ content: 'That race answer was recorded, but the race message could not be updated. Check the channel for the next round.', flags: MessageFlags.Ephemeral }).catch(() => {});
+    }
+  } else await interaction.reply(payload);
 }
 
 export async function handleNumericMessage(message, persistence = store) {
