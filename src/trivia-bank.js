@@ -46,15 +46,28 @@ function normalizeQuestion(row, indexes) {
   };
 }
 
-export function loadImportedQuestions() {
+export function loadImportedQuestions(stats = null) {
   if (!fs.existsSync(csvPath)) return [];
   const rows = parseCsv(fs.readFileSync(csvPath, 'utf8'));
   const headers = rows.shift()?.map(value => value.trim()) || [];
   const indexes = Object.fromEntries(headers.map((header, index) => [header, index]));
   const seen = new Set();
-  return rows.map(row => normalizeQuestion(row, indexes)).filter(question => {
+  const questions = rows.map(row => normalizeQuestion(row, indexes)).filter(question => {
     if (!question || seen.has(question.id)) return false;
     seen.add(question.id);
     return true;
   });
+  if (stats) {
+    stats.rows = rows.length;
+    stats.imported = questions.length;
+    stats.duplicates = rows.length - new Set(rows.map(row => `bowl-${row[indexes.id] || ''}`)).size;
+    stats.skipped = rows.length - questions.length;
+  }
+  return questions;
+}
+
+export function importedQuestionStats() {
+  const stats = { rows: 0, imported: 0, duplicates: 0, skipped: 0 };
+  loadImportedQuestions(stats);
+  return stats;
 }
