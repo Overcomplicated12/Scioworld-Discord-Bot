@@ -20,10 +20,16 @@ try {
   assert.equal(reply.flags, 64, 'A partial race answer should only acknowledge the answering player.');
   assert.match(reply.content, /waiting for another racer/i);
 
-  await handleButton({ guildId: 'g', user: { id: 'kedar' }, customId: `race:${race.id}:0:${questions[0].answer}`, update: async value => { reply = value; } }, persistence);
-  assert.match(reply.content, /round 2\/3/i, 'The final answer for a round should post the next question with buttons.');
-  assert.match(reply.content, /kedar> answered first/i, 'The next round should identify the first correct racer.');
-  assert.equal(reply.components[0].components.length, 4);
+  let nextQuestion;
+  await handleButton({
+    guildId: 'g', user: { id: 'kedar' }, customId: `race:${race.id}:0:${questions[0].answer}`,
+    update: async value => { reply = value; },
+    channel: { send: async value => { nextQuestion = value; } },
+  }, persistence);
+  assert.match(reply.content, /next question is below/i, 'The answered question should be closed.');
+  assert.match(nextQuestion.content, /round 2\/3/i, 'The final answer for a round should post a fresh next-question message.');
+  assert.match(nextQuestion.content, /kedar> answered first/i, 'The next round should identify the first correct racer.');
+  assert.equal(nextQuestion.components[0].components.length, 4);
 
   let staleAcknowledged = false;
   await handleButton({ guildId: 'g', user: { id: 'kedar' }, customId: `race:${race.id}:0:0`, deferUpdate: async () => { staleAcknowledged = true; } }, persistence);

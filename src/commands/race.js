@@ -81,7 +81,16 @@ export async function handleButton(interaction, persistence = store) {
   const next = result.nextQuestionId ? questions.find(item => item.id === result.nextQuestionId) : null;
   const payload = resultMessage(result, raceId, next);
   if (result.complete) {
-    try { await interaction.update(payload); }
+    try {
+      if (result.finished) {
+        await interaction.update(payload);
+      } else {
+        // Close the answered question, then post the next round as a fresh
+        // message so the race has a clear chronological thread.
+        await interaction.update({ content: '✅ Round complete. The next question is below.', components: [] });
+        await interaction.channel.send(payload);
+      }
+    }
     catch (error) {
       console.error('Race interaction update failed:', error);
       if (!interaction.replied && !interaction.deferred) await interaction.reply({ content: 'That race answer was recorded, but the race message could not be updated. Check the channel for the next round.', flags: MessageFlags.Ephemeral }).catch(() => {});
