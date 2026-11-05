@@ -37,6 +37,12 @@ export async function execute(interaction) {
     .setLabel(choice)
     .setStyle(ButtonStyle.Primary)));
   await interaction.reply({ content: `🧠 **${question.category} trivia · ${question.difficulty}**\n${question.prompt}\n\nYou have two minutes to answer.`, components: [buttons] });
+  const message = await interaction.fetchReply();
+  setTimeout(async () => {
+    const current = store.getOrCreate(interaction.guildId, interaction.user.id);
+    if (current.pendingTrivia?.questionId !== question.id) return;
+    await message.edit({ content: `⌛ **${question.category} trivia · ${question.difficulty} — EXPIRED**\n${question.prompt}\n\nThis question timed out. Start another with \`/trivia\`.`, components: [] }).catch(() => {});
+  }, 121_000).unref?.();
 }
 
 export async function handleButton(interaction) {
