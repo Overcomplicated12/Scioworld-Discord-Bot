@@ -19,7 +19,7 @@ export async function execute(interaction) {
   const difficulty = interaction.options.getString('difficulty');
   const profile = store.getOrCreate(interaction.guildId, interaction.user.id);
   const categoryPool = !category || category === 'mixed' ? questions : questions.filter(question => question.category === category);
-  const difficultyPool = selectTriviaDifficulty(categoryPool, difficulty);
+  const difficultyPool = selectTriviaDifficulty(categoryPool, difficulty, profile.triviaStreak);
   const fresh = difficultyPool.filter(question => !profile.triviaRecentQuestions.includes(question.id));
   const available = fresh.length ? fresh : difficultyPool;
   if (!available.length) { await interaction.reply({ content: 'No questions are available in that category yet.', flags: MessageFlags.Ephemeral }); return; }
@@ -64,5 +64,5 @@ export async function handleButton(interaction) {
   }
   const streak = result.correct && result.triviaStreak > 1 ? ` Your trivia streak is now **${result.triviaStreak}**!` : result.correct && result.triviaStreak === 1 ? ' Your trivia streak has started!' : '';
   const outcome = result.correct ? `Correct! **+${result.coins} Sciocoins** and **+${result.knowledgePoints} knowledge points**.${streak}` : `Not quite. Take a look at the explanation below.`;
-  await interaction.reply({ content: `${outcome}\n${question.explanation}\nRewards apply to up to five different correct questions per UTC day. You can keep playing for fun.` });
+  await interaction.reply({ content: `${outcome}\n${question.explanation}\nRewards apply to up to 15 different correct questions per UTC day. You can keep playing for fun.` });
 }

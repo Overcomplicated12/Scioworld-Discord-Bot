@@ -53,7 +53,7 @@ Start with a **draft simulation** using the configuration in `content/pilot/seas
 - `/leaderboard` — rank by knowledge points, Sciocoins, or streak.
 - `/privacy` — control leaderboard visibility, public recognition, or camp features.
 
-Knowledge points track levels (100 KP per level). Ordinary trivia pays 2 coins/3 KP for up to five different correct answers per UTC day. Optional daily rewards are flat at 2 coins/1 KP; there is no streak bonus or penalty. Daily activity and contribution rewards are listed in the pilot guide.
+Knowledge points track levels (100 KP per level). Ordinary trivia pays 2 coins/3 KP for up to 15 different correct answers per UTC day. Trivia difficulty increases after three and six consecutive correct answers. Optional daily rewards are flat at 2 coins/1 KP; there is no daily reward streak bonus or penalty. Daily activity and contribution rewards are listed in the pilot guide.
 
 ### Games and community
 

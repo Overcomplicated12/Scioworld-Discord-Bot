@@ -25,7 +25,7 @@ Three stamps qualify for a sticker claim. Answering any three daily activities, 
 
 Lore publication and rewards are independent. `/lore-review approve` publishes; `/pilot reward-lore` explicitly approves originality, substance, and relevance and grants the season reward. A second submission cannot bypass the one-lore-reward limit. Lore must have been submitted during the season. Reviews may finish after the season closes; rewards and claims remain available afterward.
 
-Ordinary trivia rewards 2 coins/3 KP for each of up to five different correct questions per UTC day. Repeated questions that day and incorrect answers pay zero. Races award 5 coins/5 KP to winners with at least one correct answer, within each player's first six completed races per UTC Monday–Sunday week. Playing after a limit is allowed. `/daily` is optional: flat 2 coins/1 KP, with no escalating reward or streak reset. Existing historical streaks and balances are retained.
+Ordinary trivia rewards 2 coins/3 KP for each of up to 15 different correct questions per UTC day. Questions default to easy, then move to medium after three consecutive correct answers and hard after six. Repeated questions that day and incorrect answers pay zero. Races award 5 coins/5 KP to winners with at least one correct answer, within each player's first six completed races per UTC Monday–Sunday week. Playing after a limit is allowed. `/daily` is optional: flat 2 coins/1 KP, with no escalating reward or streak reset. Existing historical streaks and balances are retained.
 
 ## Configuration and draft creation
 

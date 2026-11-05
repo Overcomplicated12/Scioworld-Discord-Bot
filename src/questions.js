@@ -29,12 +29,23 @@ export const questions = [...baseQuestions, ...loadImportedQuestions()];
 
 export const questionById = new Map(questions.map(question => [question.id, question]));
 
-// Keep casual play approachable when no difficulty was requested. Content
-// authors can still explicitly select medium or hard questions.
-export function selectTriviaDifficulty(pool, requestedDifficulty) {
-  if (requestedDifficulty) return pool.filter(question => question.difficulty === requestedDifficulty);
-  for (const difficulty of ['easy', 'medium', 'hard']) {
-    const matches = pool.filter(question => question.difficulty === difficulty);
+export function triviaDifficultyForStreak(streak = 0) {
+  if (streak >= 6) return 'hard';
+  if (streak >= 3) return 'medium';
+  return 'easy';
+}
+
+// Keep casual play approachable while rewarding sustained correct answers with
+// a harder target. If a category has no questions at that level, use the next
+// easier level so the player can still play.
+export function selectTriviaDifficulty(pool, requestedDifficulty, streak = 0) {
+  const levels = ['easy', 'medium', 'hard'];
+  const streakIndex = levels.indexOf(triviaDifficultyForStreak(streak));
+  const requestedIndex = requestedDifficulty ? levels.indexOf(requestedDifficulty) : streakIndex;
+  if (requestedIndex < 0) return [];
+  const targetIndex = Math.max(streakIndex, requestedIndex);
+  for (let index = targetIndex; index >= 0; index -= 1) {
+    const matches = pool.filter(question => question.difficulty === levels[index]);
     if (matches.length) return matches;
   }
   return [];

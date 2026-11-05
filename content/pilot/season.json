@@ -313,7 +313,7 @@
     "source": ""
   },
   "economy": {
-    "triviaDailyLimit": 5,
+    "triviaDailyLimit": 15,
     "triviaCoins": 2,
     "triviaKP": 3,
     "raceWeeklyLimit": 6,
