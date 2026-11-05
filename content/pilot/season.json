@@ -280,20 +280,16 @@
     },
     {
       "id": "next-frog-question",
-      "format": "prediction",
-      "prompt": "After observing frogs near a pond, which follow-up question is most testable?",
+      "format": "discussion",
+      "prompt": "Would you rather run over an unlimited number of urinals, or run over one person? Explain your choice.",
       "choices": [
-        "Does water temperature predict frog activity after controlling for time of day?",
-        "Why are frogs interesting?",
-        "Are frogs happiest in spring?"
+        "An unlimited number of urinals",
+        "One person"
       ],
       "explanations": [
-        "It names measurable variables and a confound to control.",
-        "Interest is subjective and does not define an observable test.",
-        "Happiness is undefined unless it is operationalized and measured."
+        "A chaotic plumbing-heavy answer that avoids choosing a person, while creating an absurdly large cleanup problem.",
+        "A much darker choice with a serious moral cost, even in a completely fictional thought experiment."
       ],
-      "correct": 0,
-      "source": "https://www.usgs.gov/centers/nwhc/science/amphibian-research",
       "openDay": 13,
       "closeDay": 14
     }
