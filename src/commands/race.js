@@ -1,11 +1,15 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags, SlashCommandBuilder } from 'discord.js';
-import { questions } from '../questions.js';
+import { questions, selectTriviaDifficulty } from '../questions.js';
 import { store } from '../store.js';
 import { requireGuild } from './utils.js';
 
 const categories = [...new Set(questions.map(question => question.category))];
 const choices = categories.slice(0, 25).map(category => ({ name: category, value: category }));
-function pickQuestions(category) { const pool = questions.filter(question => !category || question.category === category); return [...pool].sort(() => Math.random() - 0.5).slice(0, 3).map(question => question.id); }
+function pickQuestions(category) {
+  const categoryPool = questions.filter(question => !category || question.category === category);
+  const pool = selectTriviaDifficulty(categoryPool);
+  return [...pool].sort(() => Math.random() - 0.5).slice(0, 3).map(question => question.id);
+}
 const uniqueUsers = users => [...new Set(users.filter(Boolean))];
 function showQuestion(race, question) {
   return {

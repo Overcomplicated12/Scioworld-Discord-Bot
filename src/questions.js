@@ -28,3 +28,14 @@ const baseQuestions = [
 export const questions = [...baseQuestions, ...loadImportedQuestions()];
 
 export const questionById = new Map(questions.map(question => [question.id, question]));
+
+// Keep casual play approachable when no difficulty was requested. Content
+// authors can still explicitly select medium or hard questions.
+export function selectTriviaDifficulty(pool, requestedDifficulty) {
+  if (requestedDifficulty) return pool.filter(question => question.difficulty === requestedDifficulty);
+  for (const difficulty of ['easy', 'medium', 'hard']) {
+    const matches = pool.filter(question => question.difficulty === difficulty);
+    if (matches.length) return matches;
+  }
+  return [];
+}

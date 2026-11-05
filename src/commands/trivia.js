@@ -1,5 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags, SlashCommandBuilder } from 'discord.js';
-import { questions } from '../questions.js';
+import { questions, selectTriviaDifficulty } from '../questions.js';
 import { store } from '../store.js';
 import { requireGuild } from './utils.js';
 
@@ -19,7 +19,7 @@ export async function execute(interaction) {
   const difficulty = interaction.options.getString('difficulty');
   const profile = store.getOrCreate(interaction.guildId, interaction.user.id);
   const categoryPool = !category || category === 'mixed' ? questions : questions.filter(question => question.category === category);
-  const difficultyPool = difficulty ? categoryPool.filter(question => question.difficulty === difficulty) : categoryPool;
+  const difficultyPool = selectTriviaDifficulty(categoryPool, difficulty);
   const fresh = difficultyPool.filter(question => !profile.triviaRecentQuestions.includes(question.id));
   const available = fresh.length ? fresh : difficultyPool;
   if (!available.length) { await interaction.reply({ content: 'No questions are available in that category yet.', flags: MessageFlags.Ephemeral }); return; }
