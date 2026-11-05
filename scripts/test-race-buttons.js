@@ -26,7 +26,7 @@ try {
     update: async value => { reply = value; },
     channel: { send: async value => { nextQuestion = value; } },
   }, persistence);
-  assert.match(reply.content, /next question is below/i, 'The answered question should be closed.');
+  assert.match(reply.content, /next question in/i, 'The answered question should be closed before the next round.');
   assert.match(nextQuestion.content, /round 2\/3/i, 'The final answer for a round should post a fresh next-question message.');
   assert.match(nextQuestion.content, /kedar> answered first/i, 'The next round should identify the first correct racer.');
   assert.equal(nextQuestion.components[0].components.length, 4);

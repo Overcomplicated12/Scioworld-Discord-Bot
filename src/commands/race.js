@@ -5,6 +5,8 @@ import { requireGuild } from './utils.js';
 
 const categories = [...new Set(questions.map(question => question.category))];
 const choices = categories.slice(0, 25).map(category => ({ name: category, value: category }));
+const NEXT_QUESTION_DELAY_MS = 1500;
+const waitForNextQuestion = () => new Promise(resolve => setTimeout(resolve, NEXT_QUESTION_DELAY_MS));
 function pickQuestions(category) {
   const categoryPool = questions.filter(question => !category || question.category === category);
   const pool = selectTriviaDifficulty(categoryPool);
@@ -67,6 +69,7 @@ export async function execute(interaction) {
   if (!race) { await interaction.reply({ content: 'Race not found or no longer active.', flags: MessageFlags.Ephemeral }); return; }
   const question = questions.find(item => item.id === race.questionIds[race.round]); const result = raceState(interaction.guildId, interaction.user.id, raceId, interaction.options.getInteger('choice'), question, now);
   const next = result.nextQuestionId ? questions.find(item => item.id === result.nextQuestionId) : null;
+  if (result.complete && !result.finished) await waitForNextQuestion();
   await interaction.reply(resultMessage(result, raceId, next));
 }
 
@@ -87,7 +90,8 @@ export async function handleButton(interaction, persistence = store) {
       } else {
         // Close the answered question, then post the next round as a fresh
         // message so the race has a clear chronological thread.
-        await interaction.update({ content: '✅ Round complete. The next question is below.', components: [] });
+        await interaction.update({ content: '✅ Round complete. Next question in **1.5 seconds**…', components: [] });
+        await waitForNextQuestion();
         await interaction.channel.send(payload);
       }
     }
@@ -112,6 +116,7 @@ export async function handleNumericMessage(message, persistence = store) {
     return true;
   }
   const next = result.nextQuestionId ? questions.find(item => item.id === result.nextQuestionId) : null;
+  if (result.complete && !result.finished) await waitForNextQuestion();
   await message.channel.send(resultMessage(result, race.id, next));
   return true;
 }
